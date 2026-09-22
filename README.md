@@ -2,6 +2,10 @@
 
 Rein Protocol Foundation is a public-benefit institution advancing AI Agents that create measurable social value while remaining transparent, governable, and accountable to people. This repository contains its institutional website, public community experience, and private operating dashboard. The organizational source of truth remains [PROJECT.md](./PROJECT.md).
 
+## Product requirements
+
+- Agent-operated community PRD: [English](./docs/PRD-agent-community-operations.md) · [中文](./docs/PRD-agent-community-operations-zh.md). Planned OpenClaw-based community operations, including Contributor proposals, Board voting, event coordination, reporting, and publishing. These are product requirements drafts, not statements of currently implemented capabilities; proposed policy defaults remain subject to confirmation.
+
 ## Architecture
 
 - Next.js App Router, React 19, TypeScript, and plain CSS

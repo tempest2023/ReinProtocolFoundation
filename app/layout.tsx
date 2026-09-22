@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: { default: 'Rein Protocol Foundation', template: '%s — Rein Protocol Foundation' },
   description: 'Advancing beneficial AI Agents, public knowledge, and accountable infrastructure for the Agent age.',
   openGraph: { type: 'website', siteName: 'Rein Protocol Foundation' },
+  manifest: '/site.webmanifest',
+  appleWebApp: { title: 'Rein Protocol' },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

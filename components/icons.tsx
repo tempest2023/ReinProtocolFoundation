@@ -1,9 +1,13 @@
-export function FoundationMark() {
+export function FoundationMark({ variant = 'header' }: { variant?: 'header' | 'footer' }) {
   return (
-    <svg className="foundation-mark" viewBox="0 0 42 42" aria-hidden="true">
-      <path d="M13 32V10h10c6 0 9 3 9 7s-3 7-9 7H13m10 0 10 8" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
-      <circle cx="13" cy="10" r="3" fill="var(--accent)" />
-    </svg>
+    <img
+      className={`foundation-mark foundation-mark--${variant}`}
+      src={`/brand/rein-mark-${variant}.png`}
+      width={42}
+      height={42}
+      alt=""
+      aria-hidden="true"
+    />
   )
 }
 

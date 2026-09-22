@@ -115,6 +115,11 @@
   width: 2.35rem;
   height: 2.35rem;
   flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.foundation-mark--footer {
+  border-radius: 0.2rem;
 }
 
 .menu-toggle {

@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="footer-main page-shell">
         <Link href="/" className="wordmark wordmark--footer">
-          <FoundationMark />
+          <FoundationMark variant="footer" />
           <span>Rein Protocol<small>Foundation</small></span>
         </Link>
         <p className="footer-thesis">Web3 first. Agent operated. Human accountable.</p>

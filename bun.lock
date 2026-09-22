@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "beneficenceprotocol",
+      "name": "reinprotocolfoundation",
       "dependencies": {
         "@supabase/ssr": "latest",
         "@supabase/supabase-js": "latest",

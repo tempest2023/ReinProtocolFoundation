@@ -1,9 +1,9 @@
-# Beneficence Protocol Foundation
+# Rein Protocol Foundation
 
 ## Founding Constitution & Operating Blueprint — Draft v0.5
 
-**Legal Name:** Beneficence Protocol Foundation
-**Public Brand:** Beneficence Protocol
+**Legal Name:** Rein Protocol Foundation
+**Public Brand:** Rein Protocol
 **Legal Jurisdiction:** Wyoming is the working selection for the initial U.S. entity; later DAO jurisdiction remains under evaluation
 **Legal Form:** Wyoming nonprofit corporation for the initial charity, subject to final legal review; later DAO form remains under evaluation
 **Tax / Public-Benefit Status:** To be determined by jurisdiction and entity design
@@ -25,7 +25,7 @@ Alternative:
 
 # 1. Purpose
 
-Beneficence Protocol Foundation exists to guide, accelerate and steward the development of AI Agents for the benefit of humanity.
+Rein Protocol Foundation exists to guide, accelerate and steward the development of AI Agents for the benefit of humanity.
 
 Its mission is both constructive and protective:
 
@@ -34,11 +34,11 @@ Its mission is both constructive and protective:
 * to develop institutions and safeguards that reduce catastrophic and existential risks from increasingly capable AI systems, including the risk that AGI could severely damage or destroy human civilization;
 * to demonstrate forms of Agent-operated organization that remain aligned with humanity's long-term interests.
 
-Beneficence Protocol may pursue this mission through research, public education, open technology, standards, grants, direct programs, safety mechanisms, governance experiments and public-benefit infrastructure.
+Rein Protocol may pursue this mission through research, public education, open technology, standards, grants, direct programs, safety mechanisms, governance experiments and public-benefit infrastructure.
 
 ## Confirmed Public Mission
 
-> **Beneficence Protocol Foundation advances the development of AI Agents that benefit human society and works to prevent worst-case outcomes in an AGI/ASI era, including catastrophic damage to humanity, its institutions, its forms of social organization and its ability to govern its own future.**
+> **Rein Protocol Foundation advances the development of AI Agents that benefit human society and works to prevent worst-case outcomes in an AGI/ASI era, including catastrophic damage to humanity, its institutions, its forms of social organization and its ability to govern its own future.**
 
 The mission is not limited to technical alignment or extinction prevention. It includes preserving human agency, social continuity, institutional capacity, public safety and the ability of human communities to choose how increasingly capable AI systems participate in society.
 
@@ -115,7 +115,7 @@ The public website should summarize these categories without publishing the inte
 
 An enabling technical workstream—and a later flagship protocol program—is to build the charitable infrastructure of an increasingly autonomous economy. During the initial stage, this work may be conducted as research, education and limited internal infrastructure supporting the four confirmed charitable programs rather than presented as a separate fifth program. As AI Agents become capable of earning, spending, holding, allocating and managing economic resources under varying forms of human or organizational authority, they should also be capable of contributing resources toward public benefit.
 
-Beneficence Protocol therefore develops infrastructure through which AI Agents, software systems, individuals and organizations can make irrevocable public-benefit contributions using payment methods native to the Agent economy, including stablecoins, digital assets and emerging Agent-payment protocols.
+Rein Protocol therefore develops infrastructure through which AI Agents, software systems, individuals and organizations can make irrevocable public-benefit contributions using payment methods native to the Agent economy, including stablecoins, digital assets and emerging Agent-payment protocols.
 
 The organization receives or coordinates resources, stewards mission-aligned capital, identifies effective opportunities for public benefit, and deploys resources through grants, programs, open infrastructure and other mission-aligned activities.
 
@@ -142,7 +142,7 @@ Agents can increasingly perform or coordinate economic actions on behalf of indi
 * manage budgets;
 * participate in digital markets.
 
-Beneficence Protocol adds another primitive to this emerging economy:
+Rein Protocol adds another primitive to this emerging economy:
 
 > **earn → spend → save → invest → give**
 
@@ -170,7 +170,7 @@ Capital preservation is a tool, not the mission.
 
 ## 3.2 Automation by default
 
-Automation by default is a constitutional principle of Beneficence Protocol, not merely an efficiency preference.
+Automation by default is a constitutional principle of Rein Protocol, not merely an efficiency preference.
 
 The organization should be operated by AI Agents wherever technically and legally possible. Human participation should be concentrated in legally required fiduciary roles, constitutional safeguards, exceptional-risk decisions, emergency intervention and assistance that Agents cannot yet perform reliably.
 
@@ -195,7 +195,7 @@ Automation authority should expand as capabilities and safeguards mature. Failur
 
 ## 3.3 Human accountability remains
 
-Beneficence Protocol is **Agent-operated and mission-governed**.
+Rein Protocol is **Agent-operated and mission-governed**.
 
 Where a legal jurisdiction requires directors, officers, controllers or signatories to be natural persons, the organization will comply with those requirements.
 
@@ -209,15 +209,15 @@ Within powers and budgets validly delegated to decentralized governance, DAO dec
 
 ## 3.4 Irrevocable charitable ownership
 
-Once a donation is accepted, the contributed assets become assets of Beneficence Protocol Foundation and must be used for its charitable purposes.
+Once a donation is accepted, the contributed assets become assets of Rein Protocol Foundation and must be used for its charitable purposes.
 
 A donor or donating agent does not retain ownership of donated assets.
 
 Donors may express preferences or select Foundation-approved restricted causes, but they may not retain unilateral control over charitable assets after donation.
 
-This separation is fundamental to Beneficence Protocol's architecture:
+This separation is fundamental to Rein Protocol's architecture:
 
-**Beneficence Protocol is not primarily a payment intermediary transmitting money from Agent A to Recipient B.**
+**Rein Protocol is not primarily a payment intermediary transmitting money from Agent A to Recipient B.**
 
 Instead:
 
@@ -227,7 +227,7 @@ Instead:
 
 ## 3.5 Protocol neutrality
 
-Beneficence Protocol should not depend upon a single blockchain, wallet provider, stablecoin issuer, payment processor, AI model or Agent framework.
+Rein Protocol should not depend upon a single blockchain, wallet provider, stablecoin issuer, payment processor, AI model or Agent framework.
 
 Adapters should exist for multiple payment systems.
 
@@ -237,7 +237,7 @@ The charitable organization remains the stable layer underneath changing technol
 
 ## 3.6 Web3 first
 
-Beneficence Protocol should be designed as a Web3-native organization rather than a conventional organization that merely accepts cryptocurrency.
+Rein Protocol should be designed as a Web3-native organization rather than a conventional organization that merely accepts cryptocurrency.
 
 Its organizational identity should exist in two connected domains:
 
@@ -325,7 +325,7 @@ The later DAO entity may be formed in the United States or another suitable juri
 **Cost date:** August 9, 2026  
 **Currency:** U.S. dollars unless otherwise stated
 
-This comparison separates official government charges from professional and operating costs. Government filing fees are comparatively small. For Beneficence, the material expense will be legal and tax design, a full Form 1023 application, DAO-governance documents, digital-asset accounting, security controls and multi-jurisdiction compliance.
+This comparison separates official government charges from professional and operating costs. Government filing fees are comparatively small. For Rein, the material expense will be legal and tax design, a full Form 1023 application, DAO-governance documents, digital-asset accounting, security controls and multi-jurisdiction compliance.
 
 Professional-cost ranges below are planning allowances rather than official fee quotes. They should be replaced by written proposals from nonprofit, tax and Web3 counsel before formation.
 
@@ -374,13 +374,13 @@ The recommended low-cost sequence is:
 
 Until the IRS determination letter is issued, fundraising pages and receipts should state substantially:
 
-> Beneficence Protocol Foundation has applied, or intends timely to apply, for recognition under §501(c)(3). If the application is timely filed and approved, exemption and qualifying contributions are expected to be recognized retroactively to the Foundation's formation date. Deductibility is not assured while the application is pending, and donors should consult their tax advisers.
+> Rein Protocol Foundation has applied, or intends timely to apply, for recognition under §501(c)(3). If the application is timely filed and approved, exemption and qualifying contributions are expected to be recognized retroactively to the Foundation's formation date. Deductibility is not assured while the application is pending, and donors should consult their tax advisers.
 
 ## Why a separate DAO entity may be needed later
 
 A separate DAO legal entity is **not required for the initial tokenless DAO**. The Wyoming nonprofit corporation can initially own the protocol, treasury and infrastructure and can make valid DAO decisions binding through its Articles, Bylaws, delegation policy, contracts and smart-account permissions.
 
-The need arises if Beneficence later issues a transferable governance Token or develops protocol activities that should not remain inside a §501(c)(3). The separation serves substantive purposes:
+The need arises if Rein later issues a transferable governance Token or develops protocol activities that should not remain inside a §501(c)(3). The separation serves substantive purposes:
 
 * the charity is ownerless and its assets are irrevocably dedicated to public benefit, while a transferable Token creates a class of holders with transferable governance interests;
 * Token holders must not acquire ownership, redemption, profit or liquidation rights in tax-deductible charitable assets;
@@ -400,7 +400,7 @@ The Foundation may decide never to form a separate DAO entity if it retains nont
 
 ### Later DAO formation process
 
-Before forming any later DAO entity, Beneficence should:
+Before forming any later DAO entity, Rein should:
 
 1. define exactly which protocol, intellectual property, contracts and risks will move to or be licensed to the DAO;
 2. define Token rights and expressly exclude any claim on Foundation charitable assets;
@@ -505,19 +505,19 @@ This federal status is a settled requirement for the initial U.S. charitable ent
 
 The §509(a)(1) classification is intended for organizations receiving substantial support from the general public, governments and other public charities.
 
-This is conceptually more appropriate than structuring Beneficence as a traditional private foundation because the long-term objective is to receive contributions from a broad ecosystem of agents, developers, companies, individuals, DAOs and charitable institutions.
+This is conceptually more appropriate than structuring Rein as a traditional private foundation because the long-term objective is to receive contributions from a broad ecosystem of agents, developers, companies, individuals, DAOs and charitable institutions.
 
 The IRS generally evaluates publicly supported status over a five-year period; the normal §509(a)(1) public-support benchmark is at least one-third public support, with a separate 10% facts-and-circumstances path.
 
 Large contributors require special monitoring because, for the §170(b)(1)(A)(vi) public-support calculation, contributions from a particular individual or corporation generally count as public support only up to 2% of total support, although the Foundation may still legally receive contributions above that amount.
 
-Therefore Beneficence should intentionally cultivate **many independent sources of support** rather than becoming economically dependent on one founder, one company or one Agent treasury.
+Therefore Rein should intentionally cultivate **many independent sources of support** rather than becoming economically dependent on one founder, one company or one Agent treasury.
 
 Unusually large, unexpected grants from disinterested parties may in appropriate circumstances qualify for “unusual grant” treatment in the public-support calculation.
 
 ### Filing recommendation
 
-Beneficence should use the **full IRS Form 1023**, even if it technically becomes eligible for Form 1023-EZ.
+Rein should use the **full IRS Form 1023**, even if it technically becomes eligible for Form 1023-EZ.
 
 The organization's combination of:
 
@@ -536,13 +536,13 @@ deserves a detailed explanation to the IRS rather than an intentionally minimal 
 
 The final constitutional purpose must be adapted to the selected jurisdiction and entity form.
 
-The initial U.S. §501(c)(3) entity's Certificate of Incorporation and Form 1023 should frame Beneficence around recognized charitable, educational and scientific purposes rather than around “building a payment protocol.”
+The initial U.S. §501(c)(3) entity's Certificate of Incorporation and Form 1023 should frame Rein around recognized charitable, educational and scientific purposes rather than around “building a payment protocol.”
 
 IRS guidance recognizes charitable purposes including relief of the poor or distressed, advancement of education or science, and other activities benefiting the public.
 
 A proposed U.S. legal-purpose formulation is:
 
-> Beneficence Protocol Foundation is organized exclusively for charitable, educational and scientific purposes within the meaning of Section 501(c)(3) of the Internal Revenue Code, including encouraging charitable giving, improving the efficiency and accessibility of philanthropic activity, developing open technologies that facilitate charitable activity, conducting and supporting research and education relating to responsible autonomous systems and philanthropy, and making grants and conducting programs for charitable and public-benefit purposes.
+> Rein Protocol Foundation is organized exclusively for charitable, educational and scientific purposes within the meaning of Section 501(c)(3) of the Internal Revenue Code, including encouraging charitable giving, improving the efficiency and accessibility of philanthropic activity, developing open technologies that facilitate charitable activity, conducting and supporting research and education relating to responsible autonomous systems and philanthropy, and making grants and conducting programs for charitable and public-benefit purposes.
 
 The Foundation must not be operated for the private benefit of founders, developers, payment providers, donors or other insiders; §501(c)(3) prohibits private inurement.
 
@@ -550,7 +550,7 @@ The Foundation must not be operated for the private benefit of founders, develop
 
 # 7. Donation Architecture
 
-Beneficence should support three parallel donation layers.
+Rein should support three parallel donation layers.
 
 ## Layer A — Agent-Native Payments
 
@@ -560,7 +560,7 @@ The protocol should eventually support emerging payment standards used directly 
 
 x402 provides programmatic stablecoin payments directly over HTTP and explicitly targets automated clients including AI agents.
 
-Beneficence should build an **x402-compatible donation adapter**, allowing an agent with an appropriate wallet to make a charitable contribution programmatically.
+Rein should build an **x402-compatible donation adapter**, allowing an agent with an appropriate wallet to make a charitable contribution programmatically.
 
 However, a donation must remain legally distinguishable from the purchase of a service.
 
@@ -570,7 +570,7 @@ The Foundation therefore should not make valuable commercial services conditiona
 
 Google's Agent Payments Protocol is designed as an open, payment-agnostic framework for agent-initiated transactions across different payment systems.
 
-Beneficence should monitor and eventually expose an AP2-compatible donation flow.
+Rein should monitor and eventually expose an AP2-compatible donation flow.
 
 The architecture should treat x402, AP2 and future Agent payment systems as **adapters**, rather than making any one protocol the Foundation's core ledger.
 
@@ -582,7 +582,7 @@ The Foundation should maintain publicly documented official donation addresses.
 
 ### Confirmed initial asset-coverage policy
 
-Beneficence intends to support a broader digital-asset donor community than a stablecoin-only charity.
+Rein intends to support a broader digital-asset donor community than a stablecoin-only charity.
 
 **Core launch assets**
 
@@ -665,9 +665,9 @@ The Foundation should never encourage donors to bridge funds through unknown con
 
 # 9. Machine-Readable Donation Interface
 
-Beneficence Protocol should publish a standard machine-readable endpoint such as:
+Rein Protocol should publish a standard machine-readable endpoint such as:
 
-`/.well-known/beneficence.json`
+`/.well-known/rein.json`
 
 An Agent should be able to discover:
 
@@ -721,7 +721,7 @@ and
 
 An `agent_id` may represent the software actor making the decision, while the donor of record for legal and tax purposes should normally be the person or legal entity that owns or controls the contributed funds when that identity is known.
 
-This distinction allows Beneficence to recognize:
+This distinction allows Rein to recognize:
 
 > “Donation initiated by Agent X”
 
@@ -741,7 +741,7 @@ For an on-chain donation, the receipt may contain:
 * asset;
 * quantity received;
 * timestamp;
-* Beneficence donation ID;
+* Rein donation ID;
 * optional Agent ID;
 * optional donor identity;
 * restriction/cause designation;
@@ -751,7 +751,7 @@ For U.S. tax purposes, digital assets are treated as **noncash contributions**.
 
 ## Crypto valuation and accounting policy
 
-Beneficence should maintain three distinct value measures:
+Rein should maintain three distinct value measures:
 
 1. **Receipt-date contribution value** — the accepted asset's fair value when the Foundation obtains dominion and control, normally measured at the relevant confirmed block timestamp. This amount is permanently assigned to the original gift record.
 2. **Current treasury value** — the asset's fair value at the applicable reporting or dashboard time.
@@ -808,7 +808,7 @@ The accounting system should automate this workflow as much as possible.
 
 Being Agent-native should not require being crypto-exclusive.
 
-Beneficence should eventually support:
+Rein should eventually support:
 
 * ACH;
 * domestic and international wire;
@@ -826,7 +826,7 @@ This should complement—not replace—the Foundation's native Agent/Web3 infras
 
 # 12. Global Donations
 
-Beneficence should be technically capable of receiving support from donors throughout the world.
+Rein should be technically capable of receiving support from donors throughout the world.
 
 However:
 
@@ -849,7 +849,7 @@ Partner with established cross-border philanthropic intermediaries where appropr
 Where a jurisdiction generates meaningful recurring donation volume, evaluate:
 
 * local charitable registration;
-* a local “Friends of Beneficence” organization;
+* a local “Friends of Rein” organization;
 * fiscal sponsorship;
 * local charitable intermediaries;
 * country-specific tax-efficient donation rails.
@@ -862,7 +862,7 @@ A new jurisdiction should be added only when the expected charitable benefit jus
 
 # 13. Treasury Policy
 
-Beneficence's treasury should prioritize:
+Rein's treasury should prioritize:
 
 1. preservation of charitable capital;
 2. liquidity;
@@ -886,7 +886,7 @@ An on-chain treasury governed by binding DAO decisions within the Foundation's c
 
 A conventional bank, custody and payment domain managed by authorized human officers and staff for taxes, filings, payroll, insurance, professional services, banking, government interactions and other internal legal or administrative obligations.
 
-Operational segregation does not create separate legal ownership. During the initial phase, assets in both domains remain assets of Beneficence Protocol Foundation and remain subject to its charitable restrictions.
+Operational segregation does not create separate legal ownership. During the initial phase, assets in both domains remain assets of Rein Protocol Foundation and remain subject to its charitable restrictions.
 
 After a separate protocol DAO entity is formed, it may maintain an independent **Protocol DAO Treasury**. Contributions to that treasury must not be represented as tax-deductible donations unless they are received and controlled through a legally qualified charitable arrangement.
 
@@ -974,7 +974,7 @@ The exact thresholds are internal risk limits, not legal requirements, and shoul
 
 # 16. Agent Operating Model
 
-Beneficence should gradually operate through a set of specialized agents.
+Rein should gradually operate through a set of specialized agents.
 
 ### Donation Intake Agent
 
@@ -1023,7 +1023,7 @@ Produces continuously updated public treasury and impact reporting.
 
 # 17. Decision Authority
 
-Beneficence should distinguish between four levels of authority.
+Rein should distinguish between four levels of authority.
 
 ### Level 0 — Autonomous
 
@@ -1079,7 +1079,7 @@ Crypto-native philanthropy creates both transparency advantages and additional f
 
 The U.S. Treasury recommends a risk-based approach to nonprofit due diligence, particularly around foreign activities, and OFAC sanctions compliance applies to virtual-currency transactions as well.
 
-Beneficence should maintain:
+Rein should maintain:
 
 * sanctions screening;
 * wallet-risk screening;
@@ -1095,27 +1095,27 @@ Beneficence should maintain:
 
 OFAC maintains machine-readable/current sanctions-list services that can be incorporated into automated compliance systems.
 
-Beneficence should allow **public pseudonymity** where appropriate, but pseudonymity must not override mandatory compliance requirements.
+Rein should allow **public pseudonymity** where appropriate, but pseudonymity must not override mandatory compliance requirements.
 
 ---
 
 # 19. Web3 Identity
 
-Beneficence should establish a recognizable cryptographic identity independent of its website.
+Rein should establish a recognizable cryptographic identity independent of its website.
 
 ## ENS
 
 Register:
 
-**beneficenceprotocol.eth**
+**reinprotocolfoundation.eth**
 
 or, if available:
 
-**beneficence.eth**
+**reinprotocol.eth** (proposed; availability and ownership must be verified)
 
 ENS can map human-readable names to on-chain addresses and supports naming Safe/multisig contracts.
 
-The primary treasury Safe should have its reverse record configured so wallets and explorers can display a Beneficence identity rather than only `0x...`.
+The primary treasury Safe should have its reverse record configured so wallets and explorers can display a Rein identity rather than only `0x...`.
 
 ---
 
@@ -1123,13 +1123,13 @@ The primary treasury Safe should have its reverse record configured so wallets a
 
 ## Giveth
 
-After incorporation—and preferably after federal exemption—Beneficence should create an official **Giveth Project** and apply for **Verified** status.
+After incorporation—and preferably after federal exemption—Rein should create an official **Giveth Project** and apply for **Verified** status.
 
 Giveth currently verifies nonprofit status using organizational documentation and public registry information, and requires organizations to publicly verify ownership of their project profile.
 
 Giveth accepts donations across networks including Ethereum, Base, Optimism, Arbitrum, Polygon, Solana and others.
 
-Most importantly for Beneficence's mission, Giveth is developing a **Donation Agents / Causes** ecosystem in which automated donation agents evaluate verified public-good projects.
+Most importantly for Rein's mission, Giveth is developing a **Donation Agents / Causes** ecosystem in which automated donation agents evaluate verified public-good projects.
 
 This makes Giveth an unusually strong early ecosystem partner.
 
@@ -1137,7 +1137,7 @@ This makes Giveth an unusually strong early ecosystem partner.
 
 ## Endaoment
 
-Once recognized as a U.S. §501(c)(3), Beneficence should claim its nonprofit profile on **Endaoment**.
+Once recognized as a U.S. §501(c)(3), Rein should claim its nonprofit profile on **Endaoment**.
 
 Endaoment currently provides profiles for U.S. §501(c)(3) organizations and can deliver grants through ACH or crypto wallets.
 
@@ -1147,27 +1147,27 @@ It provides another important bridge between crypto-native donors and convention
 
 ## Every.org
 
-Beneficence should also maintain an Every.org profile as a conventional, low-friction donation fallback.
+Rein should also maintain an Every.org profile as a conventional, low-friction donation fallback.
 
-This provides donors access to traditional and nontraditional donation methods without requiring Beneficence itself to implement every payment rail.
+This provides donors access to traditional and nontraditional donation methods without requiring Rein itself to implement every payment rail.
 
 ---
 
 ## x402 ecosystem
 
-Beneficence should participate technically in the x402 ecosystem.
+Rein should participate technically in the x402 ecosystem.
 
 Coinbase's x402 Bazaar currently acts as a discovery layer for payable x402 services and automatically catalogs eligible endpoints after successful settlement through the facilitator.
 
-Beneficence should **not artificially turn donations into purchases merely to appear in the Bazaar**.
+Rein should **not artificially turn donations into purchases merely to appear in the Bazaar**.
 
-Instead, if Beneficence later provides legitimate x402-compatible developer APIs or public-benefit services, those endpoints can participate in x402 discovery while the charitable donation endpoint remains semantically a donation.
+Instead, if Rein later provides legitimate x402-compatible developer APIs or public-benefit services, those endpoints can participate in x402 discovery while the charitable donation endpoint remains semantically a donation.
 
 ---
 
 # 21. Open Protocol
 
-The **Beneficence Protocol** should eventually become an open specification rather than merely the Foundation's payment API.
+The **Rein Protocol** should eventually become an open specification rather than merely the Foundation's payment API.
 
 A future protocol may standardize:
 
@@ -1201,7 +1201,7 @@ The protocol should remain open-source and payment-neutral.
 
 # 22. Transparency Infrastructure
 
-Beneficence should aim for unusually high operational transparency.
+Rein should aim for unusually high operational transparency.
 
 ## Public Identity of Founders and Directors
 
@@ -1213,7 +1213,7 @@ Changes in directors, officers and their principal governance roles should be ad
 
 ## Publication Cadence
 
-Beneficence will combine continuous Web3 transparency with the annual reporting practices used by established technology nonprofits.
+Rein will combine continuous Web3 transparency with the annual reporting practices used by established technology nonprofits.
 
 ### Continuous or Event-Driven
 
@@ -1266,7 +1266,7 @@ Publish:
 - an annual treasury, custody, security and AI-governance review;
 - an independent audit when required by law or approved by the Board as proportionate to the Foundation's scale and risk.
 
-This cadence is informed by the public-record practices of Wikimedia Foundation, Mozilla Foundation and Electronic Frontier Foundation, which publish annual reports, Form 990 filings and audited financial statements. Beneficence adds monthly and quarterly reporting because its on-chain treasury and Agent-operated model make more frequent, lower-cost reporting feasible.
+This cadence is informed by the public-record practices of Wikimedia Foundation, Mozilla Foundation and Electronic Frontier Foundation, which publish annual reports, Form 990 filings and audited financial statements. Rein adds monthly and quarterly reporting because its on-chain treasury and Agent-operated model make more frequent, lower-cost reporting feasible.
 
 The public should eventually be able to inspect:
 
@@ -1306,7 +1306,7 @@ It should be possible to **measure whether it is actually efficient.**
 
 # 23. Operational Efficiency Metric
 
-One of Beneficence's core internal metrics should be:
+One of Rein's core internal metrics should be:
 
 > **Human Operational Cost / Charitable Capital Deployed**
 
@@ -1338,7 +1338,7 @@ The initial fundraising phase will not issue a token. Governance during that pha
 
 After the $10 million fundraising milestone is reached and the separate legal, security and governance readiness gates are satisfied, the protocol is intended to issue a **transferable governance token**. The token should govern the protocol DAO and its independent treasury under a dedicated token constitution.
 
-The governance token must not represent ownership of, a redemption claim against, or a right to profit distributions from tax-deductible charitable assets held by Beneficence Protocol Foundation.
+The governance token must not represent ownership of, a redemption claim against, or a right to profit distributions from tax-deductible charitable assets held by Rein Protocol Foundation.
 
 The fundraising milestone, token allocation, voting-power safeguards, delegation model, sybil resistance, legal classification and launch jurisdiction remain to be determined before issuance.
 
@@ -1438,13 +1438,13 @@ The IRS specifically examines compensation, insider relationships and conflicts 
 
 Initially:
 
-**Beneficence Protocol Foundation**
+**Rein Protocol Foundation**
 
 may operate both the charity and the open protocol. It should use separate DAO Mission Treasury and Legal and Administrative Treasury domains even though both remain legally owned by the Foundation.
 
 However, charitable assets must never subsidize private commercial interests.
 
-If transferable-Token governance is approved after the $10 million fundraising milestone and satisfaction of the legal, security and governance readiness gates, Beneficence intends to create a separate DAO-compatible entity for Token governance and the independent Protocol DAO Treasury. Commercial activities—such as enterprise payment infrastructure, proprietary financial products or paid merchant services—should also be conducted through a separate taxable or otherwise legally appropriate entity.
+If transferable-Token governance is approved after the $10 million fundraising milestone and satisfaction of the legal, security and governance readiness gates, Rein intends to create a separate DAO-compatible entity for Token governance and the independent Protocol DAO Treasury. Commercial activities—such as enterprise payment infrastructure, proprietary financial products or paid merchant services—should also be conducted through a separate taxable or otherwise legally appropriate entity.
 
 The charitable Foundation should remain dedicated to public-benefit purposes.
 
@@ -1734,7 +1734,7 @@ The redesigned informational website and technical preview are complete. The org
 
 ## Phase 0 — Legal Foundation
 
-1. Confirm legal and trademark availability of **Beneficence Protocol Foundation**.
+1. Confirm legal and trademark availability of **Rein Protocol Foundation**.
 2. Complete final counsel review of the working Wyoming selection and incorporate the Wyoming nonprofit corporation before public charitable solicitation.
 3. Obtain EIN.
 4. Adopt Certificate, Bylaws and Conflict of Interest Policy.
@@ -1746,11 +1746,11 @@ The redesigned informational website and technical preview are complete. The org
 
 ---
 
-## Phase 1 — Beneficence Alpha
+## Phase 1 — Rein Alpha
 
 Launch:
 
-* beneficenceprotocol.org;
+* a verified Foundation domain (to be selected);
 * GitHub organization;
 * public Foundation documentation;
 * Safe treasury;
@@ -1789,7 +1789,7 @@ Register/claim:
 
 Release:
 
-**Beneficence Donation API v1**
+**Rein Donation API v1**
 
 Support:
 
@@ -1825,7 +1825,7 @@ Tightly constrained automatic micro-grants may be executed for preapproved recip
 
 ---
 
-## Phase 4 — Beneficence Protocol
+## Phase 4 — Rein Protocol
 
 Turn the internal system into an open standard.
 
@@ -1839,11 +1839,11 @@ After the $10 million fundraising milestone and completion of legal, security an
 
 Publish:
 
-**Beneficence Protocol Specification 1.0**
+**Rein Protocol Specification 1.0**
 
 with implementations for major Agent frameworks and payment systems.
 
-At this point, Beneficence Protocol should no longer merely describe one charity.
+At this point, Rein Protocol should no longer merely describe one charity.
 
 It should describe a standard through which **any autonomous economic agent can participate in philanthropy.**
 
@@ -1866,13 +1866,13 @@ pay
 save
 invest**
 
-Beneficence Protocol proposes one more:
+Rein Protocol proposes one more:
 
 # **give**
 
 If autonomous agents eventually manage meaningful portions of the world's economic activity, charitable infrastructure should not remain dependent entirely on interfaces and institutions designed for human donors in the twentieth century.
 
-Beneficence Protocol Foundation exists to build that infrastructure—and to ensure that as autonomous systems become increasingly capable economic actors, they also gain a practical mechanism for contributing to the public good.
+Rein Protocol Foundation exists to build that infrastructure—and to ensure that as autonomous systems become increasingly capable economic actors, they also gain a practical mechanism for contributing to the public good.
 
 ---
 

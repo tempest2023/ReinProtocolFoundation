@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CommunityPageHero, CommunitySection } from '@/components/community-shell'
 import { ContributionPaths, getContributionIssueLinks } from '@/components/contribution-paths'
 
-export const metadata: Metadata = { title: 'Contribute', description: 'Three ways to contribute to Beneficence: a private application, public GitHub work, or a public learning resource.' }
+export const metadata: Metadata = { title: 'Contribute', description: 'Three ways to contribute to Rein: a private application, public GitHub work, or a public learning resource.' }
 
 export default async function ContributePage() {
   const issueLinks = await getContributionIssueLinks()

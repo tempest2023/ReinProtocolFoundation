@@ -11,7 +11,7 @@ export default function GlobalError({ retry }: { error: Error & { digest?: strin
   return (
     <html lang="en">
       <body>
-        <title>Application error — Beneficence Protocol Foundation</title>
+        <title>Application error — Rein Protocol Foundation</title>
         <SystemPage
           variant="error"
           eyebrow="System interruption"

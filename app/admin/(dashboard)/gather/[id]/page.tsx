@@ -37,7 +37,7 @@ export default async function EditEventPage({params}:{params:Promise<{id:string}
             <details className="admin-disclosure admin-field--wide" open>
               <summary>Organizers and relationships</summary>
               <div className="admin-disclosure__body admin-form__section">
-                <label>Classification<select name="relationship" defaultValue={event.relationship}>{relationships.map((relationship)=><option key={relationship}>{relationship}</option>)}</select></label>
+                <label>Classification<select name="relationship" defaultValue={event.relationship}>{relationships.map((relationship)=><option key={relationship} value={relationship}>{relationship === 'Beneficence-hosted' ? 'Rein-hosted' : relationship}</option>)}</select></label>
                 <label>Approval reference<input name="approval_reference" defaultValue={event.approval_reference??''}/></label>
                 <label>Organizers<textarea name="organizers" defaultValue={event.organizers??''}/></label>
                 <label>Partners<textarea name="partners" defaultValue={event.partners??''}/></label>

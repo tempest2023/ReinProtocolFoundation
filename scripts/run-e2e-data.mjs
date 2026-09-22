@@ -8,7 +8,7 @@ const repositoryRoot = resolve(import.meta.dirname, '..')
 const testPort = process.env.PLAYWRIGHT_PORT ?? '3100'
 const apiPort = process.env.SUPABASE_E2E_API_PORT ?? '55321'
 const databasePort = process.env.SUPABASE_E2E_DB_PORT ?? '55322'
-const projectId = `beneficence-e2e-${process.pid}`
+const projectId = `rein-e2e-${process.pid}`
 
 function versionTuple(output) {
   const match = output.match(/(\d+)\.(\d+)\.(\d+)/)
@@ -77,7 +77,7 @@ let supabaseCli
 
 try {
   supabaseCli = await resolveSupabaseCli()
-  temporaryRoot = await mkdtemp(join(tmpdir(), 'beneficence-e2e-'))
+  temporaryRoot = await mkdtemp(join(tmpdir(), 'rein-e2e-'))
   const temporarySupabase = join(temporaryRoot, 'supabase')
   await mkdir(temporarySupabase)
   await cp(join(repositoryRoot, 'supabase', 'migrations'), join(temporarySupabase, 'migrations'), { recursive: true })

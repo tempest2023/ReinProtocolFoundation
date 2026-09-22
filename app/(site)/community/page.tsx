@@ -9,7 +9,7 @@ import { ProfileCard } from '@/components/profile-card'
 import { getPublishedEvents, getPublishedResources, getPublicMemberMetrics, getPublicPeople } from '@/lib/community/data'
 import { publicCommunityAudience } from '@/lib/community/presentation'
 
-export const metadata: Metadata = { title: 'Community', description: 'Learn, gather, and contribute with the Beneficence community.' }
+export const metadata: Metadata = { title: 'Community', description: 'Learn, gather, and contribute with the Rein community.' }
 export const maxDuration = 60
 
 function firstStart(event: Awaited<ReturnType<typeof getPublishedEvents>>[number]) {
@@ -32,7 +32,7 @@ export default async function CommunityPage() {
     <header className="community-hero" aria-labelledby="community-title">
       <div className="page-shell community-hero__grid">
         <div className="community-hero__content">
-          <p className="eyebrow">Beneficence Community</p>
+          <p className="eyebrow">Rein Community</p>
           <h1 id="community-title">A community of {audience}.</h1>
           <p className="community-hero__lead">Learn about AI Agents, meet thoughtful peers, and contribute to work that serves the public.</p>
           <div className="community-hero__actions"><Link href="#register" className="primary-action">Register for updates <Arrow /></Link><Link href="#contribute" className="quiet-action">Ways to contribute</Link></div>

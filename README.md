@@ -1,6 +1,6 @@
-# Beneficence Protocol Foundation
+# Rein Protocol Foundation
 
-Beneficence Protocol Foundation is a public-benefit institution advancing AI Agents that create measurable social value while remaining transparent, governable, and accountable to people. This repository contains its institutional website, public community experience, and private operating dashboard. The organizational source of truth remains [PROJECT.md](./PROJECT.md).
+Rein Protocol Foundation is a public-benefit institution advancing AI Agents that create measurable social value while remaining transparent, governable, and accountable to people. This repository contains its institutional website, public community experience, and private operating dashboard. The organizational source of truth remains [PROJECT.md](./PROJECT.md).
 
 ## Architecture
 
@@ -76,3 +76,12 @@ Automatic rejection is limited to exact-evidence, high-confidence severe conduct
 Submissions create durable Agent jobs without sending their content to OpenAI. After email verification where required, an administrator can explicitly start or retry an Agent review from the dashboard. Agent work never starts automatically from a public submission or a scheduled job. Daily retention maintenance runs within Supabase PostgreSQL. In the dashboard, administrators can resend verification, restore automated rejections, export formula-safe CSV, record Core Contributor nominations, and publish only consented profiles.
 
 Do not seed fabricated courses, events, people, projects, or member records. Public empty states are part of the intended first release.
+
+## Brand and production
+
+- Repository: https://github.com/tempest2023/ReinProtocolFoundation
+- Planned production hostname (release pending approval): https://rein-protocol-foundation.vercel.app
+- Current production: https://beneficence-protocol.vercel.app
+- Brand assets and usage: [public/brand](./public/brand/README.md)
+
+The existing production project is renamed in place, retaining its project ID and data. The previous Vercel hostname remains a compatibility entry point for existing links and authentication callbacks. `NEXT_PUBLIC_SITE_URL` retains its existing production value pending approval of the URL migration. Historical SQL migrations, the local Supabase project ID, and the stored `Beneficence-hosted` event classification intentionally retain their identifiers; the UI presents that classification as `Rein-hosted`. “Beneficence” in the founding proposition refers to the ethical principle.

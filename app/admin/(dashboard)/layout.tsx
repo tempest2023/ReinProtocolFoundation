@@ -12,7 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <a className="skip-link" href="#admin-content">Skip to admin content</a>
       <aside className="admin-sidebar">
         <Link href="/admin" className="admin-brand">
-          <span>Beneficence</span>
+          <span>Rein</span>
           <small>Administration</small>
         </Link>
         <Suspense fallback={<div className="admin-nav-loading" aria-hidden="true" />}>

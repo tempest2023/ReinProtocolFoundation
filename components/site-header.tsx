@@ -103,7 +103,7 @@ export function SiteHeader() {
       <div className="nav-shell">
         <Link href="/" className="wordmark">
           <FoundationMark />
-          <span>Beneficence Protocol<small>Foundation</small></span>
+          <span>Rein Protocol<small>Foundation</small></span>
         </Link>
         <button
           className="menu-toggle"

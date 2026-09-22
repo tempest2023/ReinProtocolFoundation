@@ -39,7 +39,7 @@ export default async function GatherAdminPage() {
             <details className="admin-disclosure admin-field--wide">
               <summary>Organizers and relationships</summary>
               <div className="admin-disclosure__body admin-form__section">
-                <label>Classification<select name="relationship">{relationships.map((relationship) => <option key={relationship}>{relationship}</option>)}</select></label>
+                <label>Classification<select name="relationship">{relationships.map((relationship) => <option key={relationship} value={relationship}>{relationship === 'Beneficence-hosted' ? 'Rein-hosted' : relationship}</option>)}</select></label>
                 <label>Internal approval reference <small>Required for Partner and Official events</small><input name="approval_reference" /></label>
                 <label>Organizers<textarea name="organizers" /></label>
                 <label>Partners<textarea name="partners" /></label>
@@ -63,7 +63,7 @@ export default async function GatherAdminPage() {
           <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Event</th><th>Schedule</th><th>Relationship</th><th>Publication</th></tr></thead><tbody>{events.map((event) => <tr key={event.id}>
             <td><strong>{event.title}</strong><br /><a href={event.external_registration_url} target="_blank" rel="noreferrer">Registration ↗</a><br/><Link href={`/admin/gather/${event.id}`}>Edit event</Link></td>
             <td>{event.event_sessions?.map((session:{id:string;starts_at:string}) => <div key={session.id}>{new Intl.DateTimeFormat('en-US',{ dateStyle:'medium',timeStyle:'short',timeZone:event.timezone }).format(new Date(session.starts_at))}<br /><small>{event.timezone}</small></div>)}</td>
-            <td>{event.relationship}<br /><small>{event.approval_reference}</small></td>
+            <td>{event.relationship === 'Beneficence-hosted' ? 'Rein-hosted' : event.relationship}<br /><small>{event.approval_reference}</small></td>
             <td><AdminForm className="admin-form admin-row-form" actionId="set_event_publication" successMessage="Event status saved."><input type="hidden" name="id" value={event.id} /><label>Status<select name="status" defaultValue={event.publication_status}><option value="draft">Draft</option><option value="published">Published</option><option value="cancelled">Cancelled</option><option value="archived">Archived</option></select></label><label>Attendance<select name="attendance_status" defaultValue={event.attendance_status}><option value="open">Open</option><option value="waitlist">Waitlist</option><option value="full">Full</option><option value="closed">Closed</option></select></label><AdminSubmitButton pendingLabel="Saving…">Save event</AdminSubmitButton></AdminForm></td>
           </tr>)}</tbody></table></div>
         ) : <div className="admin-empty"><strong>No events yet</strong><span>Create an event draft when the schedule is ready.</span></div>}

@@ -3,7 +3,7 @@ function escapeHtml(value: string) {
 }
 
 export function participantConfirmationTemplate(name?: string) {
-  return `<p>Hello${name ? ` ${escapeHtml(name)}` : ''},</p><p>Your community registration is active. Most public resources and events remain open whether or not you are registered.</p><p>This registration does not create legal membership, employment, governance, ownership, Token, agency, or tax rights.</p><p>— Beneficence Protocol Foundation</p>`
+  return `<p>Hello${name ? ` ${escapeHtml(name)}` : ''},</p><p>Your community registration is active. Most public resources and events remain open whether or not you are registered.</p><p>This registration does not create legal membership, employment, governance, ownership, Token, agency, or tax rights.</p><p>— Rein Protocol Foundation</p>`
 }
 
 export function contributorVerificationTemplate(name: string, verificationUrl: string) {
@@ -15,7 +15,7 @@ export function applicationReceivedTemplate(name: string) {
 }
 
 export function conversationInvitationTemplate(name: string, schedulingUrl: string) {
-  return `<p>Hello ${escapeHtml(name)},</p><p>We would like to invite you to a conversational 1v1 meeting. It is not a traditional interview. We will introduce Beneficence and the community, learn about your interests, discuss possible contribution paths, and answer questions. The conversation will not exceed 30 minutes.</p><p><a href="${escapeHtml(schedulingUrl)}">Choose a time</a></p><p>We do not record or automatically transcribe these conversations.</p>`
+  return `<p>Hello ${escapeHtml(name)},</p><p>We would like to invite you to a conversational 1v1 meeting. It is not a traditional interview. We will introduce Rein and the community, learn about your interests, discuss possible contribution paths, and answer questions. The conversation will not exceed 30 minutes.</p><p><a href="${escapeHtml(schedulingUrl)}">Choose a time</a></p><p>We do not record or automatically transcribe these conversations.</p>`
 }
 
 export function automaticRejectionTemplate(name: string, monitoredEmail: string) {

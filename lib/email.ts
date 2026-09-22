@@ -54,7 +54,7 @@ export async function sendTransactionalEmail(message: Message) {
 export async function sendParticipantConfirmation(email: string, name?: string, participantId?: string) {
   return sendTransactionalEmail({
     to: email,
-    subject: 'You are registered with the Beneficence community',
+    subject: 'You are registered with the Rein community',
     category: 'participant_confirmation',
     relatedType: participantId ? 'community_participant' : undefined,
     relatedId: participantId,
@@ -65,7 +65,7 @@ export async function sendParticipantConfirmation(email: string, name?: string, 
 export async function sendContributorVerification(email: string, name: string, verificationUrl: string, applicationId: string) {
   return sendTransactionalEmail({
     to: email,
-    subject: 'Verify your Beneficence Contributor application',
+    subject: 'Verify your Rein Contributor application',
     category: 'contributor_verification', relatedType: 'contributor_application', relatedId: applicationId,
     html: contributorVerificationTemplate(name, verificationUrl),
   })
@@ -83,7 +83,7 @@ export async function sendApplicationReceived(email: string, name: string, appli
 export async function sendConversationInvitation(email: string, name: string, schedulingUrl: string, applicationId: string) {
   return sendTransactionalEmail({
     to: email,
-    subject: 'Schedule a Beneficence Contributor conversation',
+    subject: 'Schedule a Rein Contributor conversation',
     category: 'conversation_invitation', relatedType: 'contributor_application', relatedId: applicationId,
     html: conversationInvitationTemplate(name, schedulingUrl),
   })
@@ -97,7 +97,7 @@ export async function sendAutomaticRejection(email: string, name: string, applic
   if (!isPlausibleEmail(monitored)) throw new Error('A monitored contact email is required in Settings.')
   return sendTransactionalEmail({
     to: email,
-    subject: 'Update on your Beneficence Contributor application',
+    subject: 'Update on your Rein Contributor application',
     category: 'automatic_rejection', relatedType: 'contributor_application', relatedId: applicationId,
     html: automaticRejectionTemplate(name, monitored),
   })

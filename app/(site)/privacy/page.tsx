@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import { getPublicSiteSettings } from '@/lib/community/data'
 
-export const metadata: Metadata = { title: 'Privacy Policy', description: 'How Beneficence Protocol Foundation handles community and contribution information.' }
+export const metadata: Metadata = { title: 'Privacy Policy', description: 'How Rein Protocol Foundation handles community and contribution information.' }
 
 export default async function PrivacyPage() {
   const settings = await getPublicSiteSettings(['email_identity'])
   const contact = settings.email_identity
-  return <main id="main-content"><article className="legal-copy page-shell"><p className="eyebrow">Privacy</p><h1>Privacy Policy</h1><p className="form-intro__lead">This policy explains how Beneficence handles information submitted through its community services.</p>
+  return <main id="main-content"><article className="legal-copy page-shell"><p className="eyebrow">Privacy</p><h1>Privacy Policy</h1><p className="form-intro__lead">This policy explains how Rein handles information submitted through its community services.</p>
     <section><h2>Information we collect</h2><p>Community registration collects email, field or industry, region, consent records, and an optional name. Contributor applications additionally collect application choices, optional professional links, and profile-publication preference. Resource submissions collect contact details and information about a public URL. When a public form is submitted, we also collect the submitting device’s IP address. We never request a street address in these flows.</p></section>
     <section><h2>How we use information</h2><p>We use information to communicate about community activity, administer applications, review public resources, operate events through external registration services, enforce safety rules, prevent submission abuse, maintain an audit record, and measure cumulative community growth. We do not treat registration as legal membership or sell these records.</p></section>
     <section><h2>AI-assisted processing</h2><p>Contributor application and resource-review workflows may use the OpenAI API. For applications, we send participation reasons, contribution interests, related “Other” text, general location, and industry. We do not send email addresses or professional profile links, and the system does not visit those links.</p><p>OpenAI states that API data is not used to train its models by default. Request content may be retained in abuse-monitoring logs for up to 30 days, subject to the account’s data controls. We do not record or automatically transcribe Contributor conversations.</p></section>

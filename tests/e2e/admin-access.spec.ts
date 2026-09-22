@@ -5,7 +5,7 @@ test.describe('administration access boundary', () => {
   test('unauthenticated dashboard requests return to login', async ({ page }) => {
     await page.goto('/admin')
     await expect(page).toHaveURL(/\/admin\/login/)
-    await expect(page.getByRole('heading', { level: 1, name: 'Beneficence Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Rein Dashboard' })).toBeVisible()
   })
 
   test('admin pages are excluded from search indexing', async ({ page }) => {

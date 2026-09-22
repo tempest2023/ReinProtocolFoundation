@@ -7,7 +7,7 @@ export function SiteFooter() {
       <div className="footer-main page-shell">
         <Link href="/" className="wordmark wordmark--footer">
           <FoundationMark />
-          <span>Beneficence Protocol<small>Foundation</small></span>
+          <span>Rein Protocol<small>Foundation</small></span>
         </Link>
         <p className="footer-thesis">Web3 first. Agent operated. Human accountable.</p>
         <nav aria-label="Footer navigation">
@@ -22,7 +22,7 @@ export function SiteFooter() {
       <div className="footer-legal page-shell">
         <p>Advancing beneficial AI, public knowledge and accountable Agent infrastructure.</p>
         <p><Link href="/privacy">Privacy</Link> · <Link href="/community/code-of-conduct">Code of Conduct</Link></p>
-        <p>© 2026 Beneficence Protocol Foundation</p>
+        <p>© 2026 Rein Protocol Foundation</p>
       </div>
       <details className="image-credits page-shell">
         <summary>Image sources and notes</summary>

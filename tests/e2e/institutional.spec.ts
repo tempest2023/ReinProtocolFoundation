@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 const institutionalRoutes = [
-  { path: '/', heading: /AI Agents should enlarge human possibility/, title: 'Beneficence Protocol Foundation' },
+  { path: '/', heading: /AI Agents should enlarge human possibility/, title: 'Rein Protocol Foundation' },
   { path: '/mission', heading: 'Build benefit. Prevent catastrophe.', title: 'Mission' },
   { path: '/programs', heading: 'Knowledge becomes public capacity.', title: 'Programs and Public Work' },
   { path: '/governance', heading: 'Power should leave a record.', title: 'Governance and Stewardship' },

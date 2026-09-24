@@ -84,8 +84,6 @@ Do not seed fabricated courses, events, people, projects, or member records. Pub
 ## Brand and production
 
 - Repository: https://github.com/tempest2023/ReinProtocolFoundation
-- Planned production hostname (release pending approval): https://rein-protocol-foundation.vercel.app
-- Current production: https://beneficence-protocol.vercel.app
+- Website: https://rein-protocol.vercel.app/
+- Vercel project: `rein-protocol-foundation`
 - Brand assets and usage: [public/brand](./public/brand/README.md)
-
-The existing production project is renamed in place, retaining its project ID and data. The previous Vercel hostname remains a compatibility entry point for existing links and authentication callbacks. `NEXT_PUBLIC_SITE_URL` retains its existing production value pending approval of the URL migration. Historical SQL migrations, the local Supabase project ID, and the stored `Beneficence-hosted` event classification intentionally retain their identifiers; the UI presents that classification as `Rein-hosted`. “Beneficence” in the founding proposition refers to the ethical principle.

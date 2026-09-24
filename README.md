@@ -48,6 +48,7 @@ There are several ways to help: [apply privately as a Contributor](https://rein-
 
 ## Current stage and source documents
 
-The [founding constitution and operating blueprint](./PROJECT.md) is a draft. Legal formation, tax status, fundraising arrangements, and parts of the governance model remain subject to review or adoption. The website and this repository describe the intended institution and provide public community entry points; they should not be taken as evidence that planned courses, events, grants, or automated community operations have launched.
-
-The [Agent-operated community requirements](./docs/PRD-agent-community-operations.md) ([中文](./docs/PRD-agent-community-operations-zh.md)) describe a proposed future workflow, not current functionality. For work on the website and application, use the [development guide](./DEVELOPMENT.md). Brand files and usage notes are in [public/brand](./public/brand/README.md).
+- Repository: https://github.com/tempest2023/ReinProtocolFoundation
+- Website: https://rein-protocol.vercel.app/
+- Vercel project: `rein-protocol-foundation`
+- Brand assets and usage: [public/brand](./public/brand/README.md)

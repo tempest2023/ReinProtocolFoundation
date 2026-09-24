@@ -19,6 +19,9 @@ tsconfig.tsbuildinfo
 test-results
 playwright-report
 
+# Local design explorations archived for future reference (not production assets)
+/local-archives/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

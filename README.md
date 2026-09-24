@@ -1,91 +1,53 @@
 # Rein Protocol Foundation
 
-Rein Protocol Foundation is a public-benefit institution advancing AI Agents that create measurable social value while remaining transparent, governable, and accountable to people. This repository contains its institutional website, public community experience, and private operating dashboard. The organizational source of truth remains [PROJECT.md](./PROJECT.md).
+[简体中文](./README-zh.md)
 
-## Product requirements
+**AI Agents should enlarge human possibility—not erase it.** Rein Protocol Foundation is being developed as a public-benefit institution for the Agent age. Its mission has two connected parts: help AI Agents create practical benefit for human society, and build safeguards against catastrophic or irreversible harm from increasingly capable AI, including AGI and ASI. That means protecting human agency, public safety, social institutions, and people's ability to govern their own future.
 
-- Agent-operated community PRD: [English](./docs/PRD-agent-community-operations.md) · [中文](./docs/PRD-agent-community-operations-zh.md). Planned OpenClaw-based community operations, including Contributor proposals, Board voting, event coordination, reporting, and publishing. These are product requirements drafts, not statements of currently implemented capabilities; proposed policy defaults remain subject to confirmation.
+[Explore the website](https://rein-protocol.vercel.app/) · [Read the founding blueprint](./PROJECT.md) · [Join the community](https://rein-protocol.vercel.app/community)
 
-## Architecture
+## Why Rein exists
 
-- Next.js App Router, React 19, TypeScript, and plain CSS
-- Supabase PostgreSQL, magic-link administrator authentication, RLS, and image storage
-- Resend transactional email
-- OpenAI Responses API with Structured Outputs and `omni-moderation-latest`
-- Vitest for unit/component tests and Playwright for desktop/mobile flows
+AI Agents can increasingly research, coordinate, build, and act on behalf of people and organizations. Those capabilities can widen access to knowledge and help address public needs. They can also concentrate power or erode meaningful human control. Rein's purpose is to direct this emerging capacity toward the public good while keeping its use inspectable and accountable to people.
 
-The warm paper palette, Newsreader/Manrope typography, institutional editorial layout, original URLs, and source-image credits are preserved from the prior Vite site.
+We approach this as an institutional problem as well as a technical one. Open education and public discussion help more people take part in decisions about AI. Research, governance, and clear limits on Agent authority help ensure that useful systems remain answerable to the communities they affect.
 
-## Routes
+## Initial programs
 
-The institutional routes remain `/`, `/mission`, `/programs`, `/governance`, and `/giving`. Community routes are:
+The founding blueprint identifies four initial charitable program areas. These are the organization's intended work, not a claim that every activity below is already running.
 
-- `/community`
-- `/community/people`
-- `/community/learn`
-- `/community/gather` and `/community/gather/[slug]`
-- `/community/contribute`
-- `/community/contribute/apply`
-- `/community/contribute/resources/submit`
-- `/community/code-of-conduct`
-- `/privacy`
+1. **Public voice and AI community education.** Explain beneficial and safe AI Agents through accessible articles, research summaries, conversations, and multilingual public material. Build informed participation in AI communities.
+2. **AI Agent research and gatherings.** Follow and contribute to research on ethics, safety, governance, and infrastructure. Convene independent workshops, panels, and discussions around the research community, describing any conference relationship accurately.
+3. **Free AI, LLM, and Agent education.** Develop openly accessible courses, curricula, reading groups, practical projects, and mentorship so more people can learn and participate responsibly.
+4. **Learning communities and public events.** Support online and local groups where learners, researchers, builders, and public-interest practitioners can study, deliberate, and act together. Events should be primarily free and broadly accessible.
 
-The unified private dashboard is at `/admin`.
+[Explore the programs](https://rein-protocol.vercel.app/programs)
 
-## Local development
+## How the organization is intended to work
 
-Use a current Node.js 22 or 24 runtime.
+Rein's guiding principle is **Agent operated, human accountable**. AI Agents may help with research, coordination, reporting, and program work within defined policies. They do not replace human fiduciary responsibility or gain independent authority over the mission, people, or resources.
 
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
+The founding model assigns different responsibilities to a legally accountable **Human Board**, a **DAO** for collective participation within an adopted constitution, and **AI Agents** operating inside approved limits. Decisions about budgets, legal duties, governance rights, and exceptions require the appropriate human or collective authority. Public reporting is intended to make decisions, spending, outcomes, and failures inspectable. This is the organizational blueprint; proposed DAO and Agent operations should not be read as a claim that every mechanism is active today.
 
-Without external-service credentials, public content renders with truthful empty states and a zero all-time count. Forms are always visible and enabled; a submission displays a service error if its required backend is unavailable.
+[Read about governance](https://rein-protocol.vercel.app/governance) · [See the detailed blueprint](./PROJECT.md)
 
-## Database setup
+## Community and participation
 
-Apply the SQL migrations in [`supabase/migrations`](./supabase/migrations) in filename order. They create all entities, transactional registration/counting functions, retry functions, retention scrubbing, RLS policies, the restricted `community-images` bucket, raw-IP rate limiting, and Supabase Cron retention maintenance.
+The community is meant to be open by default. People can access public learning resources and events without registering. Registration is an optional way to receive updates relevant to a participant's interests and region. Taking responsibility for ongoing work follows a separate Contributor path.
 
-Development and production use the same Supabase project with isolated table sets. `DATABASE_ENVIRONMENT=dev|prod` is the highest-priority selector and defaults to `dev` in local configuration. When it is omitted, local runs, tests, and Vercel Preview use `dev_*`, while the production deployment uses `prod_*`. Every migration must update both sets in the same transaction. See [`supabase/README.md`](./supabase/README.md).
-
-The migrations intentionally grant no anonymous form-table inserts. Validated Server Actions use the server-only Supabase Secret key, and anonymous access is limited to published resources, events, People profiles, event sessions, and the public aggregate metric.
-
-## Runtime configuration
-
-Forms do not use a launch flag and are enabled by default. Supabase is required to accept submissions and to use the administrator dashboard. Resend is required for verification and transactional email, while OpenAI is required only when an administrator explicitly starts an Agent review.
-
-The scheduling URL, GitHub URLs, monitored public contact email, OpenAI model, and reasoning effort are managed in `/admin/settings`, not environment variables. The OpenAI API key remains a server-only environment secret. Supabase Cron runs retention maintenance inside the database, so no public cron route or cron secret is required. Community launch does not activate donations or fundraising.
-
-## Commands
-
-| Command | Purpose |
+| Role | Way to participate |
 | --- | --- |
-| `npm run dev` | Start Next.js development |
-| `npm run typecheck` | Run strict TypeScript checks |
-| `npm run lint` | Run Oxlint |
-| `npm test` | Run unit and component tests |
-| `npm run test:e2e` | Run Playwright desktop/mobile flows |
-| `npm run build` | Create the production Next.js build |
+| **Public Participant** | Read resources and attend open events without registering. |
+| **Community Participant** | Register for community updates and stay connected. |
+| **Contributor** | Help organize activities or take responsibility for a project through the Contributor application. |
+| **Core Contributor** | An existing Contributor recognized for sustained responsibility and public stewardship. |
 
-## Agent and privacy boundary
+There are several ways to help: [apply privately as a Contributor](https://rein-protocol.vercel.app/community/contribute/apply), [propose an event, campus activity, or technical contribution on GitHub](https://rein-protocol.vercel.app/community/contribute), or [share a free learning resource](https://rein-protocol.vercel.app/community/contribute/resources/submit). GitHub issues are public; use the private application for personal details. [Browse the repository and open issues](https://github.com/tempest2023/ReinProtocolFoundation). Participation alone does not confer governance rights, ownership, token rights, or a charitable tax deduction.
 
-Contributor processing sends only reasons, contribution interests, related “Other” text, general location, and optional industry to OpenAI. It never sends email or professional links and never crawls them. Requests use `store: false`, a hashed `safety_identifier`, the reasoning effort selected in `/admin/settings`, and a strict Zod output schema. Meetings are not recorded or transcribed and are never analyzed by the Agent.
+[Visit the community](https://rein-protocol.vercel.app/community) · [Read the Code of Conduct](https://rein-protocol.vercel.app/community/code-of-conduct)
 
-Automatic rejection is limited to exact-evidence, high-confidence severe conduct. Administrators can restore the application, which disables the same automated closing path. OpenAI failure cannot roll back a registration, verification, count event, or manually reviewable record.
+## Current stage and source documents
 
-## Deployment operations
+The [founding constitution and operating blueprint](./PROJECT.md) is a draft. Legal formation, tax status, fundraising arrangements, and parts of the governance model remain subject to review or adoption. The website and this repository describe the intended institution and provide public community entry points; they should not be taken as evidence that planned courses, events, grants, or automated community operations have launched.
 
-Submissions create durable Agent jobs without sending their content to OpenAI. After email verification where required, an administrator can explicitly start or retry an Agent review from the dashboard. Agent work never starts automatically from a public submission or a scheduled job. Daily retention maintenance runs within Supabase PostgreSQL. In the dashboard, administrators can resend verification, restore automated rejections, export formula-safe CSV, record Core Contributor nominations, and publish only consented profiles.
-
-Do not seed fabricated courses, events, people, projects, or member records. Public empty states are part of the intended first release.
-
-## Brand and production
-
-- Repository: https://github.com/tempest2023/ReinProtocolFoundation
-- Planned production hostname (release pending approval): https://rein-protocol-foundation.vercel.app
-- Current production: https://beneficence-protocol.vercel.app
-- Brand assets and usage: [public/brand](./public/brand/README.md)
-
-The existing production project is renamed in place, retaining its project ID and data. The previous Vercel hostname remains a compatibility entry point for existing links and authentication callbacks. `NEXT_PUBLIC_SITE_URL` retains its existing production value pending approval of the URL migration. Historical SQL migrations, the local Supabase project ID, and the stored `Beneficence-hosted` event classification intentionally retain their identifiers; the UI presents that classification as `Rein-hosted`. “Beneficence” in the founding proposition refers to the ethical principle.
+The [Agent-operated community requirements](./docs/PRD-agent-community-operations.md) ([中文](./docs/PRD-agent-community-operations-zh.md)) describe a proposed future workflow, not current functionality. For work on the website and application, use the [development guide](./DEVELOPMENT.md). Brand files and usage notes are in [public/brand](./public/brand/README.md).

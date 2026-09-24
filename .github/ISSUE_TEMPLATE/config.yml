@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Private Contributor application
-    url: https://beneficence.foundation/community/contribute/apply
+    url: https://rein-protocol.vercel.app/community/contribute/apply
     about: Use the private form for personal contact information or ongoing Contributor participation.
   - name: Community Code of Conduct
-    url: https://beneficence.foundation/community/code-of-conduct
+    url: https://rein-protocol.vercel.app/community/code-of-conduct
     about: Read the communication and safety expectations before participating.

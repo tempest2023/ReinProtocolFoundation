@@ -160,7 +160,7 @@ Giving infrastructure is one expression of a broader thesis: AI Agents should no
 
 # 3. Core Principles
 
-## 3.1 Beneficence over accumulation
+## 3.1 Public benefit over accumulation
 
 Assets are accumulated only insofar as doing so increases the Foundation's long-term ability to create charitable benefit.
 
@@ -1529,7 +1529,7 @@ The following public-positioning decisions are now adopted for website v1:
 - Primary headline: **“AI Agents should enlarge human possibility—not erase it.”**
 - Public institutional descriptor: **“A public institution for the Agent age.”** This is positioning language, not a representation that the legal entity or federal exemption already exists.
 - Public principle line: **“Web3 first. Agent operated. Human accountable.”**
-- Founding proposition: **“Beneficence should become a native capability of autonomous systems.”**
+- Founding proposition: **“Rein makes public benefit a native capability of autonomous systems.”**
 - The public narrative begins with beneficial AI and public learning, then explains catastrophic-risk prevention, governance, inspectable transparency and legal formation.
 
 Website v1.1 uses a progressive-disclosure structure:
@@ -1855,7 +1855,7 @@ The long-term objective is not to build “a charity run by AI.”
 
 It is larger:
 
-> **to make beneficence a native capability of autonomous economic systems.**
+> **for Rein to make public benefit a native capability of autonomous economic systems.**
 
 Today the financial primitives available to software increasingly include:
 

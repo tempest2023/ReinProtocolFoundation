@@ -19,6 +19,12 @@ tsconfig.tsbuildinfo
 test-results
 playwright-report
 
+# Local design explorations archived for future reference (not production assets)
+/local-archives/
+
+# Local research unrelated to the Foundation's open-source work
+/research/beneai-research-2026-09-08.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

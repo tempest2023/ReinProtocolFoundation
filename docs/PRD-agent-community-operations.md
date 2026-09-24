@@ -29,7 +29,7 @@ If the same event requests funding, it enters a periodic selection round. The Ag
 ### 1.2 Relationship to Existing Documents and Product
 
 - [PROJECT.md](../PROJECT.md) defines the organizational mission and long-term governance blueprint. This PRD translates its community operations component into product requirements; it does not rewrite the constitution.
-- [README.md](../README.md) describes the current implementation, in which existing Agent reviews are still started manually by administrators. This PRD describes proposed operations that start automatically and continue within authorized boundaries. It does not imply that existing capabilities are already automated.
+- [DEVELOPMENT.md](../DEVELOPMENT.md) describes the current implementation, in which existing Agent reviews are still started manually by administrators. This PRD describes proposed operations that start automatically and continue within authorized boundaries. It does not imply that existing capabilities are already automated.
 - Phase-one event funding selection uses a centrally maintained member roster and configured voting weights as an interim governance arrangement. Its results must not be represented as an already operational DAO or on-chain governance system.
 - This PRD does not automatically change Contributor admission rules, fundraising launch status, privacy commitments, or payment authority. Necessary changes must be configured separately and clearly communicated to affected users.
 

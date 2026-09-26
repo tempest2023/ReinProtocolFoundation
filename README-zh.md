@@ -2,7 +2,7 @@
 
 **AI Agents 应拓展人类的可能性，而不是抹去它。** Rein Protocol Foundation 正在建设一个面向 Agent 时代的公益机构。我们的使命有两个相互关联的方向：帮助 AI Agents 为人类社会创造实际公共利益；建立防护机制，防止日益强大的 AI（包括 AGI 和 ASI）造成灾难性或不可逆的伤害。这既关乎人的自主权和公共安全，也关乎社会制度以及人类治理自身未来的能力。
 
-[访问网站](https://rein-protocol.vercel.app/) · [阅读创始蓝图](./PROJECT.md) · [加入社区](https://rein-protocol.vercel.app/community) · [English](./README.md)
+[访问网站](https://rein-protocol.org/) · [阅读创始蓝图](./PROJECT.md) · [加入社区](https://rein-protocol.org/community) · [English](./README.md)
 
 ## 为什么需要 Rein
 
@@ -19,7 +19,7 @@ AI Agents 正逐步具备研究、协调、创造和代表个人或组织行动�
 3. **免费 AI、LLM 与 Agent 教育。** 开发开放课程、教学大纲、读书会、实践项目与辅导机会，让更多人能够学习并负责任地参与这一领域。
 4. **学习社区与公共活动。** 支持线上和本地社群，让学习者、研究者、建设者和公益实践者共同学习、讨论和行动。活动应以免费为主，并向广泛人群开放。
 
-[了解各项项目](https://rein-protocol.vercel.app/programs)
+[了解各项项目](https://rein-protocol.org/programs)
 
 ## 组织计划如何运作
 
@@ -27,7 +27,7 @@ Rein 的指导原则是 **Agent 运作，人类负责**。AI Agents 可以在明
 
 创始模型把职责分配给承担法律责任的 **Human Board**、在已采纳章程范围内集体参与治理的 **DAO**，以及受批准权限约束的 **AI Agents**。预算、法律责任、治理权利和异常事项应由相应的人类或集体治理主体决定。公开报告旨在让决策、支出、成果和失败可供检查。这是组织蓝图；其中拟议的 DAO 和 Agent 机制不代表已经全部投入运行。
 
-[了解治理设计](https://rein-protocol.vercel.app/governance) · [阅读详细蓝图](./PROJECT.md)
+[了解治理设计](https://rein-protocol.org/governance) · [阅读详细蓝图](./PROJECT.md)
 
 ## 社区与参与方式
 
@@ -40,9 +40,9 @@ Rein 的指导原则是 **Agent 运作，人类负责**。AI Agents 可以在明
 | **Contributor（贡献者）** | 通过申请参与活动组织或承担项目责任。 |
 | **Core Contributor（核心贡献者）** | 因持续承担责任和公共事务而获得认可的现有 Contributor。 |
 
-你可以[私下申请成为 Contributor](https://rein-protocol.vercel.app/community/contribute/apply)、[通过 GitHub 提议活动、校园行动或技术贡献](https://rein-protocol.vercel.app/community/contribute)，也可以[分享免费学习资源](https://rein-protocol.vercel.app/community/contribute/resources/submit)。GitHub Issue 是公开的；个人资料请使用私密申请表。[浏览代码仓库和现有 Issue](https://github.com/tempest2023/ReinProtocolFoundation)。参与社区本身不产生治理权、所有权、Token 权利或慈善捐赠税务抵扣资格。
+你可以[私下申请成为 Contributor](https://rein-protocol.org/community/contribute/apply)、[通过 GitHub 提议活动、校园行动或技术贡献](https://rein-protocol.org/community/contribute)，也可以[分享免费学习资源](https://rein-protocol.org/community/contribute/resources/submit)。GitHub Issue 是公开的；个人资料请使用私密申请表。[浏览代码仓库和现有 Issue](https://github.com/tempest2023/ReinProtocolFoundation)。参与社区本身不产生治理权、所有权、Token 权利或慈善捐赠税务抵扣资格。
 
-[访问社区](https://rein-protocol.vercel.app/community) · [阅读社区行为准则](https://rein-protocol.vercel.app/community/code-of-conduct)
+[访问社区](https://rein-protocol.org/community) · [阅读社区行为准则](https://rein-protocol.org/community/code-of-conduct)
 
 ## 当前阶段与参考文档
 

@@ -1582,9 +1582,8 @@ Display typography must remain editorial without becoming poster-scale at the ex
 
 Website v1.1 has been implemented responsively for desktop and mobile, with keyboard navigation, visible focus states, reduced-motion behavior, semantic sections and appropriate alternative-text treatment. These implementation measures do not replace a final accessibility review on the production domain.
 
-The deployed technical preview is **not yet cleared for a promoted public informational launch** because the following Stage A items remain unresolved:
+The deployed technical preview is **not yet cleared for a promoted public informational launch**. The canonical Foundation domain is now selected and under Foundation control at `rein-protocol.org`. The following Stage A items remain unresolved:
 
-- canonical Foundation domain selection and control; the current `vercel.app` address is a technical preview address;
 - legal-name and trademark conflict screening;
 - a monitored public contact channel and security-reporting channel;
 - Terms of Use, Privacy Policy and a concise accessibility statement appropriate to the final hosting, analytics, form and community stack;

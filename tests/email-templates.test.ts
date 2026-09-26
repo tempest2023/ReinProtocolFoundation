@@ -9,7 +9,7 @@ import {
 
 describe('transactional email templates', () => {
   it('preserves the legal-membership and public-access distinctions', () => {
-    expect(participantConfirmationTemplate()).toContain('does not create legal membership')
+    expect(participantConfirmationTemplate()).toContain('does not confer legal membership or governance rights')
     expect(contributorVerificationTemplate('Person', 'https://example.org/verify')).toContain('Most public resources and events are open')
   })
 

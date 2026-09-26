@@ -3,13 +3,13 @@ select plan(7);
 
 select is(
   (select count(*) from information_schema.tables where table_schema='public' and table_name like 'dev\_%' escape '\'),
-  18::bigint,
+  25::bigint,
   'development has every application table'
 );
 
 select is(
   (select count(*) from information_schema.tables where table_schema='public' and table_name like 'prod\_%' escape '\'),
-  18::bigint,
+  25::bigint,
   'production has every application table'
 );
 

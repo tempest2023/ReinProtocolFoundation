@@ -1,9 +1,11 @@
+import { participantWelcomeHtml } from './participant-welcome'
+
 function escapeHtml(value: string) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;')
 }
 
 export function participantConfirmationTemplate(name?: string) {
-  return `<p>Hello${name ? ` ${escapeHtml(name)}` : ''},</p><p>Your community registration is active. Most public resources and events remain open whether or not you are registered.</p><p>This registration does not create legal membership, employment, governance, ownership, Token, agency, or tax rights.</p><p>— Rein Protocol Foundation</p>`
+  return participantWelcomeHtml.replace('{{{USER_NAME}}}', () => escapeHtml(name?.trim() || 'there'))
 }
 
 export function contributorVerificationTemplate(name: string, verificationUrl: string) {

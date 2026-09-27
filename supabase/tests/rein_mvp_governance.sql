@@ -1,5 +1,5 @@
 begin;
-select plan(174);
+select plan(187);
 
 -- Authority fixtures: contacts c1/c3/c6 belong to active Contributors and hold
 -- a director Person row (c1 and c6 by contact, c3 through contributor_id), c2
@@ -130,6 +130,16 @@ insert into public.dev_rein_mvp_proposals(id,proposer_contact_id,title,vote_type
   ('aaaaaaa3-1111-4111-8111-111111111113','11111111-1111-4111-8111-111111111111','Third funding request','funding'),
   ('aaaaaaa4-1111-4111-8111-111111111114','11111111-1111-4111-8111-111111111111','Fourth funding request','funding'),
   ('aaaaaaa5-1111-4111-8111-111111111115','11111111-1111-4111-8111-111111111111','Routine study group','routine');
+-- A separate batch of funding candidates exists so a live poll can be opened
+-- without naming a proposal the closed round-one poll already froze.
+insert into public.dev_rein_mvp_proposals(id,proposer_contact_id,title,vote_type) values
+  ('aaaaaaa7-1111-4111-8111-111111111117','11111111-1111-4111-8111-111111111111','Seventh funding request','funding'),
+  ('aaaaaaa8-1111-4111-8111-111111111118','11111111-1111-4111-8111-111111111111','Eighth funding request','funding'),
+  ('aaaaaaa9-1111-4111-8111-111111111119','11111111-1111-4111-8111-111111111111','Ninth funding request','funding'),
+  ('aaaaaaa0-1111-4111-8111-111111111110','11111111-1111-4111-8111-111111111111','Live routine study group','routine');
+insert into public.dev_rein_mvp_proposals(id,proposer_contact_id,title,vote_type) values
+  ('aaaaaaa6-1111-4111-8111-111111111116','11111111-1111-4111-8111-111111111111','Live routine study group','routine'),
+  ('aaaaaaab-1111-4111-8111-11111111111b','11111111-1111-4111-8111-111111111111','Clock round request','funding');
 insert into public.prod_rein_mvp_proposals(id,proposer_contact_id,title,vote_type) values
   ('aaaaaaa6-1111-4111-8111-111111111116','99999999-9999-4999-8999-999999999999','Production request','funding');
 
@@ -285,82 +295,184 @@ select throws_ok(
 
 -- Ballots: one ballot per voter, approved_proposal_ids limited to the poll's
 -- candidates and to the frozen approval limit, empty array meaning abstention.
+-- cast_at is the database clock now, so a ballot is only accepted while its
+-- poll is open and inside the poll window. The window rule, the approval rule,
+-- and the one-ballot-per-voter rule are all exercised against a live poll here;
+-- the closed poll keeps its rejected writes, and its historical ballots are
+-- seeded further down so finalization can still recount them.
+select lives_ok(
+  $$insert into public.dev_rein_mvp_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444443','33333333-3333-4333-8333-333333333333','Live funding round','funding',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa8-1111-4111-8111-111111111118','aaaaaaa9-1111-4111-8111-111111111119']::uuid[],
+      now()-interval '1 hour',now()+interval '1 hour')$$,
+  'a director opens a live poll over three funding candidates'
+);
 select lives_ok(
   $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444441','11111111-1111-4111-8111-111111111111',
-      array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now()-interval '90 minutes')$$,
+    values ('44444444-4444-4444-8444-444444444443','11111111-1111-4111-8111-111111111111',
+      array['aaaaaaa7-1111-4111-8111-111111111117']::uuid[],now()-interval '30 minutes')$$,
   'a director ballot inside the poll window is accepted'
 );
 select lives_ok(
   $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333',
-      array[]::uuid[],now()-interval '90 minutes')$$,
+    values ('44444444-4444-4444-8444-444444444443','33333333-3333-4333-8333-333333333333',
+      array['aaaaaaa8-1111-4111-8111-111111111118']::uuid[],now()-interval '30 minutes')$$,
   'an empty approved array records an abstention'
 );
 select lives_ok(
   $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
-      array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112']::uuid[],
-      now()-interval '90 minutes')$$,
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa8-1111-4111-8111-111111111118']::uuid[],
+      now()-interval '30 minutes')$$,
   'a ballot approving up to the frozen approval limit is accepted'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444443','11111111-1111-4111-8111-111111111111',
+      array[]::uuid[],now()-interval '30 minutes')$$,
+  '23505',null,'a second ballot from the same voter is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','22222222-2222-4222-8222-222222222222',array[]::uuid[])$$,
+  '23514',null,'a voter who is not a current director cannot abstain either'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','22222222-2222-4222-8222-222222222222',array['aaaaaaa7-1111-4111-8111-111111111117']::uuid[])$$,
+  '23514',null,'a voter without a director record is rejected before the approval list is read'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[])$$,
+  '23514',null,'approving a proposal that is not a candidate of the poll is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa7-1111-4111-8111-111111111117']::uuid[])$$,
+  '23514',null,'approving the same proposal twice inside one ballot is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa8-1111-4111-8111-111111111118','aaaaaaa9-1111-4111-8111-111111111119']::uuid[])$$,
+  '23514',null,'approving more proposals than the frozen approval limit is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+      array[]::uuid[],now()-interval '3 hours')$$,
+  '23514',null,'a ballot whose caller timestamp predates the closed window is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+      array[]::uuid[],now()+interval '1 hour')$$,
+  '23514',null,'a ballot whose caller timestamp outlives the closed window is rejected'
+);
+select lives_ok(
+  $$insert into public.dev_rein_mvp_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-44444444444a','33333333-3333-4333-8333-333333333333','Live routine round','routine',
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '1 hour',now()+interval '1 hour')$$,
+  'a director opens a live single-candidate poll'
+);
+select lives_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-44444444444a','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '30 minutes')$$,
+  'a ballot on a single-candidate poll is accepted'
+);
+
+-- cast_at is the database clock, not the writer's value. Service role is the
+-- only writer, so a caller-supplied timestamp must never be stored: a
+-- backdated ballot would otherwise rewrite the chronology the poll index and
+-- every audit read depend on. Every live ballot above carried a caller
+-- timestamp in the past, and the guard stored the transaction clock instead.
+select is(
+  (select bool_and(cast_at > now() - interval '1 minute') from public.dev_rein_mvp_ballots
+    where poll_id='44444444-4444-4444-8444-444444444443'),
+  true,'a stored cast_at is the database clock, not the older value the writer sent'
+);
+select ok(
+  (select pg_get_functiondef(p.oid) like '%new.cast_at := now();%'
+     from pg_proc p where p.oid = 'public.dev_rein_mvp_ballots_before_insert()'::regprocedure),
+  'the development guard assigns cast_at from the database clock'
+);
+select ok(
+  (select pg_get_functiondef(p.oid) like '%new.cast_at := now();%'
+     from pg_proc p where p.oid = 'public.prod_rein_mvp_ballots_before_insert()'::regprocedure),
+  'the production guard assigns cast_at from the database clock'
+);
+select ok(
+  (select strpos(pg_get_functiondef(p.oid), 'new.cast_at := now();')
+        < strpos(pg_get_functiondef(p.oid), 'new.cast_at < poll_opens_at')
+     from pg_proc p where p.oid = 'public.dev_rein_mvp_ballots_before_insert()'::regprocedure)
+  and (select strpos(pg_get_functiondef(p.oid), 'new.cast_at := now();')
+            < strpos(pg_get_functiondef(p.oid), 'new.cast_at < poll_opens_at')
+     from pg_proc p where p.oid = 'public.prod_rein_mvp_ballots_before_insert()'::regprocedure),
+  'each guard assigns the database clock before it reads cast_at, so the check cannot see a caller value'
+);
+
+-- One writer, one clock reading: an open poll records the ballot, and the
+-- stored instant is the transaction timestamp rather than anything the caller
+-- chose. A writer that supplies its own value cannot alter the stored instant.
+insert into public.dev_rein_mvp_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+  values ('44444444-4444-4444-8444-444444444448','33333333-3333-4333-8333-333333333333','Clock round','funding',
+    array['aaaaaaab-1111-4111-8111-11111111111b']::uuid[],now()-interval '1 hour',now()+interval '90 seconds');
+select lives_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444448','11111111-1111-4111-8111-111111111111',
+      array['aaaaaaab-1111-4111-8111-11111111111b']::uuid[],now()+interval '30 minutes')$$,
+  'an open poll accepts a ballot whose caller timestamp is ignored rather than rejected'
+);
+select is(
+  (select cast_at = now() from public.dev_rein_mvp_ballots
+    where poll_id='44444444-4444-4444-8444-444444444448'
+      and voter_contact_id='11111111-1111-4111-8111-111111111111'),
+  true,'the stored cast_at is the database clock, not the future value the writer sent'
+);
+
+select throws_ok(
+  $$update public.dev_rein_mvp_ballots set approved_proposal_ids=array[]::uuid[]
+    where poll_id='44444444-4444-4444-8444-444444444443'$$,
+  '23001',null,'a recorded ballot cannot be replaced'
+);
+select throws_ok(
+  $$delete from public.dev_rein_mvp_ballots where poll_id='44444444-4444-4444-8444-444444444443'$$,
+  '23001',null,'a recorded ballot cannot be removed'
+);
+
+-- Historical recount fixture. The closed poll above can no longer accept a
+-- live ballot, so its recorded ballots are reconstructed with explicit
+-- preexisting timestamps. This is a fixture-only step: the write guard is
+-- disabled for exactly the statement that seeds rows, and the frozen rows are
+-- then asserted below. The immutable-table trigger stays armed the whole time,
+-- every production constraint is unchanged, and no application path runs with
+-- the guard down.
+alter table public.dev_rein_mvp_ballots disable trigger dev_rein_mvp_ballots_before_insert;
+insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at) values
+  ('44444444-4444-4444-8444-444444444441','11111111-1111-4111-8111-111111111111',
+   array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now()-interval '90 minutes'),
+  ('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333',array[]::uuid[],now()-interval '90 minutes'),
+  ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+   array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '90 minutes');
+alter table public.dev_rein_mvp_ballots enable trigger dev_rein_mvp_ballots_before_insert;
+select ok(
+  (select bool_and(cast_at < now() - interval '1 hour')
+     from public.dev_rein_mvp_ballots where poll_id='44444444-4444-4444-8444-444444444441'),
+  'the closed poll carries the historical ballot timestamps its recount depends on'
+);
+select ok(
+  (select count(*)=3 and count(distinct voter_contact_id)=3
+     from public.dev_rein_mvp_ballots where poll_id='44444444-4444-4444-8444-444444444441'),
+  'the closed poll records its three voter rows for the recount'
 );
 select throws_ok(
   $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('44444444-4444-4444-8444-444444444441','11111111-1111-4111-8111-111111111111',
       array[]::uuid[],now()-interval '90 minutes')$$,
-  '23505',null,'a second ballot from the same voter is rejected'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
-    values ('44444444-4444-4444-8444-444444444441','22222222-2222-4222-8222-222222222222',array[]::uuid[])$$,
-  '23514',null,'a voter who is not a current director cannot abstain either'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
-    values ('44444444-4444-4444-8444-444444444441','22222222-2222-4222-8222-222222222222',array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[])$$,
-  '23514',null,'a voter without a director record is rejected before the approval list is read'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
-    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[])$$,
-  '23514',null,'approving a proposal that is not a candidate of the poll is rejected'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
-    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
-      array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa1-1111-4111-8111-111111111111']::uuid[])$$,
-  '23514',null,'approving the same proposal twice inside one ballot is rejected'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids)
-    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
-      array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112','aaaaaaa3-1111-4111-8111-111111111113']::uuid[])$$,
-  '23514',null,'approving more proposals than the frozen approval limit is rejected'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',array[]::uuid[],now()-interval '3 hours')$$,
-  '23514',null,'a ballot cast before the poll opens is rejected'
-);
-select throws_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',array[]::uuid[],now()+interval '1 hour')$$,
-  '23514',null,'a ballot cast after the poll closes is rejected'
-);
-select lives_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444442','11111111-1111-4111-8111-111111111111',
-      array['aaaaaaa5-1111-4111-8111-111111111115']::uuid[],now()-interval '90 minutes')$$,
-  'a ballot on a single-candidate poll is accepted'
-);
-select throws_ok(
-  $$update public.dev_rein_mvp_ballots set approved_proposal_ids=array[]::uuid[]
-    where poll_id='44444444-4444-4444-8444-444444444441'$$,
-  '23001',null,'a recorded ballot cannot be replaced'
-);
-select throws_ok(
-  $$delete from public.dev_rein_mvp_ballots where poll_id='44444444-4444-4444-8444-444444444441'$$,
-  '23001',null,'a recorded ballot cannot be removed'
+  '23514',null,'the reopened guard still refuses a live write to the closed poll'
 );
 
 -- Finalization: one call closes a poll whose window has run out, recounts the
@@ -381,6 +493,16 @@ select throws_ok(
 select lives_ok(
   $$select public.dev_rein_mvp_finalize_poll('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333')$$,
   'a director finalizes the funding poll'
+);
+select throws_ok(
+  $$select public.dev_rein_mvp_finalize_poll('44444444-4444-4444-8444-444444444443','33333333-3333-4333-8333-333333333333')$$,
+  '23514',null,'a poll inside its window cannot be finalized'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now()-interval '90 minutes')$$,
+  '23514',null,'a closed poll takes no further ballot even after finalization'
 );
 select is(
   (select status from public.dev_rein_mvp_polls where id='44444444-4444-4444-8444-444444444441'),
@@ -507,13 +629,15 @@ select lives_ok(
   'a later poll carries the unselected candidates'
 );
 select lives_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+  $$alter table public.dev_rein_mvp_ballots disable trigger dev_rein_mvp_ballots_before_insert;
+    insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('44444444-4444-4444-8444-444444444446','11111111-1111-4111-8111-111111111111',
       array['aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '90 minutes');
     insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('44444444-4444-4444-8444-444444444446','66666666-6666-4666-8666-666666666666',
-      array['aaaaaaa3-1111-4111-8111-111111111113']::uuid[],now()-interval '90 minutes')$$,
-  'two directors approve one candidate each'
+      array['aaaaaaa3-1111-4111-8111-111111111113']::uuid[],now()-interval '90 minutes');
+    alter table public.dev_rein_mvp_ballots enable trigger dev_rein_mvp_ballots_before_insert;$$,
+  'the closed tie poll gets its two historical ballots'
 );
 select lives_ok(
   $$select public.dev_rein_mvp_finalize_poll('44444444-4444-4444-8444-444444444446','33333333-3333-4333-8333-333333333333')$$,
@@ -539,9 +663,11 @@ select lives_ok(
   'a candidate with no approvals may enter a later poll'
 );
 select lives_ok(
-  $$insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
-    values ('44444444-4444-4444-8444-444444444447','11111111-1111-4111-8111-111111111111',array[]::uuid[],now()-interval '90 minutes')$$,
-  'the only ballot on the third round abstains'
+  $$alter table public.dev_rein_mvp_ballots disable trigger dev_rein_mvp_ballots_before_insert;
+    insert into public.dev_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444447','11111111-1111-4111-8111-111111111111',array[]::uuid[],now()-interval '90 minutes');
+    alter table public.dev_rein_mvp_ballots enable trigger dev_rein_mvp_ballots_before_insert;$$,
+  'the closed third round gets its single historical abstention'
 );
 select lives_ok(
   $$select public.dev_rein_mvp_finalize_poll('44444444-4444-4444-8444-444444444447','11111111-1111-4111-8111-111111111111')$$,
@@ -968,10 +1094,12 @@ select lives_ok(
   $$insert into public.prod_rein_mvp_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
     values ('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999','Production poll','funding',
       array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '2 hours',now()-interval '1 hour');
+    alter table public.prod_rein_mvp_ballots disable trigger prod_rein_mvp_ballots_before_insert;
     insert into public.prod_rein_mvp_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999',
-      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '90 minutes')$$,
-  'production poll and ballot are accepted'
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '90 minutes');
+    alter table public.prod_rein_mvp_ballots enable trigger prod_rein_mvp_ballots_before_insert;$$,
+  'the closed production poll gets its historical ballot'
 );
 select throws_ok(
   $$update public.prod_rein_mvp_ballots set approved_proposal_ids=array[]::uuid[]

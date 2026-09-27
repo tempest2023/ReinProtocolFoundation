@@ -1,5 +1,5 @@
 begin;
-select plan(39);
+select plan(42);
 
 select ok((select relrowsecurity from pg_class where oid='public.dev_community_participants'::regclass),'participant RLS is enabled');
 select ok((select relrowsecurity from pg_class where oid='public.dev_contributor_applications'::regclass),'application RLS is enabled');
@@ -43,56 +43,97 @@ select throws_ok(
 select ok(
   (select bool_and(relrowsecurity) from pg_class
     where relnamespace='public'::regnamespace
-      and relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls','dev_rein_mvp_ballots',
-                      'dev_rein_mvp_proposal_revisions')),
+      and relname in ('dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                      'dev_rein_proposal_revisions')),
   'development governance RLS is enabled'
 );
 select ok(
   (select bool_and(relrowsecurity) from pg_class
     where relnamespace='public'::regnamespace
-      and relname in ('prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls','prod_rein_mvp_ballots',
-                      'prod_rein_mvp_proposal_revisions')),
+      and relname in ('prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                      'prod_rein_proposal_revisions')),
   'production governance RLS is enabled'
 );
 select policies_are(
-  'public','dev_rein_mvp_proposals',array[]::text[],
+  'public','dev_rein_proposals',array[]::text[],
   'development governance tables expose no Data API policies'
 );
 select policies_are(
-  'public','prod_rein_mvp_proposals',array[]::text[],
+  'public','prod_rein_proposals',array[]::text[],
   'production governance tables expose no Data API policies'
 );
 select ok(
   not exists(
     select 1 from (values ('anon'),('authenticated')) role_name(role_name),
-      unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls','dev_rein_mvp_ballots',
-                   'dev_rein_mvp_proposal_revisions']) t
+      unnest(array['dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                   'dev_rein_proposal_revisions']) t
     where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
   )
   and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
-       from unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls','dev_rein_mvp_ballots',
-                         'dev_rein_mvp_proposal_revisions']) t),
+       from unnest(array['dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                         'dev_rein_proposal_revisions']) t),
   'development governance tables are readable by service_role only'
 );
 select ok(
   not exists(
     select 1 from (values ('anon'),('authenticated')) role_name(role_name),
-      unnest(array['prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls','prod_rein_mvp_ballots',
-                   'prod_rein_mvp_proposal_revisions']) t
+      unnest(array['prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                   'prod_rein_proposal_revisions']) t
     where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
   )
   and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
-       from unnest(array['prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls','prod_rein_mvp_ballots',
-                         'prod_rein_mvp_proposal_revisions']) t),
+       from unnest(array['prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                         'prod_rein_proposal_revisions']) t),
   'production governance tables are readable by service_role only'
 );
 
+-- The old "mvp" governance names survive as read/write passthrough views over
+-- the renamed tables, so a caller that still uses them must not gain a route
+-- around either the RLS or the grants.
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace and c.relkind='v'
+      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
+                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
+                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
+                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')),
+  10::bigint,
+  'the legacy governance names are views, not row stores'
+);
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace and c.relkind='v'
+      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
+                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
+                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
+                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')
+      and array_to_string(c.reloptions,',') like '%security_invoker=true%'),
+  10::bigint,
+  'every legacy governance view runs with the invoker privileges and RLS context'
+);
+select ok(
+  not exists(
+    select 1 from (values ('anon'),('authenticated')) role_name(role_name),
+      unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
+                   'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
+                   'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
+                   'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions']) t
+    where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
+  )
+  and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
+       from unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
+                         'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
+                         'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
+                         'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions']) t),
+  'the legacy governance views are readable by service_role only'
+);
+
 select policies_are(
-  'public','dev_rein_mvp_proposal_revisions',array[]::text[],
+  'public','dev_rein_proposal_revisions',array[]::text[],
   'development feedback table exposes no Data API policies'
 );
 select policies_are(
-  'public','prod_rein_mvp_proposal_revisions',array[]::text[],
+  'public','prod_rein_proposal_revisions',array[]::text[],
   'production feedback table exposes no Data API policies'
 );
 select ok(
@@ -100,12 +141,16 @@ select ok(
     select 1
       from (values ('anon'),('authenticated')) role_name(role_name),
            unnest(array['dev_rein_mvp_poll_winner(uuid)',
+                        'dev_rein_finalize_poll(uuid,uuid)',
+                        'dev_rein_approve_revision(uuid,uuid)',
                         'dev_rein_mvp_finalize_poll(uuid,uuid)',
                         'dev_rein_mvp_approve_revision(uuid,uuid)']) signature
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
        from unnest(array['dev_rein_mvp_poll_winner(uuid)',
+                         'dev_rein_finalize_poll(uuid,uuid)',
+                         'dev_rein_approve_revision(uuid,uuid)',
                          'dev_rein_mvp_finalize_poll(uuid,uuid)',
                          'dev_rein_mvp_approve_revision(uuid,uuid)']) signature),
   'development finalization and approval RPCs are executable by service_role only'
@@ -115,23 +160,27 @@ select ok(
     select 1
       from (values ('anon'),('authenticated')) role_name(role_name),
            unnest(array['prod_rein_mvp_poll_winner(uuid)',
+                        'prod_rein_finalize_poll(uuid,uuid)',
+                        'prod_rein_approve_revision(uuid,uuid)',
                         'prod_rein_mvp_finalize_poll(uuid,uuid)',
                         'prod_rein_mvp_approve_revision(uuid,uuid)']) signature
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
        from unnest(array['prod_rein_mvp_poll_winner(uuid)',
+                         'prod_rein_finalize_poll(uuid,uuid)',
+                         'prod_rein_approve_revision(uuid,uuid)',
                          'prod_rein_mvp_finalize_poll(uuid,uuid)',
                          'prod_rein_mvp_approve_revision(uuid,uuid)']) signature),
   'production finalization and approval RPCs are executable by service_role only'
 );
 select ok(
-  (select bool_and(has_column_privilege('service_role','public.dev_rein_mvp_proposals',column_name,'select'))
+  (select bool_and(has_column_privilege('service_role','public.dev_rein_proposals',column_name,'select'))
      from unnest(array['location','schedule','personnel','event_flow']) column_name),
   'development proposals persist the material fields as their own columns'
 );
 select ok(
-  (select bool_and(has_column_privilege('service_role','public.prod_rein_mvp_proposals',column_name,'select'))
+  (select bool_and(has_column_privilege('service_role','public.prod_rein_proposals',column_name,'select'))
      from unnest(array['location','schedule','personnel','event_flow']) column_name),
   'production proposals persist the material fields as their own columns'
 );

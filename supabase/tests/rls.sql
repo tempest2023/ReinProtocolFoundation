@@ -1,5 +1,5 @@
 begin;
-select plan(42);
+select plan(43);
 
 select ok((select relrowsecurity from pg_class where oid='public.dev_community_participants'::regclass),'participant RLS is enabled');
 select ok((select relrowsecurity from pg_class where oid='public.dev_contributor_applications'::regclass),'application RLS is enabled');
@@ -140,7 +140,7 @@ select ok(
   not exists(
     select 1
       from (values ('anon'),('authenticated')) role_name(role_name),
-           unnest(array['dev_rein_mvp_poll_winner(uuid)',
+           unnest(array['dev_rein_poll_winner(uuid)',
                         'dev_rein_finalize_poll(uuid,uuid)',
                         'dev_rein_approve_revision(uuid,uuid)',
                         'dev_rein_mvp_finalize_poll(uuid,uuid)',
@@ -148,7 +148,7 @@ select ok(
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
-       from unnest(array['dev_rein_mvp_poll_winner(uuid)',
+       from unnest(array['dev_rein_poll_winner(uuid)',
                          'dev_rein_finalize_poll(uuid,uuid)',
                          'dev_rein_approve_revision(uuid,uuid)',
                          'dev_rein_mvp_finalize_poll(uuid,uuid)',
@@ -159,7 +159,7 @@ select ok(
   not exists(
     select 1
       from (values ('anon'),('authenticated')) role_name(role_name),
-           unnest(array['prod_rein_mvp_poll_winner(uuid)',
+           unnest(array['prod_rein_poll_winner(uuid)',
                         'prod_rein_finalize_poll(uuid,uuid)',
                         'prod_rein_approve_revision(uuid,uuid)',
                         'prod_rein_mvp_finalize_poll(uuid,uuid)',
@@ -167,12 +167,23 @@ select ok(
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
-       from unnest(array['prod_rein_mvp_poll_winner(uuid)',
+       from unnest(array['prod_rein_poll_winner(uuid)',
                          'prod_rein_finalize_poll(uuid,uuid)',
                          'prod_rein_approve_revision(uuid,uuid)',
                          'prod_rein_mvp_finalize_poll(uuid,uuid)',
                          'prod_rein_mvp_approve_revision(uuid,uuid)']) signature),
   'production finalization and approval RPCs are executable by service_role only'
+);
+select ok(
+  not exists(
+    select 1
+      from pg_proc p
+     where p.pronamespace='public'::regnamespace
+       and p.proname ~ '^(dev|prod)_rein_mvp_'
+       and p.proname not in ('dev_rein_mvp_finalize_poll','dev_rein_mvp_approve_revision',
+                             'prod_rein_mvp_finalize_poll','prod_rein_mvp_approve_revision')
+  ),
+  'no mvp-named helper or trigger function survives to carry a grant'
 );
 select ok(
   (select bool_and(has_column_privilege('service_role','public.dev_rein_proposals',column_name,'select'))

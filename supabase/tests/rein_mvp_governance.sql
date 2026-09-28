@@ -1,5 +1,5 @@
 begin;
-select plan(203);
+select plan(208);
 
 -- Authority fixtures: contacts c1/c3/c6 belong to active Contributors and hold
 -- a director Person row (c1 and c6 by contact, c3 through contributor_id), c2
@@ -425,21 +425,21 @@ select is(
 );
 select ok(
   (select pg_get_functiondef(p.oid) like '%new.cast_at := now();%'
-     from pg_proc p where p.oid = 'public.dev_rein_mvp_ballots_before_insert()'::regprocedure),
+     from pg_proc p where p.oid = 'public.dev_rein_ballots_before_insert()'::regprocedure),
   'the development guard assigns cast_at from the database clock'
 );
 select ok(
   (select pg_get_functiondef(p.oid) like '%new.cast_at := now();%'
-     from pg_proc p where p.oid = 'public.prod_rein_mvp_ballots_before_insert()'::regprocedure),
+     from pg_proc p where p.oid = 'public.prod_rein_ballots_before_insert()'::regprocedure),
   'the production guard assigns cast_at from the database clock'
 );
 select ok(
   (select strpos(pg_get_functiondef(p.oid), 'new.cast_at := now();')
         < strpos(pg_get_functiondef(p.oid), 'new.cast_at < poll_opens_at')
-     from pg_proc p where p.oid = 'public.dev_rein_mvp_ballots_before_insert()'::regprocedure)
+     from pg_proc p where p.oid = 'public.dev_rein_ballots_before_insert()'::regprocedure)
   and (select strpos(pg_get_functiondef(p.oid), 'new.cast_at := now();')
             < strpos(pg_get_functiondef(p.oid), 'new.cast_at < poll_opens_at')
-     from pg_proc p where p.oid = 'public.prod_rein_mvp_ballots_before_insert()'::regprocedure),
+     from pg_proc p where p.oid = 'public.prod_rein_ballots_before_insert()'::regprocedure),
   'each guard assigns the database clock before it reads cast_at, so the check cannot see a caller value'
 );
 
@@ -479,14 +479,14 @@ select throws_ok(
 -- then asserted below. The immutable-table trigger stays armed the whole time,
 -- every production constraint is unchanged, and no application path runs with
 -- the guard down.
-alter table public.dev_rein_ballots disable trigger dev_rein_mvp_ballots_before_insert;
+alter table public.dev_rein_ballots disable trigger dev_rein_ballots_before_insert;
 insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at) values
   ('44444444-4444-4444-8444-444444444441','11111111-1111-4111-8111-111111111111',
    array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now()-interval '90 minutes'),
   ('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333',array[]::uuid[],now()-interval '90 minutes'),
   ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
    array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '90 minutes');
-alter table public.dev_rein_ballots enable trigger dev_rein_mvp_ballots_before_insert;
+alter table public.dev_rein_ballots enable trigger dev_rein_ballots_before_insert;
 select ok(
   (select bool_and(cast_at < now() - interval '1 hour')
      from public.dev_rein_ballots where poll_id='44444444-4444-4444-8444-444444444441'),
@@ -658,14 +658,14 @@ select lives_ok(
   'a later poll carries the unselected candidates'
 );
 select lives_ok(
-  $$alter table public.dev_rein_ballots disable trigger dev_rein_mvp_ballots_before_insert;
+  $$alter table public.dev_rein_ballots disable trigger dev_rein_ballots_before_insert;
     insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('44444444-4444-4444-8444-444444444446','11111111-1111-4111-8111-111111111111',
       array['aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '90 minutes');
     insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('44444444-4444-4444-8444-444444444446','66666666-6666-4666-8666-666666666666',
       array['aaaaaaa3-1111-4111-8111-111111111113']::uuid[],now()-interval '90 minutes');
-    alter table public.dev_rein_ballots enable trigger dev_rein_mvp_ballots_before_insert;$$,
+    alter table public.dev_rein_ballots enable trigger dev_rein_ballots_before_insert;$$,
   'the closed tie poll gets its two historical ballots'
 );
 select lives_ok(
@@ -692,10 +692,10 @@ select lives_ok(
   'a candidate with no approvals may enter a later poll'
 );
 select lives_ok(
-  $$alter table public.dev_rein_ballots disable trigger dev_rein_mvp_ballots_before_insert;
+  $$alter table public.dev_rein_ballots disable trigger dev_rein_ballots_before_insert;
     insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('44444444-4444-4444-8444-444444444447','11111111-1111-4111-8111-111111111111',array[]::uuid[],now()-interval '90 minutes');
-    alter table public.dev_rein_ballots enable trigger dev_rein_mvp_ballots_before_insert;$$,
+    alter table public.dev_rein_ballots enable trigger dev_rein_ballots_before_insert;$$,
   'the closed third round gets its single historical abstention'
 );
 select lives_ok(
@@ -1123,11 +1123,11 @@ select lives_ok(
   $$insert into public.prod_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
     values ('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999','Production poll','funding',
       array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '2 hours',now()-interval '1 hour');
-    alter table public.prod_rein_ballots disable trigger prod_rein_mvp_ballots_before_insert;
+    alter table public.prod_rein_ballots disable trigger prod_rein_ballots_before_insert;
     insert into public.prod_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
     values ('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999',
       array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '90 minutes');
-    alter table public.prod_rein_ballots enable trigger prod_rein_mvp_ballots_before_insert;$$,
+    alter table public.prod_rein_ballots enable trigger prod_rein_ballots_before_insert;$$,
   'the closed production poll gets its historical ballot'
 );
 select throws_ok(
@@ -1265,6 +1265,80 @@ select throws_ok(
   $$select public.dev_rein_mvp_finalize_poll('99999999-1111-4111-8111-111111111119','33333333-3333-4333-8333-333333333333')$$,
   '23503',null,
   'the legacy finalize wrapper refuses an unknown poll exactly as the renamed function does'
+);
+
+-- The rename must not leave a second implementation of the same behavior under
+-- the mvp name. Exactly four legacy RPC wrappers exist (two per environment),
+-- the two old-name wrapper bodies only forward to the new functions, and the
+-- ten helper and trigger functions live under the new names with no mvp-named
+-- twin left behind.
+select is(
+  (select array_agg(p.proname::text order by p.proname)
+     from pg_proc p
+    where p.pronamespace='public'::regnamespace
+      and p.proname in ('dev_rein_mvp_finalize_poll','dev_rein_mvp_approve_revision',
+                        'prod_rein_mvp_finalize_poll','prod_rein_mvp_approve_revision')),
+  array['dev_rein_mvp_approve_revision','dev_rein_mvp_finalize_poll',
+        'prod_rein_mvp_approve_revision','prod_rein_mvp_finalize_poll'],
+  'exactly the four legacy RPC wrappers survive under the old names'
+);
+select is(
+  (select count(*)
+     from pg_proc p
+    where p.pronamespace='public'::regnamespace
+      and p.proname in ('dev_rein_is_current_director','dev_rein_poll_winner',
+                        'dev_rein_proposals_before_write','dev_rein_polls_before_insert',
+                        'dev_rein_polls_before_update','dev_rein_ballots_before_insert',
+                        'dev_rein_ballots_before_update','dev_rein_vote_types_before_write',
+                        'dev_rein_revisions_before_write','dev_rein_proposals_record_origin',
+                        'prod_rein_is_current_director','prod_rein_poll_winner',
+                        'prod_rein_proposals_before_write','prod_rein_polls_before_insert',
+                        'prod_rein_polls_before_update','prod_rein_ballots_before_insert',
+                        'prod_rein_ballots_before_update','prod_rein_vote_types_before_write',
+                        'prod_rein_revisions_before_write','prod_rein_proposals_record_origin')),
+  20::bigint,
+  'all twenty helper and trigger functions live under the long-term names'
+);
+select is(
+  (select count(*)
+     from pg_proc p
+    where p.pronamespace='public'::regnamespace
+      and p.proname ~ '^(dev|prod)_rein_mvp_'
+      and p.proname not in ('dev_rein_mvp_finalize_poll','dev_rein_mvp_approve_revision',
+                            'prod_rein_mvp_finalize_poll','prod_rein_mvp_approve_revision')),
+  0::bigint,
+  'no helper or trigger function survives under an mvp name'
+);
+select ok(
+  not exists(
+    select 1
+      from pg_proc p
+     where p.pronamespace='public'::regnamespace
+       and p.proname in ('dev_rein_finalize_poll','dev_rein_approve_revision',
+                         'dev_rein_is_current_director','dev_rein_poll_winner',
+                         'dev_rein_proposals_before_write','dev_rein_polls_before_insert',
+                         'dev_rein_polls_before_update','dev_rein_ballots_before_insert',
+                         'dev_rein_ballots_before_update','dev_rein_vote_types_before_write',
+                         'dev_rein_revisions_before_write','dev_rein_proposals_record_origin',
+                         'prod_rein_finalize_poll','prod_rein_approve_revision',
+                         'prod_rein_is_current_director','prod_rein_poll_winner',
+                         'prod_rein_proposals_before_write','prod_rein_polls_before_insert',
+                         'prod_rein_polls_before_update','prod_rein_ballots_before_insert',
+                         'prod_rein_ballots_before_update','prod_rein_vote_types_before_write',
+                         'prod_rein_revisions_before_write','prod_rein_proposals_record_origin')
+       and pg_get_functiondef(p.oid) like '%rein_mvp_%'
+  ),
+  'no long-term-named governance function body still names an mvp object'
+);
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace and c.relkind='v'
+      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
+                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
+                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
+                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')),
+  10::bigint,
+  'exactly ten legacy compatibility views answer to the old table names'
 );
 
 -- Access control covers both identifier sets. The long-term names, the legacy

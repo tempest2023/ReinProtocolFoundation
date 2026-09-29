@@ -1,5 +1,5 @@
 begin;
-select plan(43);
+select plan(41);
 
 select ok((select relrowsecurity from pg_class where oid='public.dev_community_participants'::regclass),'participant RLS is enabled');
 select ok((select relrowsecurity from pg_class where oid='public.dev_contributor_applications'::regclass),'application RLS is enabled');
@@ -87,45 +87,24 @@ select ok(
   'production governance tables are readable by service_role only'
 );
 
--- The old "mvp" governance names survive as read/write passthrough views over
--- the renamed tables, so a caller that still uses them must not gain a route
--- around either the RLS or the grants.
+-- The old "mvp" governance names were passthrough views over the renamed
+-- tables and are gone as of 20260929045543_remove_stage_compatibility_objects.
+-- A removed object cannot be a route around RLS or the grants, and the checks
+-- here keep a later migration from quietly reinstating one outside this
+-- test's access model.
 select is(
   (select count(*) from pg_class c
-    where c.relnamespace='public'::regnamespace and c.relkind='v'
-      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')),
-  10::bigint,
-  'the legacy governance names are views, not row stores'
+    where c.relnamespace='public'::regnamespace
+      and c.relname like '%rein_mvp_%'),
+  0::bigint,
+  'no relation survives under an old governance name'
 );
 select is(
-  (select count(*) from pg_class c
-    where c.relnamespace='public'::regnamespace and c.relkind='v'
-      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')
-      and array_to_string(c.reloptions,',') like '%security_invoker=true%'),
-  10::bigint,
-  'every legacy governance view runs with the invoker privileges and RLS context'
-);
-select ok(
-  not exists(
-    select 1 from (values ('anon'),('authenticated')) role_name(role_name),
-      unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                   'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                   'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                   'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions']) t
-    where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
-  )
-  and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
-       from unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                         'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                         'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                         'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions']) t),
-  'the legacy governance views are readable by service_role only'
+  (select count(*) from pg_proc p
+    where p.pronamespace='public'::regnamespace
+      and p.proname like '%rein_mvp_%'),
+  0::bigint,
+  'no governance function survives under an old name'
 );
 
 select policies_are(
@@ -142,17 +121,13 @@ select ok(
       from (values ('anon'),('authenticated')) role_name(role_name),
            unnest(array['dev_rein_poll_winner(uuid)',
                         'dev_rein_finalize_poll(uuid,uuid)',
-                        'dev_rein_approve_revision(uuid,uuid)',
-                        'dev_rein_mvp_finalize_poll(uuid,uuid)',
-                        'dev_rein_mvp_approve_revision(uuid,uuid)']) signature
+                        'dev_rein_approve_revision(uuid,uuid)']) signature
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
        from unnest(array['dev_rein_poll_winner(uuid)',
                          'dev_rein_finalize_poll(uuid,uuid)',
-                         'dev_rein_approve_revision(uuid,uuid)',
-                         'dev_rein_mvp_finalize_poll(uuid,uuid)',
-                         'dev_rein_mvp_approve_revision(uuid,uuid)']) signature),
+                         'dev_rein_approve_revision(uuid,uuid)']) signature),
   'development finalization and approval RPCs are executable by service_role only'
 );
 select ok(
@@ -161,29 +136,14 @@ select ok(
       from (values ('anon'),('authenticated')) role_name(role_name),
            unnest(array['prod_rein_poll_winner(uuid)',
                         'prod_rein_finalize_poll(uuid,uuid)',
-                        'prod_rein_approve_revision(uuid,uuid)',
-                        'prod_rein_mvp_finalize_poll(uuid,uuid)',
-                        'prod_rein_mvp_approve_revision(uuid,uuid)']) signature
+                        'prod_rein_approve_revision(uuid,uuid)']) signature
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
        from unnest(array['prod_rein_poll_winner(uuid)',
                          'prod_rein_finalize_poll(uuid,uuid)',
-                         'prod_rein_approve_revision(uuid,uuid)',
-                         'prod_rein_mvp_finalize_poll(uuid,uuid)',
-                         'prod_rein_mvp_approve_revision(uuid,uuid)']) signature),
+                         'prod_rein_approve_revision(uuid,uuid)']) signature),
   'production finalization and approval RPCs are executable by service_role only'
-);
-select ok(
-  not exists(
-    select 1
-      from pg_proc p
-     where p.pronamespace='public'::regnamespace
-       and p.proname ~ '^(dev|prod)_rein_mvp_'
-       and p.proname not in ('dev_rein_mvp_finalize_poll','dev_rein_mvp_approve_revision',
-                             'prod_rein_mvp_finalize_poll','prod_rein_mvp_approve_revision')
-  ),
-  'no mvp-named helper or trigger function survives to carry a grant'
 );
 select ok(
   (select bool_and(has_column_privilege('service_role','public.dev_rein_proposals',column_name,'select'))

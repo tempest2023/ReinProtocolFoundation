@@ -1,5 +1,5 @@
 begin;
-select plan(208);
+select plan(198);
 
 -- Authority fixtures: contacts c1/c3/c6 belong to active Contributors and hold
 -- a director Person row (c1 and c6 by contact, c3 through contributor_id), c2
@@ -31,10 +31,9 @@ insert into public.prod_contributors(id,contact_id,status,became_contributor_at)
 insert into public.prod_people(id,contact_id,contributor_id,slug,display_name,person_type,role) values
   ('b9000000-0000-4000-8000-000000000009','99999999-9999-4999-8999-999999999999','a9000000-0000-4000-8000-000000000009','prod-director','Production Director','director','President');
 
--- The long-term physical names carry the row stores; the old "mvp" names are
--- kept only as read/write passthrough views. Assert the base tables first, then
--- assert the kind of each legacy name so a rename that silently left a view
--- where a table is expected cannot pass.
+-- The long-term physical names carry the row stores. Assert each of the ten
+-- tables first, then assert that no old "mvp" name answers to a relation at
+-- all, so a rename that silently reinstated one cannot pass.
 select has_table('public','dev_rein_vote_types','development vote type rules table exists');
 select has_table('public','prod_rein_vote_types','production vote type rules table exists');
 select has_table('public','dev_rein_proposals','development proposals table exists');
@@ -46,9 +45,6 @@ select has_table('public','prod_rein_ballots','production ballots table exists')
 select has_table('public','dev_rein_proposal_revisions','development feedback table exists');
 select has_table('public','prod_rein_proposal_revisions','production feedback table exists');
 
--- The old "mvp" names are views over the renamed tables, not row stores. The
--- kind check keeps a rename from silently leaving a view where a table is
--- expected, and confirms the compatibility route is a view.
 select is(
   (select count(*) from pg_class c
     where c.relnamespace='public'::regnamespace and c.relkind='r'
@@ -59,16 +55,16 @@ select is(
   10::bigint,
   'the long-term governance names are ordinary tables'
 );
+-- 20260929045543_remove_stage_compatibility_objects dropped the old-name
+-- passthrough views and RPC wrappers the rename left behind, so no relation in
+-- public answers to an "mvp" governance name any more. The kind check keeps a
+-- later rename from quietly reintroducing an old name as a view over a table.
 select is(
   (select count(*) from pg_class c
-    where c.relnamespace='public'::regnamespace and c.relkind='v'
-      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')
-      and array_to_string(c.reloptions,',') like '%security_invoker=true%'),
-  10::bigint,
-  'the legacy governance names are security_invoker views'
+    where c.relnamespace='public'::regnamespace
+      and c.relname like '%rein_mvp_%'),
+  0::bigint,
+  'no relation survives under an old governance name'
 );
 
 -- Vote type rules are operator configuration with no implicit default, and a
@@ -1086,12 +1082,12 @@ select ok(
                       'dev_rein_proposal_revisions',
                       'prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
                       'prod_rein_proposal_revisions')),
-  'RLS is enabled on every Rein MVP governance table'
+  'RLS is enabled on every Rein governance table'
 );
 select is(
-  (select count(*) from pg_policies where schemaname='public' and tablename like '%rein\_mvp\_%' escape '\'),
+  (select count(*) from pg_policies where schemaname='public' and tablename like '%\_rein\_%' escape '\'),
   0::bigint,
-  'no Rein MVP governance table carries a Data API policy'
+  'no Rein governance table carries a Data API policy'
 );
 select ok(
   not exists(
@@ -1183,105 +1179,71 @@ select is(
   'development and production governance columns stay identical'
 );
 
--- Old-name compatibility: the migration left the old identifiers working as a
--- transition route, so a caller that still writes or finalizes through them
--- must reach the same row stores and the same logic. These assertions write
--- through the legacy views and read the result back from the long-term table,
--- then call the legacy RPC wrappers and match their behavior against the new
--- functions.
-select lives_ok(
-  $$insert into public.dev_rein_mvp_vote_types(vote_type,max_candidates,max_approvals_per_voter)
-    values ('compat_routine',1,1)$$,
-  'an operator can still register a vote type rule through the legacy name'
+-- The rename's transition shim is gone. The old identifiers were a route an
+-- unpublished caller might have used; 20260929045543_remove_stage_
+-- compatibility_objects dropped them, so the long-term names are the only way
+-- to reach the governance row stores and the governance RPCs. Every check
+-- below reads the catalog and then calls an old name, so the removal is proven
+-- by an absent object and by a statement that no longer resolves.
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace
+      and c.relname like '%rein_mvp_%'),
+  0::bigint,
+  'no relation survives under an old governance name'
 );
 select is(
-  (select max_candidates from public.dev_rein_vote_types where vote_type='compat_routine'),
-  1,
-  'a write through the legacy vote type view lands in the long-term table'
-);
-select lives_ok(
-  $$insert into public.dev_rein_mvp_proposals(id,proposer_contact_id,title,vote_type)
-    values ('f0000000-0000-4000-8000-000000000010','11111111-1111-4111-8111-111111111111',
-            'Compatibility route request','compat_routine')$$,
-  'a Contributor can still file a proposal through the legacy name'
-);
-select is(
-  (select status from public.dev_rein_proposals where id='f0000000-0000-4000-8000-000000000010'),
-  'submitted',
-  'a proposal written through the legacy view lands in the long-term table'
-);
-select is(
-  (select count(*) from public.dev_rein_mvp_proposal_revisions
-    where proposal_id='f0000000-0000-4000-8000-000000000010' and version=1),
-  1::bigint,
-  'the intake trigger still records version one for a legacy-name insert'
-);
-select lives_ok(
-  $$update public.dev_rein_mvp_proposals set title='Compatibility route request (revised)'
-    where id='f0000000-0000-4000-8000-000000000010'$$,
-  'the legacy view routes an update to the long-term table'
-);
-select is(
-  (select title from public.dev_rein_proposals where id='f0000000-0000-4000-8000-000000000010'),
-  'Compatibility route request (revised)',
-  'the update through the legacy view is visible on the long-term table'
-);
-
--- The legacy RPC names are wrappers with the same signature and return type as
--- the renamed functions, and they delegate rather than reimplement.
-select is(
-  (select array_agg(pg_get_function_result(p.oid)::text order by p.proname)
-     from pg_proc p
+  (select count(*) from pg_proc p
     where p.pronamespace='public'::regnamespace
-      and p.proname in ('dev_rein_finalize_poll','dev_rein_mvp_finalize_poll')),
-  array['jsonb','jsonb'],
-  'the development finalize wrapper returns the same type as the renamed function'
+      and p.proname like '%rein_mvp_%'),
+  0::bigint,
+  'no function survives under an old governance name'
 );
 select is(
-  (select array_agg(pg_get_function_result(p.oid)::text order by p.proname)
-     from pg_proc p
-    where p.pronamespace='public'::regnamespace
-      and p.proname in ('dev_rein_approve_revision','dev_rein_mvp_approve_revision')),
-  array['void','void'],
-  'the development approve wrapper returns the same type as the renamed function'
-);
-select is(
-  (select array_agg(pg_get_function_result(p.oid)::text order by p.proname)
-     from pg_proc p
-    where p.pronamespace='public'::regnamespace
-      and p.proname in ('prod_rein_finalize_poll','prod_rein_mvp_finalize_poll')),
-  array['jsonb','jsonb'],
-  'the production finalize wrapper returns the same type as the renamed function'
-);
-select is(
-  (select array_agg(pg_get_function_result(p.oid)::text order by p.proname)
-     from pg_proc p
-    where p.pronamespace='public'::regnamespace
-      and p.proname in ('prod_rein_approve_revision','prod_rein_mvp_approve_revision')),
-  array['void','void'],
-  'the production approve wrapper returns the same type as the renamed function'
+  (select count(*) from (
+      select tg.tgname as name from pg_trigger tg
+       where not tg.tgisinternal and tg.tgname like '%rein_mvp_%'
+      union all
+      select con.conname from pg_constraint con where con.conname like '%rein_mvp_%'
+      union all
+      select cls.relname from pg_class cls
+        join pg_index ix on ix.indexrelid = cls.oid
+       where cls.relname like '%rein_mvp_%'
+      union all
+      select cls.relname from pg_class cls
+       where cls.relkind = 'S' and cls.relname like '%rein_mvp_%'
+    ) leftovers),
+  0::bigint,
+  'no trigger, constraint, index, or sequence survives under an old governance name'
 );
 select throws_ok(
-  $$select public.dev_rein_mvp_finalize_poll('99999999-1111-4111-8111-111111111119','33333333-3333-4333-8333-333333333333')$$,
-  '23503',null,
-  'the legacy finalize wrapper refuses an unknown poll exactly as the renamed function does'
+  $$insert into public.dev_rein_mvp_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('stale_route',1,1)$$,
+  '42P01',null,'the old table name is gone rather than a shadow of the long-term table'
+);
+select throws_ok(
+  $$select public.prod_rein_mvp_finalize_poll('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999')$$,
+  '42883',null,'the old finalize name is gone rather than a second entry point'
 );
 
--- The rename must not leave a second implementation of the same behavior under
--- the mvp name. Exactly four legacy RPC wrappers exist (two per environment),
--- the two old-name wrapper bodies only forward to the new functions, and the
--- ten helper and trigger functions live under the new names with no mvp-named
--- twin left behind.
+-- Every long-term RPC the application calls is still present at the exact
+-- signature the tests below and the app use, so removing the wrappers took
+-- nothing else with it.
 select is(
-  (select array_agg(p.proname::text order by p.proname)
-     from pg_proc p
-    where p.pronamespace='public'::regnamespace
-      and p.proname in ('dev_rein_mvp_finalize_poll','dev_rein_mvp_approve_revision',
-                        'prod_rein_mvp_finalize_poll','prod_rein_mvp_approve_revision')),
-  array['dev_rein_mvp_approve_revision','dev_rein_mvp_finalize_poll',
-        'prod_rein_mvp_approve_revision','prod_rein_mvp_finalize_poll'],
-  'exactly the four legacy RPC wrappers survive under the old names'
+  (select count(*) from unnest(array['dev_rein_finalize_poll(uuid,uuid)',
+                                    'dev_rein_approve_revision(uuid,uuid)',
+                                    'dev_rein_poll_winner(uuid)',
+                                    'prod_rein_finalize_poll(uuid,uuid)',
+                                    'prod_rein_approve_revision(uuid,uuid)',
+                                    'prod_rein_poll_winner(uuid)']) signature
+    where to_regprocedure('public.'||signature) is null),
+  0::bigint,
+  'every long-term governance RPC is still present at its recorded signature'
 );
+
+-- No second implementation of the same behavior is left under an mvp name:
+-- the twenty helper and trigger functions live under the long-term names with
+-- no mvp-named twin, and no long-term-named body still routes through one.
 select is(
   (select count(*)
      from pg_proc p
@@ -1298,16 +1260,6 @@ select is(
                         'prod_rein_revisions_before_write','prod_rein_proposals_record_origin')),
   20::bigint,
   'all twenty helper and trigger functions live under the long-term names'
-);
-select is(
-  (select count(*)
-     from pg_proc p
-    where p.pronamespace='public'::regnamespace
-      and p.proname ~ '^(dev|prod)_rein_mvp_'
-      and p.proname not in ('dev_rein_mvp_finalize_poll','dev_rein_mvp_approve_revision',
-                            'prod_rein_mvp_finalize_poll','prod_rein_mvp_approve_revision')),
-  0::bigint,
-  'no helper or trigger function survives under an mvp name'
 );
 select ok(
   not exists(
@@ -1330,60 +1282,30 @@ select ok(
   ),
   'no long-term-named governance function body still names an mvp object'
 );
-select is(
-  (select count(*) from pg_class c
-    where c.relnamespace='public'::regnamespace and c.relkind='v'
-      and c.relname in ('dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                        'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                        'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                        'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions')),
-  10::bigint,
-  'exactly ten legacy compatibility views answer to the old table names'
-);
 
--- Access control covers both identifier sets. The long-term names, the legacy
--- views, and both RPC wrappers must stay service_role only, so the transition
--- shim is not a route around the grants.
-select ok(
-  not exists(
-    select 1 from (values ('anon'),('authenticated')) role_name(role_name),
-      unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                   'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                   'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                   'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions']) t
-    where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
-  )
-  and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
-       from unnest(array['dev_rein_mvp_vote_types','dev_rein_mvp_proposals','dev_rein_mvp_polls',
-                         'dev_rein_mvp_ballots','dev_rein_mvp_proposal_revisions',
-                         'prod_rein_mvp_vote_types','prod_rein_mvp_proposals','prod_rein_mvp_polls',
-                         'prod_rein_mvp_ballots','prod_rein_mvp_proposal_revisions']) t),
-  'the legacy governance views are readable by service_role only'
-);
+-- Access control is unchanged by the removal. Dropping the compatibility
+-- objects must not hand a Data API role a route it did not have before, so
+-- every remaining governance RPC stays service_role only.
 select ok(
   not exists(
     select 1
       from (values ('anon'),('authenticated')) role_name(role_name),
            unnest(array['dev_rein_finalize_poll(uuid,uuid)',
                         'dev_rein_approve_revision(uuid,uuid)',
-                        'dev_rein_mvp_finalize_poll(uuid,uuid)',
-                        'dev_rein_mvp_approve_revision(uuid,uuid)',
+                        'dev_rein_poll_winner(uuid)',
                         'prod_rein_finalize_poll(uuid,uuid)',
                         'prod_rein_approve_revision(uuid,uuid)',
-                        'prod_rein_mvp_finalize_poll(uuid,uuid)',
-                        'prod_rein_mvp_approve_revision(uuid,uuid)']) signature
+                        'prod_rein_poll_winner(uuid)']) signature
      where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
   )
   and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
        from unnest(array['dev_rein_finalize_poll(uuid,uuid)',
                          'dev_rein_approve_revision(uuid,uuid)',
-                         'dev_rein_mvp_finalize_poll(uuid,uuid)',
-                         'dev_rein_mvp_approve_revision(uuid,uuid)',
+                         'dev_rein_poll_winner(uuid)',
                          'prod_rein_finalize_poll(uuid,uuid)',
                          'prod_rein_approve_revision(uuid,uuid)',
-                         'prod_rein_mvp_finalize_poll(uuid,uuid)',
-                         'prod_rein_mvp_approve_revision(uuid,uuid)']) signature),
-  'both RPC names, new and legacy, are executable by service_role only'
+                         'prod_rein_poll_winner(uuid)']) signature),
+  'every governance RPC is executable by service_role only'
 );
 
 select * from finish();

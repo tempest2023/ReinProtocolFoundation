@@ -1,15 +1,24 @@
 begin;
 select plan(7);
 
+-- The count is over base tables only. Until 20260929045543_remove_stage_
+-- compatibility_objects, information_schema.tables also carried the ten
+-- old-name passthrough views, which is why the expectation moved from 30 to 25
+-- when that compatibility layer was removed; pinning table_type keeps a future
+-- view from hiding a missing row store behind a matching count.
 select is(
-  (select count(*) from information_schema.tables where table_schema='public' and table_name like 'dev\_%' escape '\'),
-  30::bigint,
+  (select count(*) from information_schema.tables
+    where table_schema='public' and table_type='BASE TABLE'
+      and table_name like 'dev\_%' escape '\'),
+  25::bigint,
   'development has every application table'
 );
 
 select is(
-  (select count(*) from information_schema.tables where table_schema='public' and table_name like 'prod\_%' escape '\'),
-  30::bigint,
+  (select count(*) from information_schema.tables
+    where table_schema='public' and table_type='BASE TABLE'
+      and table_name like 'prod\_%' escape '\'),
+  25::bigint,
   'production has every application table'
 );
 

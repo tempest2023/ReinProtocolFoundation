@@ -17,12 +17,12 @@ vi.mock('next/navigation', () => ({
 
 import ErrorPage from '@/app/error'
 import { ErrorStatePreviewClient } from '@/app/dev/system-states/error/preview-client'
-import Loading from '@/app/loading'
+import { LoadingPage } from '@/components/loading-page'
 import NotFound from '@/app/not-found'
 
 describe('public system pages', () => {
   it('presents an independent San Francisco loading artwork as an indeterminate status', () => {
-    const { container } = render(<Loading />)
+    const { container } = render(<LoadingPage />)
 
     expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'true')
     expect(screen.getByRole('heading', { name: 'Bringing the next page into view.' })).toBeInTheDocument()

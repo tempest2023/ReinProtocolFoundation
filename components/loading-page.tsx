@@ -1,7 +1,7 @@
 import loadingFerry from '@/src/assets/scenes/system-loading-ferry-distilled.webp'
 import { SystemPage } from '@/components/system-page'
 
-export default function Loading() {
+export function LoadingPage({ chrome = true }: { chrome?: boolean }) {
   return (
     <SystemPage
       variant="loading"
@@ -11,6 +11,7 @@ export default function Loading() {
       artwork={loadingFerry}
       artworkCaption="San Francisco / Ferry Building / DXR · CC BY-SA 4.0 · altered"
       artworkHref="https://commons.wikimedia.org/wiki/File:Ferry_building,_San_Francisco,_South_view_20110804_1.jpg"
+      chrome={chrome}
       busy
       live="polite"
     >

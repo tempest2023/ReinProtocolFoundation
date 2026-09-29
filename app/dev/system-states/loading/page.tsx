@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import Loading from '@/app/loading'
+import { LoadingPage } from '@/components/loading-page'
 
 export default function LoadingStatePreview() {
   if (process.env.NODE_ENV !== 'development') notFound()
 
-  return <Loading />
+  return <LoadingPage />
 }

@@ -317,6 +317,76 @@
   margin-top: .75rem !important;
 }
 
+.audience-pending {
+  display: inline-block;
+  color: transparent;
+  background: var(--paper-deep);
+  border-radius: .12em;
+  user-select: none;
+}
+
+.skeleton-line {
+  display: block;
+  height: .8rem;
+  background: var(--paper-deep);
+  border-radius: .1rem;
+}
+
+.skeleton-line + .skeleton-line {
+  margin-top: .75rem;
+}
+
+.skeleton-line--role {
+  width: 6rem;
+  height: .6rem;
+}
+
+.skeleton-line--name {
+  width: min(14rem, 70%);
+  height: 1.5rem;
+}
+
+.skeleton-line--bio {
+  width: 100%;
+}
+
+.skeleton-line--short {
+  width: 62%;
+}
+
+.skeleton-line--kicker {
+  width: 5rem;
+  height: .6rem;
+}
+
+.skeleton-line--title {
+  width: min(18rem, 80%);
+  height: 1.6rem;
+}
+
+.skeleton-line--index {
+  width: 2rem;
+  height: .7rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .audience-pending,
+  .skeleton-line {
+    animation: placeholder-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes placeholder-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .55;
+  }
+}
+
 .profile-card__links {
   display: flex;
   flex-wrap: wrap;

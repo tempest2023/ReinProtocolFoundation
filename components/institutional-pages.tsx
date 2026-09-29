@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import sanFrancisco from '@/src/assets/scenes/san-francisco.webp'
 import santaClara from '@/src/assets/scenes/santa-clara.webp'
 import stanford from '@/src/assets/scenes/stanford.webp'
@@ -52,9 +53,35 @@ const disclosureCadence = [
   ['Annual', 'Financial, governance, impact and filing record'],
 ]
 
-export async function InstitutionalHomePage() {
-  const [metrics, people] = await Promise.all([getPublicMemberMetrics(), getPublicPeople({ featured: true })])
-  const audience = publicCommunityAudience(metrics.allTime)
+async function HomeAudience() {
+  const metrics = await getPublicMemberMetrics()
+  return <>{publicCommunityAudience(metrics.allTime)}</>
+}
+
+async function HomeFeaturedPeople() {
+  const people = await getPublicPeople({ featured: true })
+  if (!people.length) return null
+  return (
+    <div className="profile-grid" style={{ marginTop: '4rem' }}>
+      {people.map((person) => <article className="profile-card" key={person.id}>{person.photo_url ? <img className="profile-card__portrait" src={person.photo_url} alt={person.photo_alt ?? ''} /> : <div className="profile-card__placeholder" aria-hidden="true">{person.display_name.slice(0, 1)}</div>}<div><p className="profile-card__role">{person.role}</p><h2>{person.display_name}</h2><p className="profile-card__bio">{person.biography}</p></div></article>)}
+    </div>
+  )
+}
+
+function HomePeopleFallback() {
+  return (
+    <div className="profile-grid" style={{ marginTop: '4rem' }} aria-hidden="true">
+      {[0, 1].map((index) => (
+        <article className="profile-card" key={index}>
+          <div className="profile-card__placeholder" />
+          <div><span className="skeleton-line skeleton-line--role" /><span className="skeleton-line skeleton-line--name" /><span className="skeleton-line skeleton-line--bio" /><span className="skeleton-line skeleton-line--bio skeleton-line--short" /></div>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+export function InstitutionalHomePage() {
   return (
     <main id="main-content">
       <section className="home-hero" aria-labelledby="home-title">
@@ -105,8 +132,10 @@ export async function InstitutionalHomePage() {
 
       <section className="community-section community-section--soft" aria-labelledby="home-community-title">
         <div className="page-shell">
-          <div className="community-heading"><p className="section-index">04 / Community</p><div><h2 id="home-community-title">A public network of {audience}.</h2><p>Learn about AI Agents, join public events, and contribute to work that serves the public.</p><TextLink href="/community">Enter the community</TextLink></div></div>
-          {people.length ? <div className="profile-grid" style={{ marginTop: '4rem' }}>{people.map((person) => <article className="profile-card" key={person.id}>{person.photo_url ? <img className="profile-card__portrait" src={person.photo_url} alt={person.photo_alt ?? ''} /> : <div className="profile-card__placeholder" aria-hidden="true">{person.display_name.slice(0, 1)}</div>}<div><p className="profile-card__role">{person.role}</p><h2>{person.display_name}</h2><p className="profile-card__bio">{person.biography}</p></div></article>)}</div> : null}
+          <div className="community-heading"><p className="section-index">04 / Community</p><div><h2 id="home-community-title">A public network of <Suspense fallback={<span className="audience-pending">many active participants</span>}><HomeAudience /></Suspense>.</h2><p>Learn about AI Agents, join public events, and contribute to work that serves the public.</p><TextLink href="/community">Enter the community</TextLink></div></div>
+          <Suspense fallback={<HomePeopleFallback />}>
+            <HomeFeaturedPeople />
+          </Suspense>
         </div>
       </section>
 

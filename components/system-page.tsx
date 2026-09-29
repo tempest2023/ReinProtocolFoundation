@@ -13,6 +13,8 @@ type SystemPageProps = {
   children?: ReactNode
   busy?: boolean
   live?: 'polite' | 'assertive'
+  /** Renders the page-level header and skip link. Turn off when a layout already provides them. */
+  chrome?: boolean
 }
 
 export function SystemPage({
@@ -26,13 +28,13 @@ export function SystemPage({
   children,
   busy = false,
   live,
+  chrome = true,
 }: SystemPageProps) {
   const titleId = `system-page-${variant}-title`
 
   return (
     <>
-      <a className="skip-link" href="#main-content">Skip to main content</a>
-      <SiteHeader />
+      {chrome ? <><a className="skip-link" href="#main-content">Skip to main content</a><SiteHeader /></> : null}
       <main
         id="main-content"
         className={`system-page system-page--${variant}`}

@@ -14,7 +14,8 @@ import {
 type Message = {
   to: string
   subject: string
-  html: string
+  html?: string
+  template?: { id: string; variables: Record<string, string> }
   category: string
   relatedType?: string
   relatedId?: string
@@ -28,7 +29,9 @@ export async function sendTransactionalEmail(message: Message) {
   const client = getSecretClient()
   let deliveryLogged = false
   try {
-    const { data, error } = await resend.emails.send({ from, to: message.to, subject: message.subject, html: message.html })
+    const { data, error } = await resend.emails.send(message.template
+      ? { from, to: message.to, subject: message.subject, template: message.template }
+      : { from, to: message.to, subject: message.subject, html: message.html ?? '' })
     if (client) {
       await client.from('email_deliveries').insert({
         recipient_email: message.to.toLowerCase(), category: message.category,
@@ -52,13 +55,16 @@ export async function sendTransactionalEmail(message: Message) {
 }
 
 export async function sendParticipantConfirmation(email: string, name?: string, participantId?: string) {
+  const templateId = process.env.RESEND_WELCOME_TEMPLATE_ID
   return sendTransactionalEmail({
     to: email,
     subject: 'You are registered with the Rein community',
     category: 'participant_confirmation',
     relatedType: participantId ? 'community_participant' : undefined,
     relatedId: participantId,
-    html: participantConfirmationTemplate(name),
+    ...(templateId
+      ? { template: { id: templateId, variables: { USER_NAME: name?.trim() || 'there' } } }
+      : { html: participantConfirmationTemplate(name) }),
   })
 }
 

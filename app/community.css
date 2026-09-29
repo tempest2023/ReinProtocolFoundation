@@ -354,6 +354,21 @@
   width: 62%;
 }
 
+.skeleton-line--kicker {
+  width: 5rem;
+  height: .6rem;
+}
+
+.skeleton-line--title {
+  width: min(18rem, 80%);
+  height: 1.6rem;
+}
+
+.skeleton-line--index {
+  width: 2rem;
+  height: .7rem;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .audience-pending,
   .skeleton-line {

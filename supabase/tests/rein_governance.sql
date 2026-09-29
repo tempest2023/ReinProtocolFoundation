@@ -32,7 +32,7 @@ insert into public.prod_people(id,contact_id,contributor_id,slug,display_name,pe
   ('b9000000-0000-4000-8000-000000000009','99999999-9999-4999-8999-999999999999','a9000000-0000-4000-8000-000000000009','prod-director','Production Director','director','President');
 
 -- The long-term physical names carry the row stores. Assert each of the ten
--- tables first, then assert that no old "mvp" name answers to a relation at
+-- tables first, then assert that no old stage-compatibility name answers to a relation at
 -- all, so a rename that silently reinstated one cannot pass.
 select has_table('public','dev_rein_vote_types','development vote type rules table exists');
 select has_table('public','prod_rein_vote_types','production vote type rules table exists');
@@ -57,7 +57,7 @@ select is(
 );
 -- 20260929045543_remove_stage_compatibility_objects dropped the old-name
 -- passthrough views and RPC wrappers the rename left behind, so no relation in
--- public answers to an "mvp" governance name any more. The kind check keeps a
+-- public answers to an old stage-compatibility governance name any more. The kind check keeps a
 -- later rename from quietly reintroducing an old name as a view over a table.
 select is(
   (select count(*) from pg_class c
@@ -785,7 +785,7 @@ select throws_ok(
 select throws_ok(
   $$do $forge$
     begin
-      perform set_config('dev_rein_mvp.revision_origin','aaaaaaa2-1111-4111-8111-111111111112',true);
+      perform set_config('dev_rein.revision_origin','aaaaaaa2-1111-4111-8111-111111111112',true);
       insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
         values ('aaaaaaa2-1111-4111-8111-111111111112','44444444-4444-4444-8444-444444444444',
                 'Feedback smuggled past the status gate');
@@ -1159,7 +1159,7 @@ select is(
       and confrelid::regclass::text like '\_%community\_contacts' escape '\'
       and confdeltype <> 'r'),
   0::bigint,
-  'every Rein MVP contact reference deletes by RESTRICT'
+  'every Rein v0.1 contact reference deletes by RESTRICT'
 );
 
 with dev_columns as (
@@ -1241,9 +1241,9 @@ select is(
   'every long-term governance RPC is still present at its recorded signature'
 );
 
--- No second implementation of the same behavior is left under an mvp name:
+-- No second implementation of the same behavior is left under a stage name:
 -- the twenty helper and trigger functions live under the long-term names with
--- no mvp-named twin, and no long-term-named body still routes through one.
+-- no stage-named twin, and no long-term-named body still routes through one.
 select is(
   (select count(*)
      from pg_proc p
@@ -1280,7 +1280,7 @@ select ok(
                          'prod_rein_revisions_before_write','prod_rein_proposals_record_origin')
        and pg_get_functiondef(p.oid) like '%rein_mvp_%'
   ),
-  'no long-term-named governance function body still names an mvp object'
+  'no long-term-named governance function body still names a stage object'
 );
 
 -- Access control is unchanged by the removal. Dropping the compatibility

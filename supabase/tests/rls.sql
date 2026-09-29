@@ -87,7 +87,7 @@ select ok(
   'production governance tables are readable by service_role only'
 );
 
--- The old "mvp" governance names were passthrough views over the renamed
+-- The old stage-compatibility governance names were passthrough views over the renamed
 -- tables and are gone as of 20260929045543_remove_stage_compatibility_objects.
 -- A removed object cannot be a route around RLS or the grants, and the checks
 -- here keep a later migration from quietly reinstating one outside this

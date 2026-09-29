@@ -1,0 +1,1312 @@
+begin;
+select plan(198);
+
+-- Authority fixtures: contacts c1/c3/c6 belong to active Contributors and hold
+-- a director Person row (c1 and c6 by contact, c3 through contributor_id), c2
+-- is an inactive Contributor without a Person row, c4 is a core_contributor
+-- rather than a director, and c5 has no Contributor record at all.
+insert into public.dev_community_contacts(id,first_source) values
+  ('11111111-1111-4111-8111-111111111111','manual'),
+  ('22222222-2222-4222-8222-222222222222','manual'),
+  ('33333333-3333-4333-8333-333333333333','manual'),
+  ('44444444-4444-4444-8444-444444444444','manual'),
+  ('55555555-5555-4555-8555-555555555555','manual'),
+  ('66666666-6666-4666-8666-666666666666','manual');
+insert into public.dev_contributors(id,contact_id,status,became_contributor_at) values
+  ('a1000000-0000-4000-8000-000000000001','11111111-1111-4111-8111-111111111111','active',now()-interval '30 days'),
+  ('a2000000-0000-4000-8000-000000000002','22222222-2222-4222-8222-222222222222','inactive',now()-interval '30 days'),
+  ('a3000000-0000-4000-8000-000000000003','33333333-3333-4333-8333-333333333333','active',now()-interval '30 days'),
+  ('a4000000-0000-4000-8000-000000000004','44444444-4444-4444-8444-444444444444','active',now()-interval '30 days'),
+  ('a6000000-0000-4000-8000-000000000006','66666666-6666-4666-8666-666666666666','active',now()-interval '30 days');
+insert into public.dev_people(id,contact_id,contributor_id,slug,display_name,person_type,role,nominating_director_id,effective_date) values
+  ('b1000000-0000-4000-8000-000000000001','11111111-1111-4111-8111-111111111111','a1000000-0000-4000-8000-000000000001','director-by-contact','Director By Contact','director','Secretary',null,null),
+  ('b3000000-0000-4000-8000-000000000003',null,'a3000000-0000-4000-8000-000000000003','director-by-contributor','Director By Contributor','director','Treasurer',null,null),
+  ('b4000000-0000-4000-8000-000000000004',null,'a4000000-0000-4000-8000-000000000004','core-contributor','Core Contributor','core_contributor','Research Lead','b1000000-0000-4000-8000-000000000001',current_date),
+  ('b6000000-0000-4000-8000-000000000006','66666666-6666-4666-8666-666666666666','a6000000-0000-4000-8000-000000000006','director-three','Director Three','director','Director',null,null);
+
+insert into public.prod_community_contacts(id,first_source) values
+  ('99999999-9999-4999-8999-999999999999','manual');
+insert into public.prod_contributors(id,contact_id,status,became_contributor_at) values
+  ('a9000000-0000-4000-8000-000000000009','99999999-9999-4999-8999-999999999999','active',now()-interval '30 days');
+insert into public.prod_people(id,contact_id,contributor_id,slug,display_name,person_type,role) values
+  ('b9000000-0000-4000-8000-000000000009','99999999-9999-4999-8999-999999999999','a9000000-0000-4000-8000-000000000009','prod-director','Production Director','director','President');
+
+-- The long-term physical names carry the row stores. Assert each of the ten
+-- tables first, then assert that no old stage-compatibility name answers to a relation at
+-- all, so a rename that silently reinstated one cannot pass.
+select has_table('public','dev_rein_vote_types','development vote type rules table exists');
+select has_table('public','prod_rein_vote_types','production vote type rules table exists');
+select has_table('public','dev_rein_proposals','development proposals table exists');
+select has_table('public','prod_rein_proposals','production proposals table exists');
+select has_table('public','dev_rein_polls','development polls table exists');
+select has_table('public','prod_rein_polls','production polls table exists');
+select has_table('public','dev_rein_ballots','development ballots table exists');
+select has_table('public','prod_rein_ballots','production ballots table exists');
+select has_table('public','dev_rein_proposal_revisions','development feedback table exists');
+select has_table('public','prod_rein_proposal_revisions','production feedback table exists');
+
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace and c.relkind='r'
+      and c.relname in ('dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                        'dev_rein_proposal_revisions',
+                        'prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                        'prod_rein_proposal_revisions')),
+  10::bigint,
+  'the long-term governance names are ordinary tables'
+);
+-- 20260929045543_remove_stage_compatibility_objects dropped the old-name
+-- passthrough views and RPC wrappers the rename left behind, so no relation in
+-- public answers to an old stage-compatibility governance name any more. The kind check keeps a
+-- later rename from quietly reintroducing an old name as a view over a table.
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace
+      and c.relname like '%rein_mvp_%'),
+  0::bigint,
+  'no relation survives under an old governance name'
+);
+
+-- Vote type rules are operator configuration with no implicit default, and a
+-- rule that allows no approval at all is not a meaningful vote.
+select throws_ok(
+  $$insert into public.dev_rein_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('zero_approvals',2,0)$$,
+  '23514',null,'a type rule without an allowed approval is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('over_approved',1,2)$$,
+  '23514',null,'a type rule that allows more approvals than candidates is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('Funding',3,2)$$,
+  '23514',null,'a type name that is not lower snake case is rejected'
+);
+select lives_ok(
+  $$insert into public.dev_rein_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('funding',3,2)$$,
+  'an operator can register the funding rule'
+);
+select lives_ok(
+  $$insert into public.dev_rein_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('routine',1,1)$$,
+  'an operator can register a single-candidate routine rule'
+);
+insert into public.prod_rein_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+  values ('funding',3,2);
+
+-- Proposals: an active Contributor proposes, the amount is optional but
+-- complete, and the recorded content is frozen.
+select lives_ok(
+  $$insert into public.dev_rein_proposals(id,proposer_contact_id,title,summary,vote_type,requested_minor,currency)
+    values ('aaaaaaa1-1111-4111-8111-111111111111','11111111-1111-4111-8111-111111111111','Fund the reading room','Two paragraph summary','funding',250000,'USD')$$,
+  'a proposal with a requested amount is accepted'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa1-1111-4111-8111-111111111111'),
+  'submitted',
+  'a new proposal starts in submitted status'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type)
+    values ('11111111-1111-4111-8111-111111111111','   ','funding')$$,
+  '23514',null,'a blank proposal title is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type,requested_minor,currency)
+    values ('11111111-1111-4111-8111-111111111111','Negative','funding',-1,'USD')$$,
+  '23514',null,'a negative requested amount is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type,requested_minor)
+    values ('11111111-1111-4111-8111-111111111111','No currency','funding',100)$$,
+  '23514',null,'a requested amount without a currency is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type,currency)
+    values ('11111111-1111-4111-8111-111111111111','No amount','funding','USD')$$,
+  '23514',null,'a currency without a requested amount is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type)
+    values ('11111111-1111-4111-8111-111111111111','Unregistered type','nonexistent')$$,
+  '23503',null,'a proposal cannot name a vote type that has no rule'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type)
+    values ('22222222-2222-4222-8222-222222222222','Stale proposer','funding')$$,
+  '23514',null,'a proposer without an active Contributor record is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type)
+    values ('55555555-5555-4555-8555-555555555555','Contact without Contributor','funding')$$,
+  '23514',null,'a proposer contact without a Contributor record is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type)
+    values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc','Unknown proposer','funding')$$,
+  '23503',null,'a proposer with no contact record is rejected'
+);
+
+insert into public.dev_rein_proposals(id,proposer_contact_id,title,vote_type) values
+  ('aaaaaaa2-1111-4111-8111-111111111112','11111111-1111-4111-8111-111111111111','Second funding request','funding'),
+  ('aaaaaaa3-1111-4111-8111-111111111113','11111111-1111-4111-8111-111111111111','Third funding request','funding'),
+  ('aaaaaaa4-1111-4111-8111-111111111114','11111111-1111-4111-8111-111111111111','Fourth funding request','funding'),
+  ('aaaaaaa5-1111-4111-8111-111111111115','11111111-1111-4111-8111-111111111111','Routine study group','routine');
+-- A separate batch of funding candidates exists so a live poll can be opened
+-- without naming a proposal the closed round-one poll already froze.
+insert into public.dev_rein_proposals(id,proposer_contact_id,title,vote_type) values
+  ('aaaaaaa7-1111-4111-8111-111111111117','11111111-1111-4111-8111-111111111111','Seventh funding request','funding'),
+  ('aaaaaaa8-1111-4111-8111-111111111118','11111111-1111-4111-8111-111111111111','Eighth funding request','funding'),
+  ('aaaaaaa9-1111-4111-8111-111111111119','11111111-1111-4111-8111-111111111111','Ninth funding request','funding'),
+  ('aaaaaaa0-1111-4111-8111-111111111110','11111111-1111-4111-8111-111111111111','Live routine study group','routine');
+insert into public.dev_rein_proposals(id,proposer_contact_id,title,vote_type) values
+  ('aaaaaaa6-1111-4111-8111-111111111116','11111111-1111-4111-8111-111111111111','Live routine study group','routine'),
+  ('aaaaaaab-1111-4111-8111-11111111111b','11111111-1111-4111-8111-111111111111','Clock round request','funding');
+insert into public.prod_rein_proposals(id,proposer_contact_id,title,vote_type) values
+  ('aaaaaaa6-1111-4111-8111-111111111116','99999999-9999-4999-8999-999999999999','Production request','funding');
+
+-- Version 1 of every proposal is the content it was submitted with, so the
+-- chain of prior versions starts complete.
+select ok(
+  (select changed_fields = array['title', 'summary', 'budget']
+     from public.dev_rein_proposal_revisions
+    where proposal_id='aaaaaaa1-1111-4111-8111-111111111111' and version=1),
+  'intake records version one of the recorded content'
+);
+select ok(
+  (select changed_fields = array['title'] and approved_by_contact_id is null
+     from public.dev_rein_proposal_revisions
+    where proposal_id='aaaaaaa2-1111-4111-8111-111111111112' and version=1),
+  'a proposal without a summary or an amount records only its title'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type,status)
+    values ('11111111-1111-4111-8111-111111111111','Born selected','funding','selected')$$,
+  '23514',null,'a new proposal always starts submitted'
+);
+
+select lives_ok(
+  $$update public.dev_rein_proposals set title='Fund the reading room (revised)'
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  'proposal text is editable while the proposal is still submitted'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set version=2
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'an unrevised draft cannot claim a later version'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set status='not_a_status'
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a proposal status outside the recorded set is rejected'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set status='selected'
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a selection cannot be recorded outside the finalize function'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set vote_type='routine'
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23001',null,'a recorded proposal cannot change its vote type'
+);
+select throws_ok(
+  $$delete from public.dev_rein_proposals
+    where id='aaaaaaa4-1111-4111-8111-111111111114'$$,
+  '23001',null,'a proposal is not deleted'
+);
+
+-- Polls: a director opens an approval-only poll over named candidates of one
+-- vote type, and the poll freezes the rule values in force at creation.
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333','Funding round one','funding',
+      array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112','aaaaaaa3-1111-4111-8111-111111111113']::uuid[],
+      now()-interval '2 hours',now()-interval '1 hour')$$,
+  'a director opens a poll over three funding candidates'
+);
+select ok(
+  (select candidate_limit=3 and max_approvals_per_voter=2 from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444441'),
+  'the poll freezes the candidate limit and approval limit of the funding rule'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Backwards','routine',array['aaaaaaa5-1111-4111-8111-111111111115']::uuid[],now(),now())$$,
+  '23514',null,'a poll that closes when it opens is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','No candidate','routine',array[]::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a poll without a candidate is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Duplicate candidate','funding',
+      array['aaaaaaa4-1111-4111-8111-111111111114','aaaaaaa4-1111-4111-8111-111111111114']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'duplicate poll candidates are rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Too many candidates','funding',
+      array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112','aaaaaaa3-1111-4111-8111-111111111113','aaaaaaa4-1111-4111-8111-111111111114']::uuid[],
+      now(),now()+interval '1 hour')$$,
+  '23514',null,'more candidates than the rule allows are rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Unknown candidate','funding',
+      array['dddddddd-dddd-4ddd-8ddd-dddddddddddd']::uuid[],now(),now()+interval '1 hour')$$,
+  '23503',null,'a poll candidate that is not a proposal is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Mixed types','funding',
+      array['aaaaaaa5-1111-4111-8111-111111111115']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a candidate of another vote type is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Overlapping poll','funding',
+      array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a candidate that is already on an open poll is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Unregistered type','nonexistent',
+      array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[],now(),now()+interval '1 hour')$$,
+  '23503',null,'a poll cannot name a vote type that has no rule'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('22222222-2222-4222-8222-222222222222','Stale creator','funding',
+      array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a poll creator without a director record is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444444','Core contributor creator','funding',
+      array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a core_contributor who is not a director cannot open a poll'
+);
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444442','33333333-3333-4333-8333-333333333333','Routine round','routine',
+      array['aaaaaaa5-1111-4111-8111-111111111115']::uuid[],now()-interval '2 hours',now()-interval '1 hour')$$,
+  'a single-candidate poll is accepted'
+);
+select ok(
+  (select candidate_limit=1 and max_approvals_per_voter=1 from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444442'),
+  'the single-candidate poll freezes its own rule values'
+);
+select throws_ok(
+  $$update public.dev_rein_polls set candidate_proposal_ids=array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[]
+    where id='44444444-4444-4444-8444-444444444441'$$,
+  '23001',null,'poll candidates cannot be changed after creation'
+);
+select throws_ok(
+  $$update public.dev_rein_polls set closes_at=closes_at+interval '1 day'
+    where id='44444444-4444-4444-8444-444444444441'$$,
+  '23001',null,'a poll deadline cannot be extended after creation'
+);
+select throws_ok(
+  $$delete from public.dev_rein_polls where id='44444444-4444-4444-8444-444444444441'$$,
+  '23001',null,'a poll is not deleted'
+);
+
+-- Ballots: one ballot per voter, approved_proposal_ids limited to the poll's
+-- candidates and to the frozen approval limit, empty array meaning abstention.
+-- cast_at is the database clock now, so a ballot is only accepted while its
+-- poll is open and inside the poll window. The window rule, the approval rule,
+-- and the one-ballot-per-voter rule are all exercised against a live poll here;
+-- the closed poll keeps its rejected writes, and its historical ballots are
+-- seeded further down so finalization can still recount them.
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444443','33333333-3333-4333-8333-333333333333','Live funding round','funding',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa8-1111-4111-8111-111111111118','aaaaaaa9-1111-4111-8111-111111111119']::uuid[],
+      now()-interval '1 hour',now()+interval '1 hour')$$,
+  'a director opens a live poll over three funding candidates'
+);
+select lives_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444443','11111111-1111-4111-8111-111111111111',
+      array['aaaaaaa7-1111-4111-8111-111111111117']::uuid[],now()-interval '30 minutes')$$,
+  'a director ballot inside the poll window is accepted'
+);
+select lives_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444443','33333333-3333-4333-8333-333333333333',
+      array['aaaaaaa8-1111-4111-8111-111111111118']::uuid[],now()-interval '30 minutes')$$,
+  'an empty approved array records an abstention'
+);
+select lives_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa8-1111-4111-8111-111111111118']::uuid[],
+      now()-interval '30 minutes')$$,
+  'a ballot approving up to the frozen approval limit is accepted'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444443','11111111-1111-4111-8111-111111111111',
+      array[]::uuid[],now()-interval '30 minutes')$$,
+  '23505',null,'a second ballot from the same voter is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','22222222-2222-4222-8222-222222222222',array[]::uuid[])$$,
+  '23514',null,'a voter who is not a current director cannot abstain either'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','22222222-2222-4222-8222-222222222222',array['aaaaaaa7-1111-4111-8111-111111111117']::uuid[])$$,
+  '23514',null,'a voter without a director record is rejected before the approval list is read'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[])$$,
+  '23514',null,'approving a proposal that is not a candidate of the poll is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa7-1111-4111-8111-111111111117']::uuid[])$$,
+  '23514',null,'approving the same proposal twice inside one ballot is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444443','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa7-1111-4111-8111-111111111117','aaaaaaa8-1111-4111-8111-111111111118','aaaaaaa9-1111-4111-8111-111111111119']::uuid[])$$,
+  '23514',null,'approving more proposals than the frozen approval limit is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+      array[]::uuid[],now()-interval '3 hours')$$,
+  '23514',null,'a ballot whose caller timestamp predates the closed window is rejected'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+      array[]::uuid[],now()+interval '1 hour')$$,
+  '23514',null,'a ballot whose caller timestamp outlives the closed window is rejected'
+);
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-44444444444a','33333333-3333-4333-8333-333333333333','Live routine round','routine',
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '1 hour',now()+interval '1 hour')$$,
+  'a director opens a live single-candidate poll'
+);
+select lives_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-44444444444a','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '30 minutes')$$,
+  'a ballot on a single-candidate poll is accepted'
+);
+
+-- cast_at is the database clock, not the writer's value. Service role is the
+-- only writer, so a caller-supplied timestamp must never be stored: a
+-- backdated ballot would otherwise rewrite the chronology the poll index and
+-- every audit read depend on. Every live ballot above carried a caller
+-- timestamp in the past, and the guard stored the transaction clock instead.
+select is(
+  (select bool_and(cast_at > now() - interval '1 minute') from public.dev_rein_ballots
+    where poll_id='44444444-4444-4444-8444-444444444443'),
+  true,'a stored cast_at is the database clock, not the older value the writer sent'
+);
+select ok(
+  (select pg_get_functiondef(p.oid) like '%new.cast_at := now();%'
+     from pg_proc p where p.oid = 'public.dev_rein_ballots_before_insert()'::regprocedure),
+  'the development guard assigns cast_at from the database clock'
+);
+select ok(
+  (select pg_get_functiondef(p.oid) like '%new.cast_at := now();%'
+     from pg_proc p where p.oid = 'public.prod_rein_ballots_before_insert()'::regprocedure),
+  'the production guard assigns cast_at from the database clock'
+);
+select ok(
+  (select strpos(pg_get_functiondef(p.oid), 'new.cast_at := now();')
+        < strpos(pg_get_functiondef(p.oid), 'new.cast_at < poll_opens_at')
+     from pg_proc p where p.oid = 'public.dev_rein_ballots_before_insert()'::regprocedure)
+  and (select strpos(pg_get_functiondef(p.oid), 'new.cast_at := now();')
+            < strpos(pg_get_functiondef(p.oid), 'new.cast_at < poll_opens_at')
+     from pg_proc p where p.oid = 'public.prod_rein_ballots_before_insert()'::regprocedure),
+  'each guard assigns the database clock before it reads cast_at, so the check cannot see a caller value'
+);
+
+-- One writer, one clock reading: an open poll records the ballot, and the
+-- stored instant is the transaction timestamp rather than anything the caller
+-- chose. A writer that supplies its own value cannot alter the stored instant.
+insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+  values ('44444444-4444-4444-8444-444444444448','33333333-3333-4333-8333-333333333333','Clock round','funding',
+    array['aaaaaaab-1111-4111-8111-11111111111b']::uuid[],now()-interval '1 hour',now()+interval '90 seconds');
+select lives_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444448','11111111-1111-4111-8111-111111111111',
+      array['aaaaaaab-1111-4111-8111-11111111111b']::uuid[],now()+interval '30 minutes')$$,
+  'an open poll accepts a ballot whose caller timestamp is ignored rather than rejected'
+);
+select is(
+  (select cast_at = now() from public.dev_rein_ballots
+    where poll_id='44444444-4444-4444-8444-444444444448'
+      and voter_contact_id='11111111-1111-4111-8111-111111111111'),
+  true,'the stored cast_at is the database clock, not the future value the writer sent'
+);
+
+select throws_ok(
+  $$update public.dev_rein_ballots set approved_proposal_ids=array[]::uuid[]
+    where poll_id='44444444-4444-4444-8444-444444444443'$$,
+  '23001',null,'a recorded ballot cannot be replaced'
+);
+select throws_ok(
+  $$delete from public.dev_rein_ballots where poll_id='44444444-4444-4444-8444-444444444443'$$,
+  '23001',null,'a recorded ballot cannot be removed'
+);
+
+-- Historical recount fixture. The closed poll above can no longer accept a
+-- live ballot, so its recorded ballots are reconstructed with explicit
+-- preexisting timestamps. This is a fixture-only step: the write guard is
+-- disabled for exactly the statement that seeds rows, and the frozen rows are
+-- then asserted below. The immutable-table trigger stays armed the whole time,
+-- every production constraint is unchanged, and no application path runs with
+-- the guard down.
+alter table public.dev_rein_ballots disable trigger dev_rein_ballots_before_insert;
+insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at) values
+  ('44444444-4444-4444-8444-444444444441','11111111-1111-4111-8111-111111111111',
+   array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now()-interval '90 minutes'),
+  ('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333',array[]::uuid[],now()-interval '90 minutes'),
+  ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+   array['aaaaaaa1-1111-4111-8111-111111111111','aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '90 minutes');
+alter table public.dev_rein_ballots enable trigger dev_rein_ballots_before_insert;
+select ok(
+  (select bool_and(cast_at < now() - interval '1 hour')
+     from public.dev_rein_ballots where poll_id='44444444-4444-4444-8444-444444444441'),
+  'the closed poll carries the historical ballot timestamps its recount depends on'
+);
+select ok(
+  (select count(*)=3 and count(distinct voter_contact_id)=3
+     from public.dev_rein_ballots where poll_id='44444444-4444-4444-8444-444444444441'),
+  'the closed poll records its three voter rows for the recount'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','11111111-1111-4111-8111-111111111111',
+      array[]::uuid[],now()-interval '90 minutes')$$,
+  '23514',null,'the reopened guard still refuses a live write to the closed poll'
+);
+
+-- Finalization: one call closes a poll whose window has run out, recounts the
+-- ballots, records the director who did it, and refuses to invent a winner.
+select throws_ok(
+  $$update public.dev_rein_polls set status='closed'
+    where id='44444444-4444-4444-8444-444444444441'$$,
+  '23514',null,'a bare status write does not close a poll'
+);
+select throws_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444441','22222222-2222-4222-8222-222222222222')$$,
+  '23514',null,'a finalizing contact who is not a current director is refused'
+);
+select throws_ok(
+  $$select public.dev_rein_finalize_poll('99999999-1111-4111-8111-111111111119','33333333-3333-4333-8333-333333333333')$$,
+  '23503',null,'an unknown poll carries no outcome'
+);
+select lives_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333')$$,
+  'a director finalizes the funding poll'
+);
+select throws_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444443','33333333-3333-4333-8333-333333333333')$$,
+  '23514',null,'a poll inside its window cannot be finalized'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444441','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now()-interval '90 minutes')$$,
+  '23514',null,'a closed poll takes no further ballot even after finalization'
+);
+select is(
+  (select status from public.dev_rein_polls where id='44444444-4444-4444-8444-444444444441'),
+  'closed','finalizing closes the poll'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa1-1111-4111-8111-111111111111'),
+  'selected','the candidate with the highest approval count is selected'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa2-1111-4111-8111-111111111112'),
+  'unselected','a candidate with fewer approvals is unselected'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa3-1111-4111-8111-111111111113'),
+  'unselected','a candidate nobody approved is unselected'
+);
+select is(
+  (select winning_proposal_id::text from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444441'),
+  'aaaaaaa1-1111-4111-8111-111111111111','the poll records the counted winner'
+);
+select is(
+  (select finalized_by_contact_id::text from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444441'),
+  '33333333-3333-4333-8333-333333333333','the poll records the director who finalized it'
+);
+select ok(
+  (select (public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444441','33333333-3333-4333-8333-333333333333')->>'repeated')::boolean),
+  'finalizing an already finalized poll returns the recorded outcome'
+);
+select is(
+  (select winning_proposal_id::text from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444441'),
+  'aaaaaaa1-1111-4111-8111-111111111111','the repeated call does not recount the winner'
+);
+select throws_ok(
+  $$update public.dev_rein_polls set winning_proposal_id='aaaaaaa2-1111-4111-8111-111111111112'
+    where id='44444444-4444-4444-8444-444444444441'$$,
+  '23001',null,'a recorded poll outcome is not rewritten'
+);
+select throws_ok(
+  $$update public.dev_rein_polls set status='open'
+    where id='44444444-4444-4444-8444-444444444441'$$,
+  '23514',null,'a closed poll cannot be reopened'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set status='selected'
+    where id='aaaaaaa2-1111-4111-8111-111111111112'$$,
+  '23514',null,'an unselected proposal cannot be re-marked selected by hand'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set status='submitted'
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a selected proposal cannot return to submitted'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals set title='Renamed after selection'
+    where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23001',null,'recorded proposal text changes only through a revision'
+);
+
+-- Cancelling is the separate early exit: a poll inside its window cannot be
+-- closed or finalized, and a cancelled poll carries no outcome.
+select lives_ok(
+  $$update public.dev_rein_polls set status='cancelled'
+    where id='44444444-4444-4444-8444-444444444442'$$,
+  'a director cancels the routine poll instead of closing it early'
+);
+select lives_ok(
+  $$update public.dev_rein_vote_types set max_candidates=2,max_approvals_per_voter=2 where vote_type='routine'$$,
+  'an operator can change a vote type rule'
+);
+select ok(
+  (select candidate_limit=1 and max_approvals_per_voter=1 from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444442'),
+  'an existing poll keeps the rule values it froze'
+);
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444444','33333333-3333-4333-8333-333333333333','Routine round cancelled','routine',
+      array['aaaaaaa5-1111-4111-8111-111111111115']::uuid[],now()-interval '1 hour',now()+interval '1 hour')$$,
+  'a rule change applies to polls created afterwards'
+);
+select ok(
+  (select candidate_limit=2 and max_approvals_per_voter=2 from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444444'),
+  'the later poll freezes the updated rule values'
+);
+select throws_ok(
+  $$update public.dev_rein_polls set status='closed'
+    where id='44444444-4444-4444-8444-444444444444'$$,
+  '23514',null,'a poll cannot be closed before its window runs out'
+);
+select throws_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444444','33333333-3333-4333-8333-333333333333')$$,
+  '23514',null,'a poll cannot be finalized before its window runs out'
+);
+select lives_ok(
+  $$update public.dev_rein_polls set status='cancelled' where id='44444444-4444-4444-8444-444444444444'$$,
+  'a director cancels the later poll'
+);
+select throws_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444444','33333333-3333-4333-8333-333333333333')$$,
+  '23514',null,'a cancelled poll carries no outcome'
+);
+select throws_ok(
+  $$insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids)
+    values ('44444444-4444-4444-8444-444444444444','11111111-1111-4111-8111-111111111111',array[]::uuid[])$$,
+  '23514',null,'a cancelled poll takes no ballot'
+);
+select throws_ok(
+  $$update public.dev_rein_polls set status='open' where id='44444444-4444-4444-8444-444444444444'$$,
+  '23514',null,'a cancelled poll cannot be reopened'
+);
+
+-- A tie and an all-abstain poll both record no winner, so no proposal is
+-- promoted on a coin flip.
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444446','33333333-3333-4333-8333-333333333333','Funding round two','funding',
+      array['aaaaaaa2-1111-4111-8111-111111111112','aaaaaaa3-1111-4111-8111-111111111113']::uuid[],
+      now()-interval '2 hours',now()-interval '1 hour')$$,
+  'a later poll carries the unselected candidates'
+);
+select lives_ok(
+  $$alter table public.dev_rein_ballots disable trigger dev_rein_ballots_before_insert;
+    insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444446','11111111-1111-4111-8111-111111111111',
+      array['aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '90 minutes');
+    insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444446','66666666-6666-4666-8666-666666666666',
+      array['aaaaaaa3-1111-4111-8111-111111111113']::uuid[],now()-interval '90 minutes');
+    alter table public.dev_rein_ballots enable trigger dev_rein_ballots_before_insert;$$,
+  'the closed tie poll gets its two historical ballots'
+);
+select lives_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444446','33333333-3333-4333-8333-333333333333')$$,
+  'a tied poll is finalized'
+);
+select ok(
+  (select winning_proposal_id is null and finalized_at is not null
+     from public.dev_rein_polls where id='44444444-4444-4444-8444-444444444446'),
+  'a tie records no winner'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa2-1111-4111-8111-111111111112'),
+  'unselected','the first tied candidate is not selected'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa3-1111-4111-8111-111111111113'),
+  'unselected','the second tied candidate is not selected'
+);
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444447','33333333-3333-4333-8333-333333333333','Funding round three','funding',
+      array['aaaaaaa3-1111-4111-8111-111111111113']::uuid[],now()-interval '2 hours',now()-interval '1 hour')$$,
+  'a candidate with no approvals may enter a later poll'
+);
+select lives_ok(
+  $$alter table public.dev_rein_ballots disable trigger dev_rein_ballots_before_insert;
+    insert into public.dev_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('44444444-4444-4444-8444-444444444447','11111111-1111-4111-8111-111111111111',array[]::uuid[],now()-interval '90 minutes');
+    alter table public.dev_rein_ballots enable trigger dev_rein_ballots_before_insert;$$,
+  'the closed third round gets its single historical abstention'
+);
+select lives_ok(
+  $$select public.dev_rein_finalize_poll('44444444-4444-4444-8444-444444444447','11111111-1111-4111-8111-111111111111')$$,
+  'an all-abstain poll is finalized'
+);
+select ok(
+  (select winning_proposal_id is null from public.dev_rein_polls
+    where id='44444444-4444-4444-8444-444444444447'),
+  'an all-abstain poll records no winner'
+);
+select is(
+  (select status from public.dev_rein_proposals where id='aaaaaaa3-1111-4111-8111-111111111113'),
+  'unselected','an all-abstain candidate stays unselected'
+);
+
+-- Carryover: a rule change does not move an existing poll, and only submitted
+-- or unselected proposals may be named by a later poll.
+select lives_ok(
+  $$insert into public.dev_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('44444444-4444-4444-8444-444444444445','33333333-3333-4333-8333-333333333333','Carryover round','funding',
+      array['aaaaaaa2-1111-4111-8111-111111111112']::uuid[],now()-interval '1 hour',now()+interval '1 hour')$$,
+  'an unselected proposal may be carried into a later poll'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Second selection','funding',
+      array['aaaaaaa1-1111-4111-8111-111111111111']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a selected proposal cannot be carried into a later poll'
+);
+select lives_ok(
+  $$update public.dev_rein_proposals set status='withdrawn'
+    where id='aaaaaaa4-1111-4111-8111-111111111114'$$,
+  'a submitted proposal can be withdrawn'
+);
+select throws_ok(
+  $$insert into public.dev_rein_polls(creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('33333333-3333-4333-8333-333333333333','Withdrawn candidate','funding',
+      array['aaaaaaa4-1111-4111-8111-111111111114']::uuid[],now(),now()+interval '1 hour')$$,
+  '23514',null,'a withdrawn proposal cannot enter a new poll'
+);
+
+-- Feedback and revisions: one append-only table holds comments and suggested
+-- revisions, applying a revision moves exactly the fields it named, and only
+-- a material change (budget, location, schedule, personnel composition, or
+-- major event flow) needs a recorded approval from a current director.
+-- Feedback is the post-result path, so it is accepted only on a proposal the
+-- poll recorded as the winner; an unselected or withdrawn proposal takes no
+-- new comment or revision, and the version-1 row of every proposal is still
+-- written by its own intake trigger.
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa2-1111-4111-8111-111111111112','44444444-4444-4444-8444-444444444444',
+            'Comment on a proposal nobody selected')$$,
+  '23514',null,'an unselected proposal takes no comment'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,changed_fields,summary)
+    values ('aaaaaaa2-1111-4111-8111-111111111112','44444444-4444-4444-8444-444444444444',
+            array['summary'],'Reworded after losing')$$,
+  '23514',null,'an unselected proposal takes no suggested revision'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa3-1111-4111-8111-111111111113','11111111-1111-4111-8111-111111111111',
+            'Director comment on a proposal nobody approved')$$,
+  '23514',null,'not even a current director records feedback on an unselected proposal'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa4-1111-4111-8111-111111111114','11111111-1111-4111-8111-111111111111',
+            'Comment on a proposal still under consideration')$$,
+  '23514',null,'a proposal that has not been decided yet takes no feedback'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,changed_fields,summary)
+    values ('aaaaaaa4-1111-4111-8111-111111111114','44444444-4444-4444-8444-444444444444',
+            array['summary'],'Reworded before the vote')$$,
+  '23514',null,'a submitted proposal takes no suggested revision'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('dddddddd-dddd-4ddd-8ddd-dddddddddddd','44444444-4444-4444-8444-444444444444',
+            'Comment on a proposal that does not exist')$$,
+  '23503',null,'feedback names an existing proposal'
+);
+-- The intake exemption is trigger depth, not a caller-settable flag, and a
+-- caller cannot reach the integer it compares against. Neither a copied local
+-- setting nor a hand-written version-1 row puts feedback on a proposal that
+-- was never selected; intake itself still records its own version one.
+select throws_ok(
+  $$do $forge$
+    begin
+      perform set_config('dev_rein.revision_origin','aaaaaaa2-1111-4111-8111-111111111112',true);
+      insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+        values ('aaaaaaa2-1111-4111-8111-111111111112','44444444-4444-4444-8444-444444444444',
+                'Feedback smuggled past the status gate');
+    end
+    $forge$;$$,
+  '23514',null,'a caller cannot exempt itself by copying the intake flag'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,version,author_contact_id,note)
+    values ('aaaaaaa2-1111-4111-8111-111111111112',1,'44444444-4444-4444-8444-444444444444',
+            'A hand-written version one')$$,
+  '23514',null,'a caller cannot claim the intake version for an unselected proposal'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set summary='Applied without any feedback record', effective_revision_id=null
+     where id='aaaaaaa2-1111-4111-8111-111111111112'$$,
+  '23001',null,'an unselected proposal cannot be changed outside a recorded revision'
+);
+select is(
+  (select count(*) from public.dev_rein_proposal_revisions
+    where proposal_id in ('aaaaaaa2-1111-4111-8111-111111111112','aaaaaaa3-1111-4111-8111-111111111113',
+                          'aaaaaaa4-1111-4111-8111-111111111114')),
+  3::bigint,
+  'the only feedback rows on undecided and losing proposals are their version-one intake rows'
+);
+select lives_ok(
+  $$insert into public.dev_rein_proposal_revisions(id,proposal_id,author_contact_id,note)
+    values ('e1000000-0000-4000-8000-000000000001','aaaaaaa1-1111-4111-8111-111111111111',
+            '44444444-4444-4444-8444-444444444444','Please keep the reading room open later')$$,
+  'an active Contributor records a comment'
+);
+select ok(
+  (select changed_fields = array[]::text[] and version is null
+     from public.dev_rein_proposal_revisions where id='e1000000-0000-4000-8000-000000000001'),
+  'a comment records no changed fields and no version'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa1-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','Inactive Contributor')$$,
+  '23514',null,'an inactive Contributor cannot record feedback'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa1-1111-4111-8111-111111111111','55555555-5555-4555-8555-555555555555','Unknown contact')$$,
+  '23514',null,'a contact without a Contributor or director record cannot record feedback'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,version,author_contact_id,note)
+    values ('aaaaaaa1-1111-4111-8111-111111111111',2,'44444444-4444-4444-8444-444444444444','Numbered comment')$$,
+  '23514',null,'a comment cannot claim a version'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa1-1111-4111-8111-111111111111','44444444-4444-4444-8444-444444444444','   ')$$,
+  '23514',null,'a comment without a body is rejected'
+);
+select throws_ok(
+  $$update public.dev_rein_proposal_revisions set note='Rewritten'
+      where id='e1000000-0000-4000-8000-000000000001'$$,
+  '23001',null,'recorded feedback is append-only'
+);
+select throws_ok(
+  $$delete from public.dev_rein_proposal_revisions
+      where id='e1000000-0000-4000-8000-000000000001'$$,
+  '23001',null,'recorded feedback is not deleted'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,changed_fields,title)
+    values ('aaaaaaa1-1111-4111-8111-111111111111','44444444-4444-4444-8444-444444444444',array['venue'],'Renamed')$$,
+  '23514',null,'a revision cannot name a field the schema does not record'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,changed_fields)
+    values ('aaaaaaa1-1111-4111-8111-111111111111','44444444-4444-4444-8444-444444444444',array['summary'])$$,
+  '23514',null,'a named field carries the value it records'
+);
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,version,author_contact_id,changed_fields,summary)
+    values ('aaaaaaa1-1111-4111-8111-111111111111',2,'44444444-4444-4444-8444-444444444444',array['summary'],'Numbered')$$,
+  '23514',null,'a revision takes its version when it becomes effective'
+);
+select lives_ok(
+  $$insert into public.dev_rein_proposal_revisions(id,proposal_id,author_contact_id,changed_fields,summary,note)
+    values ('e2000000-0000-4000-8000-000000000002','aaaaaaa1-1111-4111-8111-111111111111',
+            '44444444-4444-4444-8444-444444444444',array['summary'],'Revised summary text','Wording fix')$$,
+  'a Contributor suggests a wording revision'
+);
+select lives_ok(
+  $$update public.dev_rein_proposals
+       set summary='Revised summary text', effective_revision_id='e2000000-0000-4000-8000-000000000002'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  'a minor wording revision takes effect without a director approval'
+);
+select ok(
+  (select version=2 and summary='Revised summary text'
+     from public.dev_rein_proposals where id='aaaaaaa1-1111-4111-8111-111111111111'),
+  'the applied revision advances the proposal version'
+);
+select ok(
+  (select version=2 from public.dev_rein_proposal_revisions
+    where id='e2000000-0000-4000-8000-000000000002'),
+  'the applied revision records the version it produced'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set summary='Comment driven', effective_revision_id='e1000000-0000-4000-8000-000000000001'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a comment never changes a recorded proposal'
+);
+select lives_ok(
+  $$insert into public.dev_rein_proposal_revisions(id,proposal_id,author_contact_id,changed_fields,location,note)
+    values ('e3000000-0000-4000-8000-000000000003','aaaaaaa1-1111-4111-8111-111111111111',
+            '44444444-4444-4444-8444-444444444444',array['location'],'Online','Move the room online')$$,
+  'a Contributor suggests a location change'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set location='Online', effective_revision_id='e3000000-0000-4000-8000-000000000003'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a location change cannot take effect without a director approval'
+);
+select throws_ok(
+  $$select public.dev_rein_approve_revision('e3000000-0000-4000-8000-000000000003','44444444-4444-4444-8444-444444444444')$$,
+  '23514',null,'a contact without a director record cannot approve'
+);
+select lives_ok(
+  $$select public.dev_rein_approve_revision('e3000000-0000-4000-8000-000000000003','11111111-1111-4111-8111-111111111111')$$,
+  'a current director approves the location revision'
+);
+select throws_ok(
+  $$select public.dev_rein_approve_revision('e3000000-0000-4000-8000-000000000003','66666666-6666-4666-8666-666666666666')$$,
+  '23514',null,'a recorded approval is not replaced'
+);
+select lives_ok(
+  $$update public.dev_rein_proposals
+       set location='Online', effective_revision_id='e3000000-0000-4000-8000-000000000003'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  'the approved location change takes effect'
+);
+select ok(
+  (select version=3 and location='Online'
+     from public.dev_rein_proposals where id='aaaaaaa1-1111-4111-8111-111111111111'),
+  'the location is persisted on the proposal and the version advances'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set location='Somewhere else', effective_revision_id='e3000000-0000-4000-8000-000000000003'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'an applied revision is not applied twice'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set title='Cross proposal', effective_revision_id='e2000000-0000-4000-8000-000000000002'
+     where id='aaaaaaa2-1111-4111-8111-111111111112'$$,
+  '23514',null,'a revision of another proposal is refused'
+);
+select lives_ok(
+  $$insert into public.dev_rein_proposal_revisions(id,proposal_id,author_contact_id,changed_fields,requested_minor,currency,note)
+    values ('e4000000-0000-4000-8000-000000000004','aaaaaaa1-1111-4111-8111-111111111111',
+            '44444444-4444-4444-8444-444444444444',array['budget'],300000,'USD','Raise the budget')$$,
+  'a Contributor suggests a budget change'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set requested_minor=275000, currency='USD', effective_revision_id='e4000000-0000-4000-8000-000000000004'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a budget change must match the amount the revision recorded'
+);
+select lives_ok(
+  $$select public.dev_rein_approve_revision('e4000000-0000-4000-8000-000000000004','66666666-6666-4666-8666-666666666666')$$,
+  'a second director approves the budget revision'
+);
+select lives_ok(
+  $$update public.dev_rein_proposals
+       set requested_minor=300000, currency='USD', effective_revision_id='e4000000-0000-4000-8000-000000000004'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  'the approved budget change takes effect'
+);
+select ok(
+  (select version=4 and requested_minor=300000
+     from public.dev_rein_proposals where id='aaaaaaa1-1111-4111-8111-111111111111'),
+  'the budget revision advances the proposal to version four'
+);
+select is(
+  (select array_agg(version order by version) from public.dev_rein_proposal_revisions
+    where proposal_id='aaaaaaa1-1111-4111-8111-111111111111' and version is not null),
+  array[1, 2, 3, 4],
+  'every applied version of the proposal stays recorded'
+);
+select lives_ok(
+  $$insert into public.dev_rein_proposal_revisions(id,proposal_id,author_contact_id,changed_fields,schedule,note)
+    values ('e5000000-0000-4000-8000-000000000005','aaaaaaa1-1111-4111-8111-111111111111',
+            '44444444-4444-4444-8444-444444444444',array['schedule'],'Sunday 10:00','Move the start time')$$,
+  'a Contributor suggests a schedule change'
+);
+select lives_ok(
+  $$select public.dev_rein_approve_revision('e5000000-0000-4000-8000-000000000005','11111111-1111-4111-8111-111111111111')$$,
+  'a current director approves the schedule revision'
+);
+select lives_ok(
+  $$update public.dev_people
+       set person_type='core_contributor',
+           nominating_director_id='b3000000-0000-4000-8000-000000000003',
+           effective_date=current_date
+     where id='b1000000-0000-4000-8000-000000000001'$$,
+  'the approving director steps down from the board'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set schedule='Sunday 10:00', effective_revision_id='e5000000-0000-4000-8000-000000000005'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a material change is refused once its approver is no longer a director'
+);
+
+-- The material gate is the same on the selected path: a selected proposal
+-- still stands still until a current director records an approval. Scholar
+-- c1 has since stepped down, so the approval must come from a director who
+-- holds the seat now.
+select lives_ok(
+  $$insert into public.dev_rein_proposal_revisions(id,proposal_id,author_contact_id,changed_fields,location,note)
+    values ('e6000000-0000-4000-8000-000000000006','aaaaaaa1-1111-4111-8111-111111111111',
+            '44444444-4444-4444-8444-444444444444',array['location'],'Community room B','Room changed after the vote')$$,
+  'a Contributor records a material revision on the selected proposal'
+);
+select throws_ok(
+  $$update public.dev_rein_proposals
+       set location='Community room B', effective_revision_id='e6000000-0000-4000-8000-000000000006'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  '23514',null,'a material change to the selected proposal still needs a director approval'
+);
+select throws_ok(
+  $$select public.dev_rein_approve_revision('e6000000-0000-4000-8000-000000000006','11111111-1111-4111-8111-111111111111')$$,
+  '23514',null,'a director who has since stepped down cannot approve a post-result material change'
+);
+select lives_ok(
+  $$select public.dev_rein_approve_revision('e6000000-0000-4000-8000-000000000006','33333333-3333-4333-8333-333333333333')$$,
+  'a current director approves the post-result material revision'
+);
+select lives_ok(
+  $$update public.dev_rein_proposals
+       set location='Community room B', effective_revision_id='e6000000-0000-4000-8000-000000000006'
+     where id='aaaaaaa1-1111-4111-8111-111111111111'$$,
+  'the approved post-result material change takes effect on the selected proposal'
+);
+select ok(
+  (select version=5 and location='Community room B' and status='selected'
+     from public.dev_rein_proposals where id='aaaaaaa1-1111-4111-8111-111111111111'),
+  'the selected proposal keeps its status and advances to the approved version'
+);
+
+-- A withdrawn proposal is a closed record too: it keeps the feedback it
+-- already carried and takes no new feedback.
+select throws_ok(
+  $$insert into public.dev_rein_proposal_revisions(proposal_id,author_contact_id,note)
+    values ('aaaaaaa4-1111-4111-8111-111111111114','44444444-4444-4444-8444-444444444444',
+            'Comment on a withdrawn proposal')$$,
+  '23514',null,'a withdrawn proposal takes no feedback'
+);
+
+-- The guard is defense in depth: even with a table grant in place and RLS
+-- switched off for the test, a Data API role is still refused.
+alter table public.dev_rein_proposals disable row level security;
+grant insert on table public.dev_rein_proposals to authenticated;
+select lives_ok(
+  $test$
+  do $guard$
+  declare
+    rejected boolean := false;
+  begin
+    set local role authenticated;
+    begin
+      insert into public.dev_rein_proposals(proposer_contact_id,title,vote_type)
+        values ('11111111-1111-4111-8111-111111111111','Data API writer','funding');
+    exception
+      when insufficient_privilege then rejected := true;
+    end;
+    reset role;
+    if not rejected then
+      raise exception 'the guard accepted a write from the authenticated role';
+    end if;
+  end;
+  $guard$;
+  $test$,
+  'the database guard refuses a Data API writer even when a grant exists and RLS is off'
+);
+alter table public.dev_rein_proposals enable row level security;
+revoke insert on table public.dev_rein_proposals from authenticated;
+
+select ok(
+  (select bool_and(relrowsecurity) from pg_class
+    where relnamespace='public'::regnamespace
+      and relname in ('dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                      'dev_rein_proposal_revisions',
+                      'prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                      'prod_rein_proposal_revisions')),
+  'RLS is enabled on every Rein governance table'
+);
+select is(
+  (select count(*) from pg_policies where schemaname='public' and tablename like '%\_rein\_%' escape '\'),
+  0::bigint,
+  'no Rein governance table carries a Data API policy'
+);
+select ok(
+  not exists(
+    select 1 from (values ('anon'),('authenticated')) role_name(role_name),
+      unnest(array['dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                   'dev_rein_proposal_revisions']) t
+    where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
+  )
+  and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
+       from unnest(array['dev_rein_vote_types','dev_rein_proposals','dev_rein_polls','dev_rein_ballots',
+                         'dev_rein_proposal_revisions']) t),
+  'development governance tables are readable by service_role only'
+);
+select ok(
+  not exists(
+    select 1 from (values ('anon'),('authenticated')) role_name(role_name),
+      unnest(array['prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                   'prod_rein_proposal_revisions']) t
+    where has_table_privilege(role_name.role_name,'public.'||t,'select,insert,update,delete')
+  )
+  and (select bool_and(has_table_privilege('service_role','public.'||t,'select,insert,update,delete'))
+       from unnest(array['prod_rein_vote_types','prod_rein_proposals','prod_rein_polls','prod_rein_ballots',
+                         'prod_rein_proposal_revisions']) t),
+  'production governance tables are readable by service_role only'
+);
+
+-- Production carries the same flow end to end.
+select lives_ok(
+  $$insert into public.prod_rein_polls(id,creator_contact_id,title,vote_type,candidate_proposal_ids,opens_at,closes_at)
+    values ('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999','Production poll','funding',
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '2 hours',now()-interval '1 hour');
+    alter table public.prod_rein_ballots disable trigger prod_rein_ballots_before_insert;
+    insert into public.prod_rein_ballots(poll_id,voter_contact_id,approved_proposal_ids,cast_at)
+    values ('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999',
+      array['aaaaaaa6-1111-4111-8111-111111111116']::uuid[],now()-interval '90 minutes');
+    alter table public.prod_rein_ballots enable trigger prod_rein_ballots_before_insert;$$,
+  'the closed production poll gets its historical ballot'
+);
+select throws_ok(
+  $$update public.prod_rein_ballots set approved_proposal_ids=array[]::uuid[]
+    where poll_id='77777777-7777-4777-8777-777777777777'$$,
+  '23001',null,'a production ballot cannot be replaced'
+);
+select lives_ok(
+  $$select public.prod_rein_finalize_poll('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999')$$,
+  'production finalizes its poll through the same function'
+);
+select is(
+  (select status from public.prod_rein_proposals where id='aaaaaaa6-1111-4111-8111-111111111116'),
+  'selected','the production winner is recorded as selected'
+);
+select is(
+  (select winning_proposal_id::text from public.prod_rein_polls
+    where id='77777777-7777-4777-8777-777777777777'),
+  'aaaaaaa6-1111-4111-8111-111111111116','the production poll records its winner'
+);
+
+select throws_ok(
+  $$delete from public.dev_community_contacts where id='11111111-1111-4111-8111-111111111111'$$,
+  '23503',null,'a contact that proposed, opened, and voted in polls is preserved by RESTRICT'
+);
+select throws_ok(
+  $$delete from public.dev_community_contacts where id='33333333-3333-4333-8333-333333333333'$$,
+  '23503',null,'a contact that only opened polls and cast a ballot is preserved by RESTRICT'
+);
+select is(
+  (select count(*) from pg_constraint
+    where contype='f' and conrelid::regclass::text like '\_%rein\_%' escape '\'
+      and confrelid::regclass::text like '\_%community\_contacts' escape '\'
+      and confdeltype <> 'r'),
+  0::bigint,
+  'every Rein v0.1 contact reference deletes by RESTRICT'
+);
+
+with dev_columns as (
+  select replace(table_name,'dev_','') table_name,column_name,ordinal_position,column_default,is_nullable,data_type,udt_name
+  from information_schema.columns
+  where table_schema='public' and table_name like 'dev\_rein\_%' escape '\'
+    and table_name not like 'dev\_rein\_mvp\_%' escape '\'
+), prod_columns as (
+  select replace(table_name,'prod_','') table_name,column_name,ordinal_position,column_default,is_nullable,data_type,udt_name
+  from information_schema.columns
+  where table_schema='public' and table_name like 'prod\_rein\_%' escape '\'
+    and table_name not like 'prod\_rein\_mvp\_%' escape '\'
+)
+select is(
+  (select jsonb_agg(to_jsonb(dev_columns) order by table_name,ordinal_position) from dev_columns),
+  (select jsonb_agg(to_jsonb(prod_columns) order by table_name,ordinal_position) from prod_columns),
+  'development and production governance columns stay identical'
+);
+
+-- The rename's transition shim is gone. The old identifiers were a route an
+-- unpublished caller might have used; 20260929045543_remove_stage_
+-- compatibility_objects dropped them, so the long-term names are the only way
+-- to reach the governance row stores and the governance RPCs. Every check
+-- below reads the catalog and then calls an old name, so the removal is proven
+-- by an absent object and by a statement that no longer resolves.
+select is(
+  (select count(*) from pg_class c
+    where c.relnamespace='public'::regnamespace
+      and c.relname like '%rein_mvp_%'),
+  0::bigint,
+  'no relation survives under an old governance name'
+);
+select is(
+  (select count(*) from pg_proc p
+    where p.pronamespace='public'::regnamespace
+      and p.proname like '%rein_mvp_%'),
+  0::bigint,
+  'no function survives under an old governance name'
+);
+select is(
+  (select count(*) from (
+      select tg.tgname as name from pg_trigger tg
+       where not tg.tgisinternal and tg.tgname like '%rein_mvp_%'
+      union all
+      select con.conname from pg_constraint con where con.conname like '%rein_mvp_%'
+      union all
+      select cls.relname from pg_class cls
+        join pg_index ix on ix.indexrelid = cls.oid
+       where cls.relname like '%rein_mvp_%'
+      union all
+      select cls.relname from pg_class cls
+       where cls.relkind = 'S' and cls.relname like '%rein_mvp_%'
+    ) leftovers),
+  0::bigint,
+  'no trigger, constraint, index, or sequence survives under an old governance name'
+);
+select throws_ok(
+  $$insert into public.dev_rein_mvp_vote_types(vote_type,max_candidates,max_approvals_per_voter)
+    values ('stale_route',1,1)$$,
+  '42P01',null,'the old table name is gone rather than a shadow of the long-term table'
+);
+select throws_ok(
+  $$select public.prod_rein_mvp_finalize_poll('77777777-7777-4777-8777-777777777777','99999999-9999-4999-8999-999999999999')$$,
+  '42883',null,'the old finalize name is gone rather than a second entry point'
+);
+
+-- Every long-term RPC the application calls is still present at the exact
+-- signature the tests below and the app use, so removing the wrappers took
+-- nothing else with it.
+select is(
+  (select count(*) from unnest(array['dev_rein_finalize_poll(uuid,uuid)',
+                                    'dev_rein_approve_revision(uuid,uuid)',
+                                    'dev_rein_poll_winner(uuid)',
+                                    'prod_rein_finalize_poll(uuid,uuid)',
+                                    'prod_rein_approve_revision(uuid,uuid)',
+                                    'prod_rein_poll_winner(uuid)']) signature
+    where to_regprocedure('public.'||signature) is null),
+  0::bigint,
+  'every long-term governance RPC is still present at its recorded signature'
+);
+
+-- No second implementation of the same behavior is left under a stage name:
+-- the twenty helper and trigger functions live under the long-term names with
+-- no stage-named twin, and no long-term-named body still routes through one.
+select is(
+  (select count(*)
+     from pg_proc p
+    where p.pronamespace='public'::regnamespace
+      and p.proname in ('dev_rein_is_current_director','dev_rein_poll_winner',
+                        'dev_rein_proposals_before_write','dev_rein_polls_before_insert',
+                        'dev_rein_polls_before_update','dev_rein_ballots_before_insert',
+                        'dev_rein_ballots_before_update','dev_rein_vote_types_before_write',
+                        'dev_rein_revisions_before_write','dev_rein_proposals_record_origin',
+                        'prod_rein_is_current_director','prod_rein_poll_winner',
+                        'prod_rein_proposals_before_write','prod_rein_polls_before_insert',
+                        'prod_rein_polls_before_update','prod_rein_ballots_before_insert',
+                        'prod_rein_ballots_before_update','prod_rein_vote_types_before_write',
+                        'prod_rein_revisions_before_write','prod_rein_proposals_record_origin')),
+  20::bigint,
+  'all twenty helper and trigger functions live under the long-term names'
+);
+select ok(
+  not exists(
+    select 1
+      from pg_proc p
+     where p.pronamespace='public'::regnamespace
+       and p.proname in ('dev_rein_finalize_poll','dev_rein_approve_revision',
+                         'dev_rein_is_current_director','dev_rein_poll_winner',
+                         'dev_rein_proposals_before_write','dev_rein_polls_before_insert',
+                         'dev_rein_polls_before_update','dev_rein_ballots_before_insert',
+                         'dev_rein_ballots_before_update','dev_rein_vote_types_before_write',
+                         'dev_rein_revisions_before_write','dev_rein_proposals_record_origin',
+                         'prod_rein_finalize_poll','prod_rein_approve_revision',
+                         'prod_rein_is_current_director','prod_rein_poll_winner',
+                         'prod_rein_proposals_before_write','prod_rein_polls_before_insert',
+                         'prod_rein_polls_before_update','prod_rein_ballots_before_insert',
+                         'prod_rein_ballots_before_update','prod_rein_vote_types_before_write',
+                         'prod_rein_revisions_before_write','prod_rein_proposals_record_origin')
+       and pg_get_functiondef(p.oid) like '%rein_mvp_%'
+  ),
+  'no long-term-named governance function body still names a stage object'
+);
+
+-- Access control is unchanged by the removal. Dropping the compatibility
+-- objects must not hand a Data API role a route it did not have before, so
+-- every remaining governance RPC stays service_role only.
+select ok(
+  not exists(
+    select 1
+      from (values ('anon'),('authenticated')) role_name(role_name),
+           unnest(array['dev_rein_finalize_poll(uuid,uuid)',
+                        'dev_rein_approve_revision(uuid,uuid)',
+                        'dev_rein_poll_winner(uuid)',
+                        'prod_rein_finalize_poll(uuid,uuid)',
+                        'prod_rein_approve_revision(uuid,uuid)',
+                        'prod_rein_poll_winner(uuid)']) signature
+     where has_function_privilege(role_name.role_name,'public.'||signature,'execute')
+  )
+  and (select bool_and(has_function_privilege('service_role','public.'||signature,'execute'))
+       from unnest(array['dev_rein_finalize_poll(uuid,uuid)',
+                         'dev_rein_approve_revision(uuid,uuid)',
+                         'dev_rein_poll_winner(uuid)',
+                         'prod_rein_finalize_poll(uuid,uuid)',
+                         'prod_rein_approve_revision(uuid,uuid)',
+                         'prod_rein_poll_winner(uuid)']) signature),
+  'every governance RPC is executable by service_role only'
+);
+
+select * from finish();
+rollback;

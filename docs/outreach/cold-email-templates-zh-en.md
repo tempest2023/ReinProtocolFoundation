@@ -22,7 +22,7 @@ Would this be of interest to you? I’d value your view on Rein Protocol Foundat
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founding Board Chair
+Founder & Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work.
@@ -46,7 +46,7 @@ Would this be of interest to you? I’d value your view on Rein Protocol Foundat
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founding Board Chair
+Founder & Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work. We are not offering a commercial investment or token return. Legal and fundraising arrangements are still being established.
@@ -70,7 +70,7 @@ Would this be of interest to you? I’d value your view on Rein Protocol Foundat
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founding Board Chair
+Founder & Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work.
@@ -94,7 +94,7 @@ Would this be of interest to you? I’d value your view on Rein Protocol Foundat
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founding Board Chair
+Founder & Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work. No company endorsement or affiliation is assumed.
@@ -118,7 +118,7 @@ Rein Protocol Foundation is in preparation. The Agents and programs described ar
 访问 Rein Protocol 官网: https://rein-protocol.org
 
 Tempest
-Founding Board Chair
+Founder & Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation 正在筹备中。Agents 和项目活动仍在建设阶段。

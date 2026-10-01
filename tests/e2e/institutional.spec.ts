@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 const institutionalRoutes = [
-  { path: '/', heading: /AI Agents should enlarge human possibility/, title: 'Rein Protocol Foundation' },
+  { path: '/', heading: 'Making AI agents safer for people and society.', title: 'Rein Protocol Foundation' },
   { path: '/mission', heading: 'Build benefit. Prevent catastrophe.', title: 'Mission' },
   { path: '/programs', heading: 'Knowledge becomes public capacity.', title: 'Programs and Public Work' },
   { path: '/governance', heading: 'Power should leave a record.', title: 'Governance and Stewardship' },
@@ -17,6 +17,13 @@ test.describe('institutional site', () => {
       await expect(page.locator('main#main-content')).toBeVisible()
     })
   }
+
+  test('home hero communicates the nonprofit mission and work', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.home-hero .eyebrow')).toHaveText('A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY')
+    await expect(page.locator('#home-title')).toHaveText('Making AI agents safer for people and society.')
+    await expect(page.locator('.home-hero__mission')).toHaveText('We bring people together and support open-source projects and research to make AI agents safer.')
+  })
 
   test('page titles inherit the shared leading token', async ({ page }) => {
     for (const path of ['/', '/mission', '/community']) {

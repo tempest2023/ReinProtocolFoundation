@@ -87,9 +87,9 @@ export function InstitutionalHomePage() {
       <section className="home-hero" aria-labelledby="home-title">
         <div className="home-hero__art" aria-hidden="true"><img src={sanFrancisco.src} alt="" width="971" height="1619" fetchPriority="high" /></div>
         <div className="home-hero__content page-shell">
-          <p className="eyebrow hero-enter hero-enter--1">A public institution for the Agent age</p>
-          <h1 id="home-title">AI Agents should enlarge human possibility—<em>not erase it.</em></h1>
-          <p className="home-hero__mission hero-enter hero-enter--3">We advance beneficial AI Agents, widen access to AI knowledge, and build safeguards against catastrophic harm from AGI and ASI.</p>
+          <p className="eyebrow hero-enter hero-enter--1">A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY</p>
+          <h1 id="home-title">Making AI agents safer <em>for people and society.</em></h1>
+          <p className="home-hero__mission hero-enter hero-enter--3">We bring people together and support open-source projects and research to make AI agents safer.</p>
           <div className="home-hero__actions hero-enter hero-enter--4">
             <Link href="/mission" className="primary-action">Read our mission <Arrow /></Link>
             <Link href="/governance" className="quiet-action">How trust is designed</Link>

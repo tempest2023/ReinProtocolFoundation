@@ -1,23 +1,31 @@
-# Rein Protocol Foundation, cold outreach templates
+# Rein Protocol Foundation, role-specific cold outreach templates
 
-> Each template introduces the NGO and its mission, explains the public-participation gap in AI Agent Safety, outlines free resources, in-person events and research support, then asks about interest and suitable support. It closes with a 15-minute conversation invitation. The website link is styled as a theme-color button in HTML; the plain-text alternative includes the URL.
+> Shared structure: recipient-specific relevance → brief mission and credible stage → role-specific primary ask → low-friction reply. A 15-minute conversation is optional, not the only way to respond.
 
-> Stage note: Rein Protocol Foundation is being prepared. Agent operations, programs, events and research support described here are planned work.
+> Stage note: Rein Protocol Foundation is being prepared. Agent operations, programs, events and research support are planned work. The $10M figure is a fundraising target supplied for outreach, not money already raised or an approved allocation.
+
+| Recipient | Primary help requested | Alternative help |
+| --- | --- | --- |
+| Academic / Professor | Review a one-page research agenda and suggest priorities | Introduce a relevant lab or workshop adviser |
+| VC / Investor / Donor | Indicate willingness to donate toward the $10M target | Introduce a mission-aligned philanthropist or foundation |
+| AI researcher | Review a pilot outline and recommend an evaluation method or benchmark | Discuss a separately scoped collaboration |
+| AI startup founder | Provide a technical speaker and non-confidential demo for one workshop | Provide sandbox access or API credits |
+| 朋友 | 引荐一位合适的研究、活动或公益支持伙伴 | 先审阅一段可转发的组织介绍 |
 
 ## Academic / Professor (`professor.eml`)
 
-**Subject:** Introducing Rein Protocol Foundation
+**Subject:** Help shape our AI Agent safety research agenda
 
 ```text
 Dear [Name],
 
-I’m preparing Rein Protocol Foundation, an independent AI-native NGO for the Agent era. We believe AI Agent safety needs broader public participation. Commercial pressures and intense competition can make it difficult for major AI companies to prioritize independent public-interest safety work. Our approach is to use AI Agents to analyze and oversee AI Agents.
+I’m reaching out because of your work on [specific research area or paper]. I’d like your help shaping the research agenda for Rein Protocol Foundation, an independent AI-native NGO in preparation focused on public participation in AI Agent safety.
 
-Agents developed by the early team are intended to run the organization’s day-to-day work autonomously, including maintaining communities and free online resources, coordinating in-person events, and reporting progress. People remain accountable for the mission and legal duties.
+We plan free learning resources and university-based paper discussions and workshops that connect researchers with students and practitioners. Our approach is to use AI Agents to analyze and oversee AI Agents. Our planned AI-native operating model delegates routine community coordination, event preparation and progress reporting to Agents within defined authority limits. People remain responsible for governance, resource allocation, in-person delivery and exceptions.
 
-We plan free online AI learning resources, in-person events at universities and business venues, and support for AI Agent Safety research. Events will bring researchers, investors, startup founders and people from other sectors together, helping more people explore a path into AI Agent development.
+Would you be willing to review a one-page research agenda and suggest one or two priorities where a public-interest organization could contribute? If there is a fit, we would also welcome an introduction to a relevant lab or a researcher interested in advising a pilot workshop.
 
-Would this be of interest to you? I’d value your view on Rein Protocol Foundation and what support might fit, such as feedback on the research direction, joining an event, or an introduction. Could we schedule a quick 15-minute talk?
+I can send the agenda for an asynchronous review; if a conversation is easier, would you be available for 15 minutes?
 
 Explore the Rein community: https://rein-protocol.org
 
@@ -28,20 +36,24 @@ Rein Protocol Foundation
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work.
 ```
 
-## Mission-aligned funder (`investor.eml`)
+## VC / Investor / Mission-aligned donor (`investor.eml`)
 
-**Subject:** Introducing Rein Protocol Foundation
+**Subject:** Would you consider a donation toward our $10M goal?
 
 ```text
 Dear [Name],
 
-I’m preparing Rein Protocol Foundation, an independent AI-native NGO for the Agent era. We believe AI Agent safety needs broader public participation. Commercial pressures and intense competition can make it difficult for major AI companies to prioritize independent public-interest safety work. Our approach is to use AI Agents to analyze and oversee AI Agents.
+I’m reaching out because of your support for [specific public-interest initiative or relevant focus]. I’m preparing Rein Protocol Foundation, an independent AI-native NGO focused on public participation in AI Agent safety. Our approach is to use AI Agents to analyze and oversee AI Agents, while making learning and research more accessible.
 
-Agents developed by the early team are intended to run the organization’s day-to-day work autonomously, including maintaining communities and free online resources, coordinating in-person events, and reporting progress. People remain accountable for the mission and legal duties.
+We are at the formation stage, with [verified founding-team headcount] people on the founding team and [verified community member count, as of date] community members. Our planned AI-native operating model delegates routine community coordination, event preparation and progress reporting to Agents within defined authority limits. People remain responsible for governance, resource allocation, in-person delivery and exceptions.
 
-We plan free online AI learning resources, in-person events at universities and business venues, and support for AI Agent Safety research. Events will bring researchers, investors, startup founders and people from other sectors together, helping more people explore a path into AI Agent development.
+We plan university and business-venue workshops, paper discussions and practitioner meetups that bring researchers, founders, investors and newcomers together. Our initial event plan is [location, proposed cadence and expected attendance; distinguish plans from confirmed bookings].
 
-Would this be of interest to you? I’d value your view on Rein Protocol Foundation and what support might fit, such as advice, joining an event, or an introduction to mission-aligned supporters. Could we schedule a quick 15-minute talk?
+Our fundraising target is $10M to support free AI learning resources, in-person programs, AI Agent Safety research and the infrastructure needed to operate and report on this work. This is a donation-oriented public-benefit effort, not an equity investment or a promise of financial or token returns.
+
+Would you consider making a donation toward this goal once our legal and fundraising arrangements are established? If donations are outside your mandate, could you introduce us to a philanthropist or foundation that supports AI safety or education?
+
+A brief reply about donation interest would be very helpful. I can share a proposed budget and program plan; if useful, could we discuss them for 15 minutes?
 
 Explore the Rein community: https://rein-protocol.org
 
@@ -54,18 +66,18 @@ Rein Protocol Foundation is in preparation. The Agents and programs described ar
 
 ## AI researcher (`researcher.eml`)
 
-**Subject:** Introducing Rein Protocol Foundation
+**Subject:** Help define a pilot AI Agent safety evaluation
 
 ```text
 Hello [Name],
 
-I’m preparing Rein Protocol Foundation, an independent AI-native NGO for the Agent era. We believe AI Agent safety needs broader public participation. Commercial pressures and intense competition can make it difficult for major AI companies to prioritize independent public-interest safety work. Our approach is to use AI Agents to analyze and oversee AI Agents.
+I’m reaching out because of your work on [specific paper, benchmark or project]. I’m preparing Rein Protocol Foundation, an independent AI-native NGO focused on public participation in AI Agent safety. Our approach is to use AI Agents to analyze and oversee AI Agents, while making learning and research more accessible.
 
-Agents developed by the early team are intended to run the organization’s day-to-day work autonomously, including maintaining communities and free online resources, coordinating in-person events, and reporting progress. People remain accountable for the mission and legal duties.
+We would like to start with a focused research pilot on [specific Agent safety question], supported by open learning materials and small research discussions. Our planned AI-native operating model delegates routine community coordination, event preparation and progress reporting to Agents within defined authority limits. People remain responsible for governance, resource allocation, in-person delivery and exceptions.
 
-We plan free online AI learning resources, in-person events at universities and business venues, and support for AI Agent Safety research. Events will bring researchers, investors, startup founders and people from other sectors together, helping more people explore a path into AI Agent development.
+Would you be willing to review a one-page pilot outline and recommend an evaluation method or an openly available benchmark? Our immediate goal is to identify a useful, feasible question—not to ask for an open-ended research commitment. If there is mutual interest, we can separately define a collaboration scope and how contributions would be credited.
 
-Would this be of interest to you? I’d value your view on Rein Protocol Foundation and what support might fit, such as feedback on research, joining a discussion, or an introduction. Could we schedule a quick 15-minute talk?
+I can send the outline for written feedback, or we could spend 15 minutes discussing it. Which would you prefer?
 
 Explore the Rein community: https://rein-protocol.org
 
@@ -78,18 +90,18 @@ Rein Protocol Foundation is in preparation. The Agents and programs described ar
 
 ## AI startup founder (`ai_startup_founder.eml`)
 
-**Subject:** Introducing Rein Protocol Foundation
+**Subject:** Could you support an AI Agent safety workshop?
 
 ```text
 Hello [Name],
 
-I’m preparing Rein Protocol Foundation, an independent AI-native NGO for the Agent era. We believe AI Agent safety needs broader public participation. Commercial pressures and intense competition can make it difficult for major AI companies to prioritize independent public-interest safety work. Our approach is to use AI Agents to analyze and oversee AI Agents.
+I’m reaching out because of [specific product or Agent use case] at [Company]. I’m preparing Rein Protocol Foundation, an independent AI-native NGO focused on public participation in AI Agent safety. Our approach is to use AI Agents to analyze and oversee AI Agents, while making learning and research more accessible.
 
-Agents developed by the early team are intended to run the organization’s day-to-day work autonomously, including maintaining communities and free online resources, coordinating in-person events, and reporting progress. People remain accountable for the mission and legal duties.
+We plan practical workshops at universities and business venues where participants can learn how Agents are built, evaluated and used safely. Our planned AI-native operating model delegates routine community coordination, event preparation and progress reporting to Agents within defined authority limits. People remain responsible for governance, resource allocation, in-person delivery and exceptions.
 
-We plan free online AI learning resources, in-person events at universities and business venues, and support for AI Agent Safety research. Events will bring researchers, investors, startup founders and people from other sectors together, helping more people explore a path into AI Agent development.
+Would your team be willing to contribute a technical speaker and a non-confidential Agent demo for one pilot workshop? A concrete use case and its safety trade-offs would help participants connect research with practice. If a speaker is not feasible, sandbox access or API credits for the workshop would be another useful form of support.
 
-Would this be of interest to you? I’d value your view on Rein Protocol Foundation and what support might fit, such as technical feedback, joining an event, or an introduction. Could we schedule a quick 15-minute talk?
+A reply indicating which option is feasible would help us plan. If useful, could we spend 15 minutes aligning on the workshop format and support scope?
 
 Explore the Rein community: https://rein-protocol.org
 
@@ -102,18 +114,18 @@ Rein Protocol Foundation is in preparation. The Agents and programs described ar
 
 ## 朋友 / 中文 (`friend-zh.eml`)
 
-**Subject:** 想介绍我正在筹备的 Rein Protocol Foundation
+**Subject:** 想请你引荐一位支持 AI 公益的伙伴
 
 ```text
 嗨 [Name]，
 
-我正在筹备 Rein Protocol Foundation，一个面向 Agent era 的独立 AI-native NGO。我们认为 AI Agent Safety 需要更广泛的公众参与。商业压力和激烈竞争可能让大型 AI 公司难以优先投入独立的公共利益安全工作。我们的思路是用 AI Agents 来分析和监督 AI Agents。
+想到你在 [相关领域／社群] 的人脉，我想请你帮忙引荐一位可能支持 AI 公益项目的伙伴。我正在筹备 Rein Protocol Foundation，一个面向 Agent era 的独立 AI-native NGO，希望让更多公众参与 AI Agent Safety；我们的思路是用 AI Agents 来分析和监督 AI Agents。
 
-早期团队开发的 Agents 目标是自主运行组织的日常工作，包括维护社群和免费线上资源、协调线下活动并整理进展。人类仍对组织使命和法律责任负责。
+我们计划提供免费的 AI 学习资源，在高校和商业场景举办工作坊、论文讨论和交流活动，并支持 AI Agent Safety 研究。AI-native 运营模式会让 Agents 在明确权限内承担社群协调、活动筹备和进展整理，人类负责治理、资源分配、线下执行与异常处理。
 
-我们计划提供免费的线上 AI 学习资源，在高校和商业场景举办线下活动，并支持 AI Agent Safety 研究。活动将连接研究者、投资人、创业者和其他行业人士，帮助更多人了解并进入 AI Agent 领域。
+你能否帮我引荐一位关注 AI 安全或教育的研究者、愿意提供讲者或场地的活动伙伴，或有捐赠意向的公益支持者？介绍一位你觉得最合适的人就很有帮助；我可以先发一段简短介绍，由你判断是否适合转发。
 
-你对 Rein Protocol Foundation 有兴趣吗？我想听听你的看法，也想了解什么支持方式适合你，比如给建议、参加活动或介绍相关伙伴。我们可以找 15 分钟简单聊聊。
+如果你愿意帮忙，直接回复你想到的人或支持方向即可；需要的话，我们也可以找 15 分钟聊聊。
 
 访问 Rein Protocol 官网: https://rein-protocol.org
 
@@ -124,10 +136,13 @@ Rein Protocol Foundation
 Rein Protocol Foundation 正在筹备中。Agents 和项目活动仍在建设阶段。
 ```
 
-## Before sending
+## Before sending / 发送前检查
 
-- Replace `[Name]` and personalize one line for the recipient.
-- The NGO is in preparation. Describe Agents, events and research support as planned work.
-- HTML email uses a colored button linking to `https://rein-protocol.org`. Plain-text mail includes the same link as text.
-- The message includes the small brand mark only, not the large homepage image.
-- The funder template is a public-benefit introduction, not an investment offer or token return.
+- Replace every bracketed placeholder, including the recipient-specific reason for contact. Do not send unresolved placeholders.
+- For the funder template, verify founding-team headcount and community membership separately, with an as-of date. Do not substitute registrations, projected reach or event attendance for member counts. If no reliable count exists, replace the numerical sentence with “We are a small founding team building our initial community.”
+- Fill the event-plan field with a real proposed location, cadence and attendance estimate. Label these as plans; do not imply confirmed venues, university partnerships or events already delivered.
+- Keep one primary ask per recipient. Alternatives should help the recipient respond, not become a checklist of commitments. Prepare the referenced one-page agenda, pilot outline, workshop brief or proposed budget before offering it.
+- The $10M amount is a target, not funds raised, a fixed budget breakdown or a claim of fundraising readiness. Ask about donation intent only; do not include payment instructions or promise tax deductibility while legal and fundraising arrangements remain unestablished.
+- Describe Agent operations as planned, permission-bounded work with human accountability—not a fully autonomous organization already operating.
+- HTML and plain-text versions carry the same message. The HTML website button is for background information, not the primary response request. Preserve the small brand mark and preparation-stage disclaimer.
+- These files are unsent drafts. Do not add recipient addresses or send automatically.

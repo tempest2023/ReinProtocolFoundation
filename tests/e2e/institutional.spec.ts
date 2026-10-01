@@ -18,6 +18,33 @@ test.describe('institutional site', () => {
     })
   }
 
+  test('page titles inherit the shared leading token', async ({ page }) => {
+    for (const path of ['/', '/mission', '/community']) {
+      await page.goto(path)
+      const heading = page.getByRole('heading', { level: 1 })
+      await expect(heading).toBeVisible()
+
+      const metrics = await heading.evaluate(element => {
+        const style = getComputedStyle(element)
+        return {
+          leading: parseFloat(style.lineHeight) / parseFloat(style.fontSize),
+          token: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--type-page-title-leading')),
+        }
+      })
+      expect(metrics.token).toBeGreaterThanOrEqual(1.1)
+      expect(metrics.leading).toBeCloseTo(metrics.token, 4)
+
+      const updatedLeading = metrics.token + 0.15
+      await page.evaluate(value => {
+        document.documentElement.style.setProperty('--type-page-title-leading', String(value))
+      }, updatedLeading)
+      await expect.poll(() => heading.evaluate(element => {
+        const style = getComputedStyle(element)
+        return parseFloat(style.lineHeight) / parseFloat(style.fontSize)
+      })).toBeCloseTo(updatedLeading, 4)
+    }
+  })
+
   test('home remains Mission-first while exposing Community', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByRole('link', { name: 'Read our mission' })).toHaveAttribute('href', '/mission')

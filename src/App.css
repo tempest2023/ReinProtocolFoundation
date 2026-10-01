@@ -284,7 +284,7 @@
   font-size: var(--type-page-title-size);
   font-weight: var(--type-page-title-weight);
   letter-spacing: var(--type-page-title-tracking);
-  line-height: var(--type-page-title-leading);
+  line-height: 1.1;
   text-wrap: balance;
 }
 

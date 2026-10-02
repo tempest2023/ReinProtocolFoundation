@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test'
 
 const institutionalRoutes = [
   { path: '/', heading: 'Making AI agents safer for people and society.', title: 'Rein Protocol Foundation' },
-  { path: '/mission', heading: 'Build benefit. Prevent catastrophe.', title: 'Mission' },
-  { path: '/programs', heading: 'Knowledge becomes public capacity.', title: 'Programs and Public Work' },
-  { path: '/governance', heading: 'Power should leave a record.', title: 'Governance and Stewardship' },
-  { path: '/giving', heading: 'Native to the Agent economy. Bound to charitable law.', title: 'Giving Architecture' },
+  { path: '/mission', heading: 'Making AI agents safer for people and society.', title: 'Mission' },
+  { path: '/programs', heading: 'Meet in person. Keep learning together online.', title: 'Programs and Public Work' },
+  { path: '/governance', heading: 'AI agents help run Rein. People remain responsible.', title: 'Governance and Stewardship' },
+  { path: '/giving', heading: 'Support AI agent safety and community.', title: 'Giving' },
 ] as const
 
 test.describe('institutional site', () => {

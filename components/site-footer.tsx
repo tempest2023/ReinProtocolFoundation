@@ -9,7 +9,7 @@ export function SiteFooter() {
           <FoundationMark variant="footer" />
           <span>Rein Protocol<small>Foundation</small></span>
         </Link>
-        <p className="footer-thesis">Web3 first. Agent operated. Human accountable.</p>
+        <p className="footer-thesis">An AI-native community for agent safety.</p>
         <nav aria-label="Footer navigation">
           <Link href="/">Home</Link>
           <Link href="/mission">Mission</Link>
@@ -20,7 +20,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="footer-legal page-shell">
-        <p>Advancing beneficial AI, public knowledge and accountable Agent infrastructure.</p>
+        <p>Making AI agents safer through community, open source, and research.</p>
         <p><Link href="/privacy">Privacy</Link> · <Link href="/community/code-of-conduct">Code of Conduct</Link></p>
         <p>© 2026 Rein Protocol Foundation</p>
       </div>

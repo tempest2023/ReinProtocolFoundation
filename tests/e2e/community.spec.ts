@@ -10,8 +10,8 @@ test.describe('Community overview and navigation', () => {
     await page.goto('/community')
     await expect(page.getByRole('heading', { level: 1, name: /A community of/ })).toBeVisible()
     for (const heading of [
-      'An open community with clear paths.',
-      'Learn and gather in public.',
+      'Start with a conversation, a resource, or an event.',
+      'Meet in person. Stay connected online.',
       'People behind the work.',
       'Register for community updates.',
       'Choose how you want to contribute.',
@@ -35,7 +35,7 @@ test.describe('Community overview and navigation', () => {
   })
 
   for (const item of [
-    { label: 'Program', hash: '#program', heading: 'Learn and gather in public.' },
+    { label: 'Program', hash: '#program', heading: 'Meet in person. Stay connected online.' },
     { label: 'People', hash: '#people', heading: 'People behind the work.' },
     { label: 'Connect', hash: '#register', heading: 'Register for community updates.' },
     { label: 'Contribute', hash: '#contribute', heading: 'Choose how you want to contribute.' },
@@ -52,8 +52,8 @@ test.describe('Community overview and navigation', () => {
   }
 
   for (const redirect of [
-    { path: '/community/learn', hash: '#program', heading: 'Free AI Agent learning.' },
-    { path: '/community/gather', hash: '#program', heading: 'Online and local events.' },
+    { path: '/community/learn', hash: '#program', heading: 'Online community and learning.' },
+    { path: '/community/gather', hash: '#program', heading: 'In-person events.' },
     { path: '/community/people', hash: '#people', heading: 'People behind the work.' },
   ] as const) {
     test(`${redirect.path} preserves its URL through a section redirect`, async ({ page }) => {

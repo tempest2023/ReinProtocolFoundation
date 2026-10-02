@@ -112,7 +112,7 @@ test.describe('Learning-resource submission', () => {
     await expect(form.getByRole('textbox', { name: /^Language/ })).toHaveAttribute('placeholder', 'e.g. English, 中文, Spanish')
     const description = form.getByRole('textbox', { name: /^Description/ })
     await expect(description).toHaveAttribute('maxlength', '1000')
-    await expect(description).toHaveAttribute('placeholder', /AI Agent learning or technical discussion/)
+    await expect(description).toHaveAttribute('placeholder', /what members can learn about AI agents/)
     await expect(form.getByRole('textbox', { name: /How is this relevant/ })).toHaveCount(0)
   })
 
@@ -125,7 +125,7 @@ test.describe('Learning-resource submission', () => {
 
   test('keeps submitter identity private from published resources', async ({ page }) => {
     await expect(page.getByText('Your identity stays private.')).toBeVisible()
-    await expect(page.getByText(/Learn will show the resource’s author or publisher, not the submitter/)).toBeVisible()
+    await expect(page.getByText(/the community resource list will show the resource’s author or publisher, not the submitter/)).toBeVisible()
   })
 
   test('validates required resource fields inline', async ({ page }) => {

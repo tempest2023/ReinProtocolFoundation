@@ -12,6 +12,10 @@ export function contributorVerificationTemplate(name: string, verificationUrl: s
   return `<p>Hello ${escapeHtml(name)},</p><p>Confirm your email within 24 hours so your Contributor application can enter review.</p><p><a href="${escapeHtml(verificationUrl)}">Verify my email</a></p><p>Most public resources and events are open without becoming a Contributor. Applying is for people who want deeper participation, to organize activities, or to take responsibility for ongoing work.</p>`
 }
 
+export function identityLinkReceiptTemplate(receiptUrl: string) {
+  return `<p>Hello,</p><p>Someone asked to connect a chat account to a Rein Protocol community identity using this address.</p><p><a href="${escapeHtml(receiptUrl)}">Confirm this address</a></p><p>The link expires in ten minutes and can be used once. If you did not ask for this, you can ignore this message: nothing changes until the link is opened and confirmed.</p><p>Confirming an address does not by itself make anyone a member or a Contributor.</p>`
+}
+
 export function applicationReceivedTemplate(name: string) {
   return `<p>Hello ${escapeHtml(name)},</p><p>Your email is verified and your application is now in review. If we invite you to a 1v1, it will be a conversation—not a traditional interview—and will last no more than 30 minutes.</p><p>We welcome people across industries, educational backgrounds, and professional paths.</p>`
 }

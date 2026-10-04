@@ -11,7 +11,9 @@ A link is established by two independent proofs, and neither one is sufficient a
 
 1. **Email receipt proves control of an address.** The person asks for a link from
    `/community/link/[session]`, and a message with a one-time receipt link is sent to the address they typed.
-   Opening that link (`/community/link/confirm`) returns the receipt to the server, which shows that
+   The message uses Rein's branded organization template and its action always points to
+   `https://rein-protocol.org/community/link/confirm`, even when a development backend initiated the
+   request. Opening that link returns the receipt to the server, which shows that
    whoever holds the link can also receive mail at that address. The receipt is a possession proof:
    the emailed link is the only place the raw value appears, and no API response or rendered page
    returns it.
@@ -31,7 +33,7 @@ defaults below).
 | --- | --- |
 | `/community/link/[session]` | Accepts an address and requests the receipt link. Shows a generic sentence after submission. The opaque session is a path segment so chat-runtime query-parameter redaction cannot corrupt the link. |
 | `/community/link` | Backward-compatible query entry and invalid-link fallback; new binding responses use the path form above. |
-| `/community/link/confirm` | Takes the opaque session and receipt values from the URL and confirms the address. Displays the binding code on success. |
+| `/community/link/confirm` | Takes the opaque session and receipt values from the URL, asks for the same address, and confirms it. Displays the binding code on success. The email itself never contains the code. |
 
 Both pages are excluded from search indexing and are reachable only through a session or receipt
 value handed to the person by the Agent. The initial request always receives the same response, so
@@ -39,9 +41,11 @@ it cannot be used to test whether an address exists. Only after the person prove
 opening the one-time receipt may the confirmation explain that the address is not registered and
 that an administrator must register it before linking.
 
-The pages collect only the email address (first step) or the opaque values already present in the
-URL (second step). No numeric code is entered on the website, and no internal identifier, hash,
-table name, or token is ever displayed.
+The pages collect the email address in both steps: first to request the message, then to confirm that
+the receipt is being used for the same address. No binding code is entered on the website. After a
+successful confirmation, the page displays the short-lived binding code that must be returned in
+the original chat. No internal identifier, hash, table name, or raw receipt token is displayed as
+page content.
 
 ## The binding record
 

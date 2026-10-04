@@ -75,6 +75,9 @@ describe('requestLinkEmail', () => {
     const sent = vi.mocked(sendTransactionalEmail).mock.calls[0][0] as { to: string; html: string }
     expect(sent.to).toBe('member@example.test')
     expect(sent.html).toContain('rle_secret_receipt')
+    expect(sent.html).toContain('https://rein-protocol.org/community/link/confirm?receipt=rle_secret_receipt&amp;session=rls_session')
+    expect(sent.html).not.toContain('localhost')
+    expect(sent.html).not.toContain('127.0.0.1')
   })
 
   it('answers a malformed address without a lookup or a send', async () => {

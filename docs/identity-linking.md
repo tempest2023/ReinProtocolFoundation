@@ -10,7 +10,7 @@ the email step, and the limits of the current implementation.
 A link is established by two independent proofs, and neither one is sufficient alone.
 
 1. **Email receipt proves control of an address.** The person asks for a link from
-   `/community/link`, and a message with a one-time receipt link is sent to the address they typed.
+   `/community/link/[session]`, and a message with a one-time receipt link is sent to the address they typed.
    Opening that link (`/community/link/confirm`) returns the receipt to the server, which shows that
    whoever holds the link can also receive mail at that address. The receipt is a possession proof:
    the emailed link is the only place the raw value appears, and no API response or rendered page
@@ -29,13 +29,15 @@ defaults below).
 
 | Path | Purpose |
 | --- | --- |
-| `/community/link` | Accepts an address and requests the receipt link. Shows a generic sentence after submission. |
+| `/community/link/[session]` | Accepts an address and requests the receipt link. Shows a generic sentence after submission. The opaque session is a path segment so chat-runtime query-parameter redaction cannot corrupt the link. |
+| `/community/link` | Backward-compatible query entry and invalid-link fallback; new binding responses use the path form above. |
 | `/community/link/confirm` | Takes the opaque session and receipt values from the URL and confirms the address. Displays the binding code on success. |
 
 Both pages are excluded from search indexing and are reachable only through a session or receipt
-value handed to the person by the Agent. They never state whether an address is registered: a
-well-formed address always receives the same response, so the flow cannot be used to test whether a
-given address exists in the organization's records.
+value handed to the person by the Agent. The initial request always receives the same response, so
+it cannot be used to test whether an address exists. Only after the person proves mailbox control by
+opening the one-time receipt may the confirmation explain that the address is not registered and
+that an administrator must register it before linking.
 
 The pages collect only the email address (first step) or the opaque values already present in the
 URL (second step). No numeric code is entered on the website, and no internal identifier, hash,
@@ -51,17 +53,17 @@ table name, or token is ever displayed.
   before that platform account can be linked again.
 - A binding is valid only while its status is verified. Revocation is the normal way to end a link;
   it never deletes historical contributions or records tied to the contact.
-- **One contact may hold several platform identities.** A person who uses two accounts on one
-  platform, or the same person on two platforms, keeps a single organizational identity and a single
-  set of governance outcomes. Holding several bindings never multiplies eligibility, weight, or
-  contribution counts.
+- **P0 permits one verified Slack identity per contact.** A second Slack tuple for the same contact
+  is refused, including when two completions race. Supporting account migration or multiple Slack
+  accounts is deferred to P2. Other platforms remain separately scoped and do not confer Slack
+  governance rights.
 
-## Contacts created by a verified address
+## Registered contacts only
 
-A verified address identifies a contact. If the address is unknown to the organization, the flow may
-create a contact record for it and nothing more. A new contact receives **no membership, no
-Contributor status, and no governance grant**; those come from separate, authorized processes.
-Contributor applications, admission, and role changes stay independent of linking.
+A verified address identifies an existing, non-deleted contact. If the address is unknown to the
+organization, the session enters `registration_required`, no contact or identity row is created, and
+the person is directed to an administrator. Email control alone never registers a community member
+and grants no membership, Contributor status, role, or governance right.
 
 ## Authority, scopes, and re-derivation
 
@@ -76,6 +78,9 @@ Contributor applications, admission, and role changes stay independent of linkin
   been proven to be that person.
 - Assertions are short lived. Any statement that a caller is a particular linked person carries a
   near-term expiry and has to be re-established for later operations.
+- Chat text that claims an email address or role is untrusted. Neither the Agent nor these APIs accept
+  a target email, contact id, role, platform user id, or workspace id from a model-authored binding
+  request. The email is entered only on the website and proved by its one-time receipt.
 
 ## Ingress and relay
 
@@ -100,12 +105,11 @@ change:
 | Binding validity | 10 years |
 | Binding code time to live | 10 minutes |
 
-## Not implemented yet
+## Current integration boundary
 
-- No live Slack or Discord workspace is connected, and there is no production deployment of this
-  flow.
-- Tests mock email delivery. No live message is sent from this code path during development, and
-  this environment must not send live mail.
+- Discord binding and multiple-Slack-account migration are not part of P0.
+- Automated tests mock email delivery; live sandbox tests require separately configured email and
+  platform infrastructure and must use synthetic accounts.
 - This repository contains the identity-linking domain logic (`lib/identity/linking.ts`), the
   registered-caller and scope contract (`lib/agent/contracts.ts`, `lib/agent/service-callers.ts`),
   signed-ingress and assertion verification (`lib/agent/assertions.ts`), the governance reader and
@@ -113,9 +117,9 @@ change:
   two website pages described above, and the `POST /api/agent/operations` dispatcher
   (`app/api/agent/operations/route.ts`) that carries every private governance call. Its writes run
   through the guarded governance RPC described below. What is still not wired to a live platform is
-  reachability rather than the code path: no Slack or Discord workspace is connected, inbound
-  platform traffic and relay enrollment stay configuration, and no live mail is sent from the
-  development environment.
+  reachability rather than the code path. A controlled development Slack workspace and transactional
+  mail path were exercised on 2026-10-03; production Slack/Discord enrollment and production mail
+  remain deployment configuration rather than repository defaults.
 
 ## Related reading
 

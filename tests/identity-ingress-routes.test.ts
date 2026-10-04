@@ -290,7 +290,7 @@ describe('POST /api/identity/link/start', () => {
       session_id: 'rls_abc',
       expires_at: '2026-10-01T00:00:00.000Z',
     })
-    expect(String(body.verification_url)).toContain('/community/link?session=rls_abc')
+    expect(String(body.verification_url)).toContain('/community/link/rls_abc')
     expect(issueLinkSession).toHaveBeenCalledWith(
       { platform: 'slack', workspaceId: 'T1', platformUserId: 'U1', channelId: 'C1' },
       'rein-caller-1',
@@ -350,6 +350,19 @@ describe('POST /api/identity/link/status', () => {
     const body = (await response.json()) as Record<string, unknown>
     expect(body).toMatchObject({ ok: true, state: 'email_verified', linked: false, contact_id: null })
     expect(JSON.stringify(body)).not.toMatch(/rein-|binding_code/)
+  })
+
+  it('reports registration_required without exposing a contact or binding code', async () => {
+    vi.mocked(lookupLinkSession).mockResolvedValue({
+      ...session,
+      state: 'registration_required',
+      contactId: null,
+    })
+    const response = await linkStatusPost(jsonRequest(url, { session_id: 'rls_abc', proof }, credentialHeaders))
+    expect(response.status).toBe(200)
+    const body = (await response.json()) as Record<string, unknown>
+    expect(body).toMatchObject({ ok: true, state: 'registration_required', linked: false, contact_id: null })
+    expect(JSON.stringify(body)).not.toMatch(/rein-|binding_code|email/i)
   })
 })
 

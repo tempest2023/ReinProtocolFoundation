@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   }
 
   await touchCaller(caller.callerId)
-  const verificationUrl = `${publicEnv.siteUrl}/community/link?session=${encodeURIComponent(issued.session.sessionToken)}`
+  const verificationUrl = `${publicEnv.siteUrl}/community/link/${encodeURIComponent(issued.session.sessionToken)}`
   return noStore({
     ok: true,
     session_id: issued.session.sessionToken,

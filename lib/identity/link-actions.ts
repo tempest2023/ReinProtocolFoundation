@@ -121,6 +121,12 @@ export async function confirmLinkEmail(
         message: 'This address matches more than one community record, so a person needs to review it. We have kept the request.',
       }
     }
+    if (confirmed.reason === 'contact_not_registered') {
+      return {
+        status: 'error',
+        message: 'This email address is not registered with the Rein community. Contact an administrator to register before linking your chat account.',
+      }
+    }
     if (confirmed.reason === 'binding_code_invalid') {
       return { status: 'error', message: 'That confirmation is not valid. Check the link you received and try again.' }
     }

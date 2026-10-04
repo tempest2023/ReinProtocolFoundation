@@ -68,6 +68,24 @@ select is(
   8::bigint,
   'fixture: eight link sessions are in flight');
 
+insert into public.dev_community_contacts(id, first_source)
+values
+  ('00000000-0000-4000-8000-000000001001', 'manual'),
+  ('00000000-0000-4000-8000-000000001002', 'manual'),
+  ('00000000-0000-4000-8000-000000001003', 'manual'),
+  ('00000000-0000-4000-8000-000000001004', 'manual'),
+  ('00000000-0000-4000-8000-000000001005', 'manual'),
+  ('00000000-0000-4000-8000-000000001006', 'manual');
+
+insert into public.dev_contact_identities(contact_id, identity_kind, normalized_value)
+values
+  ('00000000-0000-4000-8000-000000001001', 'email', 'alpha@example.test'),
+  ('00000000-0000-4000-8000-000000001002', 'email', 'delta@example.test'),
+  ('00000000-0000-4000-8000-000000001003', 'email', 'charlie@example.test'),
+  ('00000000-0000-4000-8000-000000001004', 'email', 'echo@example.test'),
+  ('00000000-0000-4000-8000-000000001005', 'email', 'attacker@example.test'),
+  ('00000000-0000-4000-8000-000000001006', 'email', 'expiry@example.test');
+
 -- ---------------------------------------------------------------------------
 -- 1. Cross-scope acceptance and tuple uniqueness.
 -- ---------------------------------------------------------------------------
@@ -90,7 +108,7 @@ with confirmed as materialized (
     p_binding_code_hash := 'bc-A', p_binding_expires_at := now() + interval '10 minutes'))
 select is(confirmed.ok, true, 'confirm: the tuple A address is confirmed') from confirmed
 union all
-select is(confirmed.reason, 'verified_new_contact', 'confirm: an unknown address creates a contact') from confirmed
+select is(confirmed.reason, 'verified', 'confirm: the registered address resolves to its contact') from confirmed
 union all
 select is(confirmed.outcome, 'verified', 'confirm: the challenge outcome is verified') from confirmed;
 
@@ -107,8 +125,7 @@ select is(
   (select contact_id from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'alpha@example.test'),
   'complete: tuple A is bound to the contact that owns the address') from linked;
 
--- Tuple B: a different platform tuple for the SAME contact is accepted, because
--- no uniqueness is placed on contact_id.
+-- Tuple B: a different Slack tuple for the same contact is refused.
 with issued as materialized (
   select * from public.dev_rein_issue_link_email_challenge(
     p_session_token_hash := 'tok-SB', p_email := 'alpha@example.test',
@@ -130,18 +147,15 @@ with linked_b as materialized (
   select * from public.dev_rein_complete_platform_link(
     p_session_token_hash := 'tok-SB', p_binding_code_hash := 'bc-B', p_validity := interval '10 years',
     p_platform := 'slack', p_workspace_id := 'W-A', p_platform_user_id := 'U-B', p_actor_type := 'system'))
-select is(linked_b.ok, true, 'complete: a second tuple for the same contact is accepted') from linked_b
+select is(linked_b.ok, false, 'complete: a second Slack tuple for the same contact is refused') from linked_b
 union all
-select is(
-  linked_b.contact_id,
-  (select contact_id from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'alpha@example.test'),
-  'complete: both tuples resolve to the one contact') from linked_b;
+select is(linked_b.reason, 'contact_conflict', 'complete: the second Slack tuple reports contact_conflict') from linked_b;
 
 select is(
   (select count(*) from public.dev_rein_platform_links l
     where l.contact_id = (select contact_id from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'alpha@example.test')),
-  2::bigint,
-  'one contact holds two live platform links');
+  1::bigint,
+  'one contact holds one verified Slack link');
 
 -- The SAME tuple twice, reaching completion with a different contact, is
 -- refused by the occupied tuple.
@@ -183,14 +197,14 @@ select is(
 -- ---------------------------------------------------------------------------
 with replayed as materialized (
   select * from public.dev_rein_complete_platform_link(
-    p_session_token_hash := 'tok-SB', p_binding_code_hash := 'bc-B', p_validity := interval '10 years',
-    p_platform := 'slack', p_workspace_id := 'W-A', p_platform_user_id := 'U-B', p_actor_type := 'system'))
+    p_session_token_hash := 'tok-SA', p_binding_code_hash := 'bc-A', p_validity := interval '10 years',
+    p_platform := 'slack', p_workspace_id := 'W-A', p_platform_user_id := 'U-A', p_actor_type := 'system'))
 select is(replayed.ok, false, 'replay: completing the same session twice is refused') from replayed
 union all
 select is(replayed.reason, 'binding_already_completed', 'replay: the reason is binding_already_completed') from replayed;
 
 select is(
-  (select count(*) from public.dev_rein_platform_links where platform = 'slack' and platform_workspace_id = 'W-A' and platform_user_id = 'U-B'),
+  (select count(*) from public.dev_rein_platform_links where platform = 'slack' and platform_workspace_id = 'W-A' and platform_user_id = 'U-A'),
   1::bigint,
   'replay: no second link row was created');
 
@@ -334,7 +348,7 @@ select throws_ok(
   'duplicate (identity_kind, normalized_value) is rejected, so denied_ambiguous cannot be produced');
 
 -- ---------------------------------------------------------------------------
--- 6. A verified unknown address creates a contact and nothing else.
+-- 6. A verified unknown address requires registration and creates nothing.
 -- ---------------------------------------------------------------------------
 with issued as materialized (
   select * from public.dev_rein_issue_link_email_challenge(
@@ -349,32 +363,32 @@ with confirmed as materialized (
   select * from public.dev_rein_confirm_link_email(
     p_session_token_hash := 'tok-SF', p_email := 'fresh@example.test', p_receipt_token_hash := 'rcpt-F', p_code_hash := 'ch-F',
     p_binding_code_hash := 'bc-F', p_binding_expires_at := now() + interval '10 minutes'))
-select is(confirmed.ok, true, 'confirm: a verified unknown address is accepted') from confirmed
+select is(confirmed.ok, false, 'confirm: a verified unknown address is refused') from confirmed
 union all
-select is(confirmed.reason, 'verified_new_contact', 'confirm: the unknown address created a contact') from confirmed;
+select is(confirmed.reason, 'contact_not_registered', 'confirm: the unknown address requires registration') from confirmed;
 
 select is(
   (select count(*) from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'fresh@example.test'),
-  1::bigint,
-  'the new address has exactly one identity row');
+  0::bigint,
+  'the unknown address creates no identity row');
 
 select is(
   (select count(*) from public.dev_member_count_events e
     where e.contact_id = (select contact_id from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'fresh@example.test')),
   0::bigint,
-  'linking an unknown address records no member count event');
+  'refusing an unknown address records no member count event');
 
 select is(
   (select count(*) from public.dev_contributors c
     where c.contact_id = (select contact_id from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'fresh@example.test')),
   0::bigint,
-  'linking an unknown address creates no contributor');
+  'refusing an unknown address creates no contributor');
 
 select is(
   (select count(*) from public.dev_people p
     where p.contact_id = (select contact_id from public.dev_contact_identities where identity_kind = 'email' and normalized_value = 'fresh@example.test')),
   0::bigint,
-  'linking an unknown address creates no person record');
+  'refusing an unknown address creates no person record');
 
 -- ---------------------------------------------------------------------------
 -- 7. A receipt proves the address it was sent to, and no other.
@@ -427,8 +441,8 @@ with right_address as materialized (
     p_code_hash := 'ch-G', p_binding_code_hash := 'bc-G', p_binding_expires_at := now() + interval '10 minutes'))
 select is(right_address.ok, true, 'receipt: the receipt still confirms the address it was issued for') from right_address
 union all
-select is(right_address.outcome, 'verified', 'receipt: the correct address verifies the challenge') from right_address
-union all
+select is(right_address.outcome, 'verified', 'receipt: the correct address verifies the challenge') from right_address;
+
 select is(
   (select resolved_contact_id from public.dev_rein_link_email_challenges
     where receipt_token_hash = 'rcpt-G'),
@@ -492,7 +506,7 @@ values (
   '00000000-0000-4000-8000-0000000000e9', 'slack', 'W-EXP', 'U-EXP', 'chan-exp',
   'email_verified', 'tok-expiry-session',
   (select contact_id from public.dev_contact_identities
-    where identity_kind = 'email' and normalized_value = 'alpha@example.test'),
+    where identity_kind = 'email' and normalized_value = 'expiry@example.test'),
   now(), 'expiry-binding-code',
   clock_timestamp() + interval '1 second', clock_timestamp() + interval '1 second');
 
@@ -529,7 +543,7 @@ insert into public.dev_rein_platform_links(
 values (
   'slack', 'W-EXP', 'U-EXP-2', 'chan-exp',
   (select contact_id from public.dev_contact_identities
-    where identity_kind = 'email' and normalized_value = 'alpha@example.test'),
+    where identity_kind = 'email' and normalized_value = 'expiry@example.test'),
   'verified', clock_timestamp() + interval '1 second', now(), 'expiry-fixture');
 
 select pg_sleep(2);

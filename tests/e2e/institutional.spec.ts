@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
 
 const institutionalRoutes = [
-  { path: '/', heading: /AI Agents should enlarge human possibility/, title: 'Rein Protocol Foundation' },
-  { path: '/mission', heading: 'Build benefit. Prevent catastrophe.', title: 'Mission' },
-  { path: '/programs', heading: 'Knowledge becomes public capacity.', title: 'Programs and Public Work' },
-  { path: '/governance', heading: 'Power should leave a record.', title: 'Governance and Stewardship' },
-  { path: '/giving', heading: 'Native to the Agent economy. Bound to charitable law.', title: 'Giving Architecture' },
+  { path: '/', heading: 'Making AI agents safer for people and society.', title: 'Rein Protocol Foundation' },
+  { path: '/mission', heading: 'Making AI agents safer for people and society.', title: 'Mission' },
+  { path: '/programs', heading: 'Meet in person. Keep learning together online.', title: 'Programs and Public Work' },
+  { path: '/governance', heading: 'AI agents help run Rein. People remain responsible.', title: 'Governance and Stewardship' },
+  { path: '/giving', heading: 'Support AI agent safety and community.', title: 'Giving' },
 ] as const
 
 test.describe('institutional site', () => {
@@ -17,6 +17,40 @@ test.describe('institutional site', () => {
       await expect(page.locator('main#main-content')).toBeVisible()
     })
   }
+
+  test('home hero communicates the nonprofit mission and work', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.home-hero .eyebrow')).toHaveText('A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY')
+    await expect(page.locator('#home-title')).toHaveText('Making AI agents safer for people and society.')
+    await expect(page.locator('.home-hero__mission')).toHaveText('We bring people together and support open-source projects and research to make AI agents safer.')
+  })
+
+  test('page titles inherit the shared leading token', async ({ page }) => {
+    for (const path of ['/', '/mission', '/community']) {
+      await page.goto(path)
+      const heading = page.getByRole('heading', { level: 1 })
+      await expect(heading).toBeVisible()
+
+      const metrics = await heading.evaluate(element => {
+        const style = getComputedStyle(element)
+        return {
+          leading: parseFloat(style.lineHeight) / parseFloat(style.fontSize),
+          token: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--type-page-title-leading')),
+        }
+      })
+      expect(metrics.token).toBeGreaterThanOrEqual(1.1)
+      expect(metrics.leading).toBeCloseTo(metrics.token, 4)
+
+      const updatedLeading = metrics.token + 0.15
+      await page.evaluate(value => {
+        document.documentElement.style.setProperty('--type-page-title-leading', String(value))
+      }, updatedLeading)
+      await expect.poll(() => heading.evaluate(element => {
+        const style = getComputedStyle(element)
+        return parseFloat(style.lineHeight) / parseFloat(style.fontSize)
+      })).toBeCloseTo(updatedLeading, 4)
+    }
+  })
 
   test('home remains Mission-first while exposing Community', async ({ page }) => {
     await page.goto('/')

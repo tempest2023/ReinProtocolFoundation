@@ -137,7 +137,7 @@ describe('public community forms', () => {
     expect(screen.getByRole('combobox', { name: /Material type/ })).toHaveDisplayValue('Select a material type')
     expect(screen.getByRole('textbox', { name: /^Language/ })).toHaveAttribute('placeholder', 'e.g. English, 中文, Spanish')
     expect(screen.getByRole('textbox', { name: /^Description/ })).toHaveAttribute('maxlength', '1000')
-    expect(screen.getByRole('textbox', { name: /^Description/ })).toHaveAttribute('placeholder', expect.stringMatching(/AI Agent learning or technical discussion/))
+    expect(screen.getByRole('textbox', { name: /^Description/ })).toHaveAttribute('placeholder', expect.stringMatching(/what members can learn about AI agents/))
     expect(screen.queryByRole('textbox', { name: /How is this relevant/ })).not.toBeInTheDocument()
     expect(container.querySelector('input[type="file"]')).toBeNull()
   })

@@ -11,7 +11,7 @@ export default function ContributorApplicationPage() {
     <CommunityPageHero
       eyebrow="Community / Apply"
       title="Apply as a Contributor."
-      lead="Most public resources and events are open to everyone. Apply if you want to organize activities, join ongoing work, or take on deeper responsibility."
+      lead="Most public resources and events are open to everyone. Apply to help organize events, lead online presentations, develop shared learning materials, or offer mentoring and career guidance."
     />
     <section className="community-section">
       <div className="page-shell application-form">

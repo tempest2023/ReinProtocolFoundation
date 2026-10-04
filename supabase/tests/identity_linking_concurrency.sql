@@ -17,6 +17,9 @@
 --   same-tuple-concurrent  two sessions on one platform tuple resolve to two
 --                          different contacts; exactly one wins, the loser is
 --                          refused, and the tuple keeps the winner's contact.
+--   same-contact-concurrent two sessions on different Slack tuples resolve to
+--                          one contact; exactly one wins and the contact keeps
+--                          only one verified Slack link.
 --   revoke-then-complete   a revocation that commits first makes a later
 --                          completion refuse, and it leaves the tombstone.
 
@@ -36,13 +39,19 @@ create table if not exists public.rein_concurrency_queue (
 insert into public.dev_community_contacts(id, first_source)
 values
   ('00000000-0000-4000-8000-00000000c001', 'manual'),
-  ('00000000-0000-4000-8000-00000000c002', 'manual')
+  ('00000000-0000-4000-8000-00000000c002', 'manual'),
+  ('00000000-0000-4000-8000-00000000c004', 'manual'),
+  ('00000000-0000-4000-8000-00000000c005', 'manual'),
+  ('00000000-0000-4000-8000-00000000c006', 'manual')
 on conflict do nothing;
 
 insert into public.dev_contact_identities(contact_id, identity_kind, normalized_value)
 values
   ('00000000-0000-4000-8000-00000000c001', 'email', 'concurrent-a@example.test'),
-  ('00000000-0000-4000-8000-00000000c002', 'email', 'concurrent-b@example.test')
+  ('00000000-0000-4000-8000-00000000c002', 'email', 'concurrent-b@example.test'),
+  ('00000000-0000-4000-8000-00000000c004', 'email', 'concurrent-d@example.test'),
+  ('00000000-0000-4000-8000-00000000c005', 'email', 'concurrent-e@example.test'),
+  ('00000000-0000-4000-8000-00000000c006', 'email', 'concurrent-f@example.test')
 on conflict do nothing;
 
 -- One session whose binding code is shared by both racing back ends.
@@ -57,15 +66,21 @@ values
   -- Two sessions on the SAME platform tuple, each already bound to a different
   -- contact, so both are fully qualified and only the tuple lock can separate them.
   ('00000000-0000-4000-8000-00000000d002', 'slack', 'W-RACE', 'U-RACE-2', 'chan-race',
-   'email_verified', 'race-tok-tuple-a', '00000000-0000-4000-8000-00000000c001', now(),
+   'email_verified', 'race-tok-tuple-a', '00000000-0000-4000-8000-00000000c002', now(),
    'race-binding-tuple-a', now() + interval '10 minutes', now() + interval '1 hour'),
   ('00000000-0000-4000-8000-00000000d003', 'slack', 'W-RACE', 'U-RACE-2', 'chan-race',
-   'email_verified', 'race-tok-tuple-b', '00000000-0000-4000-8000-00000000c002', now(),
+   'email_verified', 'race-tok-tuple-b', '00000000-0000-4000-8000-00000000c004', now(),
    'race-binding-tuple-b', now() + interval '10 minutes', now() + interval '1 hour'),
   -- A session used to establish a link that is then revoked before completion.
   ('00000000-0000-4000-8000-00000000d004', 'slack', 'W-RACE', 'U-RACE-4', 'chan-race',
-   'email_verified', 'race-tok-revoke', '00000000-0000-4000-8000-00000000c001', now(),
-  'race-binding-revoke', now() + interval '10 minutes', now() + interval '1 hour')
+   'email_verified', 'race-tok-revoke', '00000000-0000-4000-8000-00000000c005', now(),
+   'race-binding-revoke', now() + interval '10 minutes', now() + interval '1 hour'),
+  ('00000000-0000-4000-8000-00000000d005', 'slack', 'W-RACE', 'U-RACE-6A', 'chan-race',
+   'email_verified', 'race-tok-contact-a', '00000000-0000-4000-8000-00000000c006', now(),
+   'race-binding-contact-a', now() + interval '10 minutes', now() + interval '1 hour'),
+  ('00000000-0000-4000-8000-00000000d006', 'slack', 'W-RACE', 'U-RACE-6B', 'chan-race',
+   'email_verified', 'race-tok-contact-b', '00000000-0000-4000-8000-00000000c006', now(),
+   'race-binding-contact-b', now() + interval '10 minutes', now() + interval '1 hour')
 on conflict do nothing;
 
 -- ---------------------------------------------------------------------------
@@ -120,7 +135,7 @@ insert into public.dev_rein_platform_links(
   platform, platform_workspace_id, platform_user_id, platform_channel_id, contact_id,
   status, validity_expires_at, verified_at, verified_by)
 values
-  ('slack', 'W-RACE', 'U-RACE-2', 'chan-race', '00000000-0000-4000-8000-00000000c001',
+  ('slack', 'W-RACE', 'U-RACE-2', 'chan-race', '00000000-0000-4000-8000-00000000c002',
    'verified', now() + interval '10 years', now(), 'concurrency-fixture')
 on conflict do nothing;
 
@@ -129,7 +144,7 @@ insert into public.dev_rein_platform_links(
   platform, platform_workspace_id, platform_user_id, platform_channel_id, contact_id,
   status, validity_expires_at, verified_at, verified_by)
 values
-  ('slack', 'W-RACE', 'U-RACE-4', 'chan-race', '00000000-0000-4000-8000-00000000c001',
+  ('slack', 'W-RACE', 'U-RACE-4', 'chan-race', '00000000-0000-4000-8000-00000000c005',
    'verified', now() + interval '10 years', now(), 'concurrency-fixture')
 on conflict do nothing;
 

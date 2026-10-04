@@ -652,6 +652,7 @@ async function runConcurrencyPhase() {
 
   results.push(await raceSharedBindingCode());
   results.push(await raceSameTupleDifferentContacts());
+  results.push(await raceDifferentTuplesSameContact());
   results.push(await revokeThenComplete());
   results.push(await revokeDuringGuardedWrite());
 
@@ -782,11 +783,72 @@ select * from public.dev_rein_complete_platform_link(
     !secondExit.timedOut &&
     successes === 1 &&
     Number(rows) === 1 &&
-    kept === '00000000-0000-4000-8000-00000000c001';
+    kept === '00000000-0000-4000-8000-00000000c002';
   return {
     name: 'same-tuple-concurrent',
     pass,
     detail: `observedLock=${observed} first=${firstExit.status} second=${secondExit.status} successes=${successes} rows=${rows} kept=${kept}`,
+  };
+}
+
+/**
+ * Two different Slack tuples complete for one contact at the same time. Tuple
+ * locks alone cannot serialize this case, so the contact-scoped advisory lock
+ * must let one insert commit before the other re-checks and refuses.
+ */
+async function raceDifferentTuplesSameContact() {
+  const held = psqlSession(`
+begin;
+select * from public.dev_rein_complete_platform_link(
+  p_session_token_hash := 'race-tok-contact-a',
+  p_binding_code_hash := 'race-binding-contact-a',
+  p_validity := interval '10 years',
+  p_platform := 'slack', p_workspace_id := 'W-RACE', p_platform_user_id := 'U-RACE-6A',
+  p_actor_type := 'system');
+select pg_sleep(8);
+commit;
+`);
+  await sleep(1500);
+
+  const blocked = psqlSession(`
+select * from public.dev_rein_complete_platform_link(
+  p_session_token_hash := 'race-tok-contact-b',
+  p_binding_code_hash := 'race-binding-contact-b',
+  p_validity := interval '10 years',
+  p_platform := 'slack', p_workspace_id := 'W-RACE', p_platform_user_id := 'U-RACE-6B',
+  p_actor_type := 'system');
+`);
+  const observed = await awaitBlockedBackend(15000);
+  if (!observed) blocked.kill('SIGKILL');
+
+  const [firstExit, secondExit] = await Promise.all([waitForExit(held, 60000), waitForExit(blocked, 60000)]);
+  const firstLinked = /t\|linked\|/.test(firstExit.stdout) || /^linked$/m.test(firstExit.stdout);
+  const secondRefused = /f\|contact_conflict\|/.test(secondExit.stdout);
+  const rows = psqlValue(
+    `select count(*) from public.dev_rein_platform_links
+      where platform = 'slack' and contact_id = '00000000-0000-4000-8000-00000000c006'
+        and status = 'verified'`,
+    database,
+  );
+  const kept = psqlValue(
+    `select platform_user_id from public.dev_rein_platform_links
+      where platform = 'slack' and contact_id = '00000000-0000-4000-8000-00000000c006'
+        and status = 'verified'`,
+    database,
+  );
+
+  const pass =
+    observed &&
+    !firstExit.timedOut &&
+    !secondExit.timedOut &&
+    firstLinked &&
+    secondRefused &&
+    Number(rows) === 1 &&
+    kept === 'U-RACE-6A';
+  return {
+    name: 'same-contact-concurrent',
+    pass,
+    detail: `observedLock=${observed} first=${firstExit.status} second=${secondExit.status} linked=${firstLinked} refused=${secondRefused} rows=${rows} kept=${kept}`,
   };
 }
 

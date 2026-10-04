@@ -144,4 +144,17 @@ describe('confirmLinkEmail', () => {
     expect(state.status).toBe('error')
     expect(state.message).not.toContain('binding_expired')
   })
+
+  it('requires administrator registration for an address outside the community records', async () => {
+    domain.confirmLinkEmailDomain.mockResolvedValue({ ok: false, reason: 'contact_not_registered' })
+    const state = await confirmLinkEmail(
+      IDLE,
+      form({ session_token: 'rls_session', receipt_token: 'rle_receipt', email: 'new@example.test' }),
+    )
+
+    expect(state.status).toBe('error')
+    expect(state.message).toContain('not registered')
+    expect(state.message).toContain('administrator')
+    expect(state.code).toBeUndefined()
+  })
 })

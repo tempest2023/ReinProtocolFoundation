@@ -160,6 +160,7 @@ export const CALLER_REASONS = [
   'ineligible_actor',
   'contact_ambiguous',
   'contact_conflict',
+  'contact_not_registered',
   'identity_revoked',
   'binding_not_verified',
   'binding_code_invalid',

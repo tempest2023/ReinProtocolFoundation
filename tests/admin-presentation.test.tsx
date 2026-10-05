@@ -19,13 +19,24 @@ describe('administration presentation', () => {
     render(<AdminNavigation />)
 
     const navigation = screen.getByRole('navigation', { name: 'Administration' })
-    for (const label of ['Overview', 'Participants', 'Applications', 'Contributors', 'People', 'Learn', 'Gather', 'Review', 'Guide', 'Settings', 'Audit']) {
+    for (const label of ['Overview', 'Contacts', 'Participants', 'Applications', 'Contributors', 'People', 'Learn', 'Gather', 'Review', 'Guide', 'Settings', 'Audit']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(screen.getByRole('link', { name: 'Gather' })).toHaveAttribute('aria-current', 'page')
     expect(navigation.querySelectorAll('[aria-current="page"]')).toHaveLength(1)
     expect(screen.queryByRole('link', { name: 'Resource Review' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Meeting Guide' })).not.toBeInTheDocument()
+  })
+
+  it('keeps direct contact authorization inside the authenticated admin surface', () => {
+    const contacts = readFileSync('app/admin/(dashboard)/contacts/page.tsx', 'utf8')
+    const actions = readFileSync('app/admin/actions.ts', 'utf8')
+
+    expect(contacts).toContain('Direct registration without email verification')
+    expect(contacts).toContain('actionId="set_contact_roles"')
+    expect(contacts).toContain("service.from('rein_platform_links')")
+    expect(actions).toContain("service.rpc('admin_set_contact_roles'")
+    expect(actions).toContain('p_actor_id: user.id')
   })
 
   it('keeps the admin shell responsive while dynamic sections stream', () => {
@@ -73,5 +84,28 @@ describe('administration presentation', () => {
     const feedback = await screen.findByRole('alert')
     expect(feedback).toHaveTextContent('We could not complete this action. Review the fields and try again.')
     expect(feedback).toHaveFocus()
+  })
+
+  it('can reset an authorization form from refreshed server data without losing feedback', async () => {
+    mocks.runAdminFormAction.mockResolvedValue({ status: 'success', message: '' })
+    const { rerender } = render(
+      <AdminForm actionId="save_setting" resetKey="active" successMessage="Authorization updated.">
+        <label>Role<input name="role" defaultValue="Director" /></label>
+        <AdminSubmitButton>Save authorization</AdminSubmitButton>
+      </AdminForm>,
+    )
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Role' }), { target: { value: 'Changed locally' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save authorization' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Authorization updated.')
+    rerender(
+      <AdminForm actionId="save_setting" resetKey="inactive" successMessage="Authorization updated.">
+        <label>Role<input name="role" defaultValue="Former Director" /></label>
+        <AdminSubmitButton>Save authorization</AdminSubmitButton>
+      </AdminForm>,
+    )
+    expect(screen.getByRole('textbox', { name: 'Role' })).toHaveValue('Former Director')
+    expect(screen.getByRole('status')).toHaveTextContent('Authorization updated.')
   })
 })

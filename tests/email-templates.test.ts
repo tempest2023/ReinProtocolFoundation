@@ -3,6 +3,7 @@ import {
   automaticRejectionTemplate,
   contributorVerificationTemplate,
   conversationInvitationTemplate,
+  identityLinkReceiptTemplate,
   participantConfirmationTemplate,
   resourceUpdateTemplate,
 } from '@/lib/email-templates'
@@ -18,6 +19,17 @@ describe('transactional email templates', () => {
     expect(html).toContain('not a traditional interview')
     expect(html).toContain('will not exceed 30 minutes')
     expect(html).toContain('do not record or automatically transcribe')
+  })
+
+  it('renders identity receipts in the Rein brand and explains where the code appears', () => {
+    const html = identityLinkReceiptTemplate('https://rein-protocol.org/community/link/confirm?receipt=receipt_1&session=session_1')
+    expect(html).toContain('REIN PROTOCOL')
+    expect(html).toContain('welcome-golden-gate-cover.jpg')
+    expect(html).toContain('background-color:#e8ddc8')
+    expect(html).toContain('Confirm on the Rein website')
+    expect(html).toContain('The email does not contain the binding code')
+    expect(html).toContain('page will show a short one-time code')
+    expect(html).toContain('receipt=receipt_1&amp;session=session_1')
   })
 
   it('offers human review and keeps submitters out of resource attribution', () => {

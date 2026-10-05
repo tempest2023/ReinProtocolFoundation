@@ -1,6 +1,5 @@
 'use server'
 import { headers } from 'next/headers'
-import { publicEnv } from '@/lib/env'
 import { hashedRateIdentifier, isPlausibleEmail } from '@/lib/security'
 import { identityLinkReceiptTemplate } from '@/lib/email-templates'
 import { sendTransactionalEmail } from '@/lib/email'
@@ -22,6 +21,15 @@ const GENERIC_SENT =
 
 const INVALID_SESSION =
   'This page is no longer valid. Ask the Rein Agent in your chat platform for a new link and start again.'
+
+const IDENTITY_LINK_PUBLIC_ORIGIN = 'https://rein-protocol.org'
+
+function identityLinkReceiptUrl(receiptToken: string, sessionToken: string): string {
+  const url = new URL('/community/link/confirm', IDENTITY_LINK_PUBLIC_ORIGIN)
+  url.searchParams.set('receipt', receiptToken)
+  url.searchParams.set('session', sessionToken)
+  return url.toString()
+}
 
 async function requestIpHash(): Promise<string | null> {
   const requestHeaders = await headers()
@@ -66,7 +74,7 @@ export async function requestLinkEmail(
     return { status: 'error', message: INVALID_SESSION }
   }
 
-  const receiptUrl = `${publicEnv.siteUrl}/community/link/confirm?receipt=${encodeURIComponent(challenge.receiptToken)}&session=${encodeURIComponent(sessionToken)}`
+  const receiptUrl = identityLinkReceiptUrl(challenge.receiptToken, sessionToken)
   try {
     await sendTransactionalEmail({
       to: email,
@@ -119,6 +127,12 @@ export async function confirmLinkEmail(
       return {
         status: 'error',
         message: 'This address matches more than one community record, so a person needs to review it. We have kept the request.',
+      }
+    }
+    if (confirmed.reason === 'contact_not_registered') {
+      return {
+        status: 'error',
+        message: 'This email address is not registered with the Rein community. Contact an administrator to register before linking your chat account.',
       }
     }
     if (confirmed.reason === 'binding_code_invalid') {

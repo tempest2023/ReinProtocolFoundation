@@ -75,6 +75,9 @@ describe('requestLinkEmail', () => {
     const sent = vi.mocked(sendTransactionalEmail).mock.calls[0][0] as { to: string; html: string }
     expect(sent.to).toBe('member@example.test')
     expect(sent.html).toContain('rle_secret_receipt')
+    expect(sent.html).toContain('https://rein-protocol.org/community/link/confirm?receipt=rle_secret_receipt&amp;session=rls_session')
+    expect(sent.html).not.toContain('localhost')
+    expect(sent.html).not.toContain('127.0.0.1')
   })
 
   it('answers a malformed address without a lookup or a send', async () => {
@@ -143,5 +146,18 @@ describe('confirmLinkEmail', () => {
     )
     expect(state.status).toBe('error')
     expect(state.message).not.toContain('binding_expired')
+  })
+
+  it('requires administrator registration for an address outside the community records', async () => {
+    domain.confirmLinkEmailDomain.mockResolvedValue({ ok: false, reason: 'contact_not_registered' })
+    const state = await confirmLinkEmail(
+      IDLE,
+      form({ session_token: 'rls_session', receipt_token: 'rle_receipt', email: 'new@example.test' }),
+    )
+
+    expect(state.status).toBe('error')
+    expect(state.message).toContain('not registered')
+    expect(state.message).toContain('administrator')
+    expect(state.code).toBeUndefined()
   })
 })

@@ -474,6 +474,40 @@
   margin-bottom: .35rem;
 }
 
+.identity-link-result h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 400;
+  line-height: 1.08;
+}
+
+.identity-link-result > p:not(.eyebrow) {
+  max-width: 38rem;
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.identity-link-code {
+  display: block;
+  padding: clamp(1rem, 3vw, 1.5rem) 0;
+  overflow-wrap: anywhere;
+  color: var(--accent-dark);
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: clamp(1.2rem, 3.5vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: .035em;
+  line-height: 1.4;
+  user-select: all;
+}
+
+.identity-link-result__note {
+  font-size: .88rem;
+}
+
 .application-form {
   max-width: 58rem;
 }

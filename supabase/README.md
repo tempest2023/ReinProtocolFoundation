@@ -11,3 +11,11 @@ Development and production share one Supabase project but never share applicatio
 Every future database migration must apply the same structural change to both prefixes in one transaction. Prefer a loop over `array['dev_', 'prod_']` for mechanical changes. When SQL cannot be safely parameterized, write both explicit statements in the same migration. Do not change only one environment table set.
 
 Foreign keys, uniqueness, checks, and RLS remain local to each environment. There are no cross-environment constraints or data-copy triggers.
+
+## Branded authentication emails
+
+The six Auth templates use Rein's common email design. Sources, generation instructions,
+Supabase template variables, and hosted SMTP setup are documented in
+[`docs/outreach/supabase-auth-email.md`](../docs/outreach/supabase-auth-email.md).
+Local templates are configured in this directory's `config.toml`; hosted templates must be
+updated separately without pushing localhost configuration into the shared project.

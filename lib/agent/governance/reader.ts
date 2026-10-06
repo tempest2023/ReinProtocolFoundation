@@ -14,7 +14,7 @@
 //     source_note)                               -- human entered, integer minor units
 //   public.<env>_community_contacts(id)
 //   public.<env>_contributors(id, contact_id, status)
-//   public.<env>_people(contact_id, contributor_id, person_type)
+//   public.<env>_people(contact_id, contributor_id, person_type, authorization_status)
 //
 // Access model: those tables enable RLS, grant nothing to `anon` or `authenticated` and are
 // readable by `service_role` only, so this reader authenticates with the server-only secret key
@@ -38,8 +38,9 @@
 //   answer is an operator-entered figure, not a payment instruction.
 // - Freshness and deadline rules stay with the caller. The one clock read here is the expiry
 //   comparison on `validity_expires_at`, because a live validity window is part of the grant.
-// - `people.person_type` is the only role source used. Free-text `people.role` and the publication
-//   state are never selected, because neither establishes eligibility (R02).
+// - Director eligibility requires both `people.person_type = 'director'` and an active
+//   `authorization_status`. Free-text `people.role` and the publication state are never selected,
+//   because neither establishes eligibility (R02).
 
 import { publicEnv } from '@/lib/env';
 import { databaseEnvironment } from '@/lib/supabase/database-names';
@@ -76,7 +77,7 @@ export interface MemberResolution {
   matchedBy: 'platform_link' | null;
   /** True only for a Contributor row whose `status` is exactly `'active'`. */
   isActiveContributor: boolean;
-  /** Derived from `people.person_type = 'director'` via `contact_id` or `contributor_id`. */
+  /** Derived from an active director record via `contact_id` or `contributor_id`. */
   isDirector: boolean;
   /** HTTP status for a provider failure, otherwise null. */
   httpStatus: number | null;
@@ -148,6 +149,7 @@ const ISO_INSTANT_PATTERN = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?
 const LINK_STATUSES = Object.freeze(['verified', 'revoked']);
 const CONTRIBUTOR_STATUSES = Object.freeze(['active', 'inactive']);
 const PERSON_TYPES = Object.freeze(['director', 'core_contributor']);
+const PERSON_AUTHORIZATION_STATUSES = Object.freeze(['active', 'inactive']);
 
 /**
  * Supabase serves two generations of server key and they travel differently. A legacy
@@ -313,7 +315,7 @@ export function createFoundationDbReader(config: FoundationDbReaderConfig): Foun
 
   /**
    * The member-record proof a resolved binding rests on: the contact exists exactly once, its
-   * optional Contributor row is consistent, and `people.person_type` decides the director flag.
+   * optional Contributor row is consistent, and an active director record decides the director flag.
    */
   const resolveMemberRecord = async (
     contactId: string,
@@ -373,7 +375,10 @@ export function createFoundationDbReader(config: FoundationDbReaderConfig): Foun
     // A director may be linked through the contact or through the Contributor record, so both keys
     // are queried. `people` is unique on `contact_id` and on `contributor_id`, so at most two rows
     // can match.
-    const peopleParams: Record<string, string> = { select: 'contact_id,contributor_id,person_type', limit: '3' };
+    const peopleParams: Record<string, string> = {
+      select: 'contact_id,contributor_id,person_type,authorization_status',
+      limit: '3',
+    };
     if (contributorId) peopleParams.or = `(contact_id.eq.${contactId},contributor_id.eq.${contributorId})`;
     else peopleParams.contact_id = `eq.${contactId}`;
     const people = await requestRows(`${tablePrefix}people`, peopleParams);
@@ -395,12 +400,22 @@ export function createFoundationDbReader(config: FoundationDbReaderConfig): Foun
       if (typeof personType !== 'string' || !PERSON_TYPES.includes(personType)) {
         return { ok: false, result: memberFailure('member_record_malformed', 'person_type_malformed') };
       }
+      const authorizationStatus = rawPerson.authorization_status;
+      if (
+        typeof authorizationStatus !== 'string'
+        || !PERSON_AUTHORIZATION_STATUSES.includes(authorizationStatus)
+      ) {
+        return {
+          ok: false,
+          result: memberFailure('member_record_malformed', 'person_authorization_status_malformed'),
+        };
+      }
       const matchesContact = personContactId === contactId;
       const matchesContributor = contributorId !== null && personContributorId === contributorId;
       if (!matchesContact && !matchesContributor) {
         return { ok: false, result: memberFailure('member_record_malformed', 'person_row_out_of_scope') };
       }
-      if (personType === 'director') isDirector = true;
+      if (personType === 'director' && authorizationStatus === 'active') isDirector = true;
     }
 
     return { ok: true, isActiveContributor, isDirector };

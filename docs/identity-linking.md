@@ -69,6 +69,10 @@ organization, the session enters `registration_required`, no contact or identity
 the person is directed to an administrator. Email control alone never registers a community member
 and grants no membership, Contributor status, role, or governance right.
 
+Administrators register contacts and may directly set Contributor or Director authorization at
+`/admin/contacts`. That explicit administrative path bypasses mailbox verification and is audited;
+it is separate from the public linking flow and is never available to the Agent or a chat user.
+
 ## Authority, scopes, and re-derivation
 
 - Private governance reads and all writes go through `POST /api/agent/operations`, using a
@@ -77,6 +81,8 @@ and grants no membership, Contributor status, role, or governance right.
 - Human eligibility is **re-derived on the server on every write**. A caller cannot assert a role,
   weight, or eligibility, and an earlier confirmed result is not reused as authority for a later
   operation.
+- Director eligibility requires an active Director authorization record. Public-profile publication
+  state is independent and cannot grant or preserve governance access.
 - The Agent never sends a raw platform user identifier as authority. A platform account identifier
   is an input to be matched against the binding record, never a claim that the caller has already
   been proven to be that person.

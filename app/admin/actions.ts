@@ -17,6 +17,7 @@ import { createVerificationToken, isGithubUsername, isPlausibleEmail, normalizeE
 function value(formData: FormData, key: string) { return String(formData.get(key) ?? '').trim() }
 function nullable(formData: FormData, key: string) { return value(formData, key) || null }
 function assertSlug(slug: string) { if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Use a lowercase, hyphenated slug.') }
+function assertUuid(id: string) { if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) throw new Error('Contact ID is invalid.') }
 function assertExternalUrl(url: string, httpsOnly = false) {
   let parsed: URL
   try { parsed = new URL(url) } catch { throw new Error('Use a complete external URL.') }
@@ -68,6 +69,7 @@ export async function mergeContacts(formData: FormData) {
   if (error) throw error
   await audit('contact.merged', 'community_contact', target, { source_contact_id: source })
   revalidatePath('/admin/participants')
+  revalidatePath('/admin/contacts')
 }
 
 export async function addDirectMember(formData: FormData) {
@@ -82,7 +84,48 @@ export async function addDirectMember(formData: FormData) {
   if (error) throw error
   await audit('contact.added', 'community_contact', data?.[0]?.contact_id, { kind, source })
   revalidatePath('/admin/participants')
+  revalidatePath('/admin/contacts')
   revalidatePath('/admin')
+}
+
+export async function setContactRoles(formData: FormData) {
+  const { user, service } = await requireAdmin()
+  const contactId = value(formData, 'contact_id')
+  const contributorStatus = value(formData, 'contributor_status')
+  const directorStatus = value(formData, 'director_status')
+  assertUuid(contactId)
+  if (!['active', 'inactive'].includes(contributorStatus)) throw new Error('Contributor status is invalid.')
+  if (!['active', 'inactive'].includes(directorStatus)) throw new Error('Director status is invalid.')
+
+  const directorDisplayName = value(formData, 'director_display_name')
+  const directorSlug = value(formData, 'director_slug')
+  const directorRole = value(formData, 'director_role')
+  if (directorStatus === 'active') {
+    if (!directorDisplayName || !directorSlug || !directorRole) throw new Error('Director name, slug, and role are required when enabling Director access.')
+    assertSlug(directorSlug)
+  }
+
+  const { data, error } = await service.rpc('admin_set_contact_roles', {
+    p_contact_id: contactId,
+    p_contributor_status: contributorStatus,
+    p_director_status: directorStatus,
+    p_director_display_name: directorDisplayName,
+    p_director_slug: directorSlug,
+    p_director_role: directorRole,
+    p_actor_id: user.id,
+  })
+  if (error) {
+    if (error.message.includes('contact_not_found')) throw new Error('Contact was not found or has been deleted.')
+    if (error.message.includes('contact_has_non_director_profile')) throw new Error('Contact already has a non-Director people profile. Resolve that profile before enabling Director access.')
+    if (error.message.includes('director_profile_required')) throw new Error('Director name, slug, and role are required when enabling Director access.')
+    if (error.code === '23505') throw new Error('Director slug is already in use.')
+    throw error
+  }
+  if (!data?.[0]?.contact_id) throw new Error('Could not update contact roles.')
+
+  revalidatePath('/admin/contacts')
+  revalidatePath('/admin/contributors')
+  revalidatePath('/admin/people')
 }
 
 export async function setApplicationStatus(formData: FormData) {
@@ -393,6 +436,7 @@ export type AdminFormActionId =
   | 'review_resource_submission'
   | 'save_agent_settings'
   | 'save_setting'
+  | 'set_contact_roles'
   | 'set_application_status'
   | 'set_event_publication'
   | 'set_person_publication'
@@ -422,6 +466,7 @@ const adminFormActions: Record<AdminFormActionId, (formData: FormData) => Promis
   review_resource_submission: reviewResourceSubmission,
   save_agent_settings: saveAgentSettings,
   save_setting: saveSetting,
+  set_contact_roles: setContactRoles,
   set_application_status: setApplicationStatus,
   set_event_publication: setEventPublication,
   set_person_publication: setPersonPublication,
@@ -435,7 +480,7 @@ function safeAdminFormError(error: unknown) {
   const fallback = 'We could not complete this action. Review the fields and try again.'
   if (!(error instanceof Error)) return fallback
   if (process.env.NODE_ENV === 'development') return error.message
-  return /^(A |Alt text|An approval|Application|Choose|Confirm|Contributor|Core Contributors|Could not|Directors|Enter|Event|Images|Invalid|Nominating|Only|Partner|Select|This|Use)/.test(error.message)
+  return /^(A |Alt text|An approval|Application|Choose|Confirm|Contact|Contributor|Core Contributors|Could not|Director|Directors|Enter|Event|Images|Invalid|Nominating|Only|Partner|Select|This|Use)/.test(error.message)
     ? error.message
     : fallback
 }

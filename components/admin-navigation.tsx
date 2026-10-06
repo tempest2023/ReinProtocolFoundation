@@ -9,6 +9,7 @@ const groups = [
     label: 'Community',
     links: [
       ['/admin', 'Overview'],
+      ['/admin/contacts', 'Contacts'],
       ['/admin/participants', 'Participants'],
       ['/admin/applications', 'Applications'],
       ['/admin/contributors', 'Contributors'],

@@ -30,7 +30,7 @@ I can send the agenda for an asynchronous review; if a conversation is easier, w
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founder & Board Chair
+Founding Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work.
@@ -58,7 +58,7 @@ A brief reply about donation interest would be very helpful. I can share a propo
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founder & Board Chair
+Founding Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work. We are not offering a commercial investment or token return. Legal and fundraising arrangements are still being established.
@@ -82,7 +82,7 @@ I can send the outline for written feedback, or we could spend 15 minutes discus
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founder & Board Chair
+Founding Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work.
@@ -106,7 +106,7 @@ A reply indicating which option is feasible would help us plan. If useful, could
 Explore the Rein community: https://rein-protocol.org
 
 Tempest
-Founder & Board Chair
+Founding Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation is in preparation. The Agents and programs described are planned work. No company endorsement or affiliation is assumed.
@@ -130,7 +130,7 @@ Rein Protocol Foundation is in preparation. The Agents and programs described ar
 访问 Rein Protocol 官网: https://rein-protocol.org
 
 Tempest
-Founder & Board Chair
+Founding Board Chair
 Rein Protocol Foundation
 
 Rein Protocol Foundation 正在筹备中。Agents 和项目活动仍在建设阶段。

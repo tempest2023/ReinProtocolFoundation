@@ -1,6 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
+import { useAdminI18n } from '@/components/admin-i18n'
 
 export function AdminSubmitButton({
   children,
@@ -11,6 +12,7 @@ export function AdminSubmitButton({
   pendingLabel?: string
   className?: string
 }) {
+  const { t } = useAdminI18n()
   const { pending } = useFormStatus()
-  return <button className={className} type="submit" disabled={pending}>{pending ? pendingLabel : children}</button>
+  return <button className={className} type="submit" disabled={pending}>{pending ? t(pendingLabel) : children}</button>
 }

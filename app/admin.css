@@ -4,6 +4,66 @@
   background: #f3efe6;
 }
 
+.admin-shell:lang(zh-CN) {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+.admin-shell:lang(zh-CN) :is(h1, h2, h3, .admin-nav a, .admin-brand small) {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+.admin-language-control {
+  margin-block: 0 1rem;
+}
+
+.admin-language-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+}
+
+.admin-language-switcher button {
+  min-height: 2.25rem;
+  padding: .35rem .65rem;
+  border: 1px solid currentColor;
+  border-radius: .2rem;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: .75rem;
+  cursor: pointer;
+}
+
+.admin-language-switcher button[aria-pressed='true'] {
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: .25rem;
+}
+
+.admin-language-switcher button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.admin-language-switcher button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.admin-language-error {
+  max-width: 20rem;
+  margin-block: .5rem 0;
+  font-size: .75rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-login__panel > .admin-language-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .admin-dashboard {
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);
@@ -946,6 +1006,7 @@
     scrollbar-width: thin;
   }
   .admin-user { grid-column: 2; grid-row: 1; }
+  .admin-user .admin-language-control { margin-bottom: .4rem; }
   .admin-nav__group { display: contents; }
   .admin-nav__label { display: none; }
   .admin-nav a { min-height: 2.35rem; padding: .58rem .65rem; }

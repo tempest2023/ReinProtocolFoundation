@@ -1,5 +1,6 @@
 'use client'
 
+import { useAdminI18n } from '@/components/admin-i18n'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -38,6 +39,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 export function AdminNavigation() {
+  const { t } = useAdminI18n()
   const pathname = usePathname()
   const navRef = useRef<HTMLElement>(null)
 
@@ -51,13 +53,13 @@ export function AdminNavigation() {
   }, [pathname])
 
   return (
-    <nav className="admin-nav" aria-label="Administration" ref={navRef}>
+    <nav className="admin-nav" aria-label={t('Administration')} ref={navRef}>
       {groups.map((group) => (
         <div className="admin-nav__group" key={group.label}>
-          <p className="admin-nav__label">{group.label}</p>
+          <p className="admin-nav__label">{t(group.label)}</p>
           {group.links.map(([href, label]) => {
             const active = isActivePath(pathname, href)
-            return <Link href={href} key={href} aria-current={active ? 'page' : undefined}>{label}</Link>
+            return <Link href={href} key={href} aria-current={active ? 'page' : undefined}>{t(label)}</Link>
           })}
         </div>
       ))}

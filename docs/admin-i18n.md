@@ -1,8 +1,10 @@
 # Admin interface languages
 
 The administrator interface supports English (`en`, the default) and Simplified Chinese (`zh`).
-The language switch is available on the login page and in the dashboard sidebar, including its
-mobile layout. It preserves the current route and filters. The public website is unchanged.
+The native language dropdown is available on the login page and in the dashboard sidebar,
+including its mobile layout. It uses the website's typography, color tokens, and restrained
+underline styling, with keyboard support and a disabled state while saving. It preserves the
+current route and filters. The public website is unchanged.
 The dashboard's missing-record page also follows the selected language.
 
 The validated preference is stored for one year in the HTTP-only `rein_admin_locale` cookie,

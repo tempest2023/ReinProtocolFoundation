@@ -133,17 +133,45 @@ describe('administrator client translations', () => {
 
   it('switches language through the server action and identifies the current selection', async () => {
     renderLanguage(<AdminLanguageSwitcher />, 'en')
-    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true')
-    fireEvent.click(screen.getByRole('button', { name: '中文' }))
+    const select = screen.getByRole('combobox', { name: 'Interface language' })
+    expect(select).toHaveValue('en')
+    expect(within(select).getByRole('option', { name: '中文' })).toHaveAttribute('lang', 'zh-CN')
+    expect(screen.queryByRole('button', { name: 'English' })).not.toBeInTheDocument()
+    fireEvent.change(select, { target: { value: 'zh' } })
     await vi.waitFor(() => expect(mocks.setAdminLanguage).toHaveBeenCalledWith('zh'))
+  })
+
+  it('does not call the server when the saved language is selected again', () => {
+    renderLanguage(<AdminLanguageSwitcher />, 'en')
+    fireEvent.change(screen.getByRole('combobox', { name: 'Interface language' }), { target: { value: 'en' } })
+    expect(mocks.setAdminLanguage).not.toHaveBeenCalled()
+  })
+
+  it('disables the dropdown while saving and follows the server-rendered language', async () => {
+    let finishSwitch!: () => void
+    mocks.setAdminLanguage.mockReturnValue(new Promise<void>((resolve) => { finishSwitch = resolve }))
+    const { rerender } = renderLanguage(<AdminLanguageSwitcher />, 'en')
+    const select = screen.getByRole('combobox', { name: 'Interface language' })
+    fireEvent.change(select, { target: { value: 'zh' } })
+    await vi.waitFor(() => expect(select).toBeDisabled())
+    expect(select).toHaveAttribute('aria-busy', 'true')
+    await act(async () => { finishSwitch() })
+    rerender(<AdminI18nProvider language="zh"><AdminLanguageSwitcher /></AdminI18nProvider>)
+    const savedSelect = screen.getByRole('combobox', { name: '界面语言' })
+    expect(savedSelect).toHaveValue('zh')
+    expect(savedSelect).toBeEnabled()
+    expect(savedSelect).toHaveAttribute('aria-busy', 'false')
   })
 
   it('reports a failed switch without claiming that the language changed', async () => {
     mocks.setAdminLanguage.mockRejectedValue(new Error('offline'))
     renderLanguage(<AdminLanguageSwitcher />)
-    fireEvent.click(screen.getByRole('button', { name: 'English' }))
+    const select = screen.getByRole('combobox', { name: '界面语言' })
+    fireEvent.change(select, { target: { value: 'en' } })
     expect(await screen.findByRole('alert')).toHaveTextContent('语言切换失败，请重试。')
-    expect(screen.getByRole('button', { name: '中文' })).toHaveAttribute('aria-pressed', 'true')
+    expect(select).toHaveValue('zh')
+    expect(select).toBeEnabled()
+    expect(select).toHaveAccessibleDescription('语言切换失败，请重试。')
   })
 
   it('localizes action feedback, moves focus, and leaves the action ID intact', async () => {

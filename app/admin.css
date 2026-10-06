@@ -14,41 +14,70 @@
 }
 
 .admin-language-control {
-  margin-block: 0 1rem;
+  margin-block: 0 var(--space-sm);
 }
 
 .admin-language-switcher {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: .25rem;
+  position: relative;
+  display: inline-block;
+  width: 6.5rem;
+  max-width: 100%;
+  color: var(--ink-soft);
 }
 
-.admin-language-switcher button {
-  min-height: 2.25rem;
-  padding: .35rem .65rem;
-  border: 1px solid currentColor;
-  border-radius: .2rem;
+.admin-language-switcher select {
+  appearance: none;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: .4rem 1.35rem .4rem .15rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
   color: inherit;
   background: transparent;
   font: inherit;
-  font-size: .75rem;
+  font-size: .8rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.admin-language-switcher button[aria-pressed='true'] {
-  font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: .25rem;
+.admin-language-switcher svg {
+  position: absolute;
+  inset-inline-end: .15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
-.admin-language-switcher button:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 3px;
+.admin-language-switcher select:not(:disabled):hover {
+  border-color: currentColor;
 }
 
-.admin-language-switcher button:disabled {
+.admin-language-switcher select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.admin-language-switcher select:disabled {
   opacity: .6;
   cursor: wait;
+}
+
+.admin-language-switcher option {
+  color: var(--ink);
+  background: var(--paper-light);
+}
+
+.admin-sidebar .admin-language-switcher {
+  color: inherit;
+}
+
+.admin-sidebar .admin-language-switcher select {
+  border-bottom-color: color-mix(in oklch, currentColor 30%, transparent);
+}
+
+@media (pointer: coarse) {
+  .admin-language-switcher select { font-size: 1rem; }
 }
 
 .admin-language-error {

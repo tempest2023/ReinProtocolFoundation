@@ -1,0 +1,36 @@
+import { expect, test } from '@playwright/test'
+
+test('Admin language persists across reloads and routes without changing the public site', async ({ page, context }) => {
+  await page.goto('/admin/login?error=not_authorized')
+  await expect(page.getByRole('heading', { name: 'Rein Dashboard' })).toBeVisible()
+  const languageSelect = page.getByRole('combobox', { name: 'Interface language' })
+  await expect(languageSelect).toHaveValue('en')
+  await expect(page.getByRole('button', { name: 'English', exact: true })).toHaveCount(0)
+  await languageSelect.focus()
+  await expect(languageSelect).toBeFocused()
+  await languageSelect.selectOption('zh')
+  await expect(page.getByRole('heading', { name: 'Rein 管理后台' })).toBeVisible()
+  await expect(page.getByRole('combobox', { name: '界面语言' })).toHaveValue('zh')
+  await expect(page.locator('.admin-shell').getByRole('alert')).toHaveText('此账号未获授权。')
+  await expect(page.locator('.admin-shell')).toHaveAttribute('lang', 'zh-CN')
+  await expect(page).toHaveURL(/\/admin\/login\?error=not_authorized$/)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+
+  await page.reload()
+  await expect(page.getByRole('textbox', { name: '邮箱' })).toBeVisible()
+  const languageCookie = (await context.cookies()).find((cookie) => cookie.name === 'rein_admin_locale')
+  expect(languageCookie).toMatchObject({ value: 'zh', path: '/admin', httpOnly: true, sameSite: 'Lax' })
+
+  await page.goto('/admin/login?error=invalid_link')
+  await expect(page.locator('.admin-shell').getByRole('alert')).toHaveText('此登录链接无效或已过期，请重新申请。')
+  await page.getByRole('link', { name: '返回公开网站' }).click()
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+
+  await page.goto('/admin/login')
+  await expect(page.getByRole('heading', { name: 'Rein 管理后台' })).toBeVisible()
+  await page.getByRole('combobox', { name: '界面语言' }).selectOption('en')
+  await expect(page.getByRole('heading', { name: 'Rein Dashboard' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible()
+})

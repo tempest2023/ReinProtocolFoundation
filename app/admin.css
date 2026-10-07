@@ -4,6 +4,95 @@
   background: #f3efe6;
 }
 
+.admin-shell:lang(zh-CN) {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+.admin-shell:lang(zh-CN) :is(h1, h2, h3, .admin-nav a, .admin-brand small) {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+.admin-language-control {
+  margin-block: 0 var(--space-sm);
+}
+
+.admin-language-switcher {
+  position: relative;
+  display: inline-block;
+  width: 6.5rem;
+  max-width: 100%;
+  color: var(--ink-soft);
+}
+
+.admin-language-switcher select {
+  appearance: none;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: .4rem 1.35rem .4rem .15rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-language-switcher svg {
+  position: absolute;
+  inset-inline-end: .15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.admin-language-switcher select:not(:disabled):hover {
+  border-color: currentColor;
+}
+
+.admin-language-switcher select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.admin-language-switcher select:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.admin-language-switcher option {
+  color: var(--ink);
+  background: var(--paper-light);
+}
+
+.admin-sidebar .admin-language-switcher {
+  color: inherit;
+}
+
+.admin-sidebar .admin-language-switcher select {
+  border-bottom-color: color-mix(in oklch, currentColor 30%, transparent);
+}
+
+@media (pointer: coarse) {
+  .admin-language-switcher select { font-size: 1rem; }
+}
+
+.admin-language-error {
+  max-width: 20rem;
+  margin-block: .5rem 0;
+  font-size: .75rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-login__panel > .admin-language-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .admin-dashboard {
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);
@@ -946,6 +1035,7 @@
     scrollbar-width: thin;
   }
   .admin-user { grid-column: 2; grid-row: 1; }
+  .admin-user .admin-language-control { margin-bottom: .4rem; }
   .admin-nav__group { display: contents; }
   .admin-nav__label { display: none; }
   .admin-nav a { min-height: 2.35rem; padding: .58rem .65rem; }

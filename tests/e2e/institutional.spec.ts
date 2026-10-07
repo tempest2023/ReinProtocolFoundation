@@ -22,6 +22,7 @@ test.describe('institutional site', () => {
     await page.goto('/')
     await expect(page.locator('.home-hero .eyebrow')).toHaveText('A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY')
     await expect(page.locator('#home-title')).toHaveText('Making AI agents safer for people and society.')
+    await expect(page.locator('#home-title .home-hero__accent')).toHaveText(['safer', 'people', 'society'])
     await expect(page.locator('.home-hero__mission')).toHaveText('We bring people together and support open-source projects and research to make AI agents safer.')
   })
 

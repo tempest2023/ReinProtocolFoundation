@@ -78,7 +78,7 @@ export function InstitutionalHomePage() {
         <div className="home-hero__art" aria-hidden="true"><img src={sanFrancisco.src} alt="" width="971" height="1619" fetchPriority="high" /></div>
         <div className="home-hero__content page-shell">
           <p className="eyebrow hero-enter hero-enter--1">A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY</p>
-          <h1 id="home-title">Making AI agents safer <em>for people and society.</em></h1>
+          <h1 id="home-title">Making AI agents <span className="home-hero__accent">safer</span> <em>for <span className="home-hero__accent">people</span> and <span className="home-hero__accent">society</span>.</em></h1>
           <p className="home-hero__mission hero-enter hero-enter--3">We bring people together and support open-source projects and research to make AI agents safer.</p>
           <div className="home-hero__actions hero-enter hero-enter--4">
             <Link href="/mission" className="primary-action">Read our mission <Arrow /></Link>

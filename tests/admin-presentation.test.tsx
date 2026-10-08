@@ -19,7 +19,7 @@ describe('administration presentation', () => {
     render(<AdminNavigation />)
 
     const navigation = screen.getByRole('navigation', { name: 'Administration' })
-    for (const label of ['Overview', 'Contacts', 'Participants', 'Applications', 'Contributors', 'People', 'Learn', 'Gather', 'Review', 'Guide', 'Settings', 'Audit']) {
+    for (const label of ['Overview', 'Identities', 'Participants', 'Applications', 'Contributors', 'People', 'Learn', 'Gather', 'Review', 'Guide', 'Settings', 'Audit']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(screen.getByRole('link', { name: 'Gather' })).toHaveAttribute('aria-current', 'page')
@@ -28,13 +28,13 @@ describe('administration presentation', () => {
     expect(screen.queryByRole('link', { name: 'Meeting Guide' })).not.toBeInTheDocument()
   })
 
-  it('keeps direct contact authorization inside the authenticated admin surface', () => {
-    const contacts = readFileSync('app/admin/(dashboard)/contacts/page.tsx', 'utf8')
+  it('keeps direct Rein identity authorization inside the authenticated admin surface', () => {
+    const identities = readFileSync('app/admin/(dashboard)/identities/page.tsx', 'utf8')
     const actions = readFileSync('app/admin/actions.ts', 'utf8')
 
-    expect(contacts).toContain('Direct registration without email verification')
-    expect(contacts).toContain('actionId="set_contact_roles"')
-    expect(contacts).toContain("service.from('rein_platform_links')")
+    expect(identities).toContain('Direct registration without email verification')
+    expect(identities).toContain('actionId="set_contact_roles"')
+    expect(identities).toContain("service.from('rein_platform_links')")
     expect(actions).toContain("service.rpc('admin_set_contact_roles'")
     expect(actions).toContain('p_actor_id: user.id')
   })

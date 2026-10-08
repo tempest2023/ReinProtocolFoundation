@@ -49,28 +49,29 @@ page content.
 
 ## The binding record
 
-- A binding row is a **platform, workspace, and platform-user tuple** together with the contact it
+- A binding row is a **platform, workspace, and platform-user tuple** together with the Rein identity it
   points at, its status, and its timestamps.
 - That tuple is **unique across statuses**. A revoked row keeps its place in the table instead of
   being deleted, so a later attempt to bind the same platform account does not silently create a
   second row. The revoked row is a **tombstone**: an administrator has to clear or re-verify it
   before that platform account can be linked again.
 - A binding is valid only while its status is verified. Revocation is the normal way to end a link;
-  it never deletes historical contributions or records tied to the contact.
-- **P0 permits one verified Slack identity per contact.** A second Slack tuple for the same contact
+  it never deletes historical contributions or records tied to the Rein identity.
+- **P0 permits one verified Slack account per Rein identity.** A second Slack tuple for the same Rein identity
   is refused, including when two completions race. Supporting account migration or multiple Slack
   accounts is deferred to P2. Other platforms remain separately scoped and do not confer Slack
   governance rights.
 
-## Registered contacts only
+## Registered Rein identities only
 
-A verified address identifies an existing, non-deleted contact. If the address is unknown to the
-organization, the session enters `registration_required`, no contact or identity row is created, and
+A verified address identifies an existing, non-deleted Rein identity backed by `community_contacts`.
+If the address is unknown to the organization, the session enters `registration_required`, no
+Rein identity or identifier row is created, and
 the person is directed to an administrator. Email control alone never registers a community member
 and grants no membership, Contributor status, role, or governance right.
 
-Administrators register contacts and may directly set Contributor or Director authorization at
-`/admin/contacts`. That explicit administrative path bypasses mailbox verification and is audited;
+Administrators register Rein identities and may directly set Contributor or Director authorization at
+`/admin/identities`. That explicit administrative path bypasses mailbox verification and is audited;
 it is separate from the public linking flow and is never available to the Agent or a chat user.
 
 ## Authority, scopes, and re-derivation
@@ -89,7 +90,7 @@ it is separate from the public linking flow and is never available to the Agent 
 - Assertions are short lived. Any statement that a caller is a particular linked person carries a
   near-term expiry and has to be re-established for later operations.
 - Chat text that claims an email address or role is untrusted. Neither the Agent nor these APIs accept
-  a target email, contact id, role, platform user id, or workspace id from a model-authored binding
+  a target email, Rein identity ID (`contact_id`), role, platform user id, or workspace id from a model-authored binding
   request. The email is entered only on the website and proved by its one-time receipt.
 
 ## Ingress and relay
@@ -157,7 +158,7 @@ the mutation. Revocation takes that same link-row lock, so a revocation that
 commits before a write is visible to it and refuses it, and a write that commits
 first leaves a live row for the revocation to read. The actor is derived from the
 locked link row rather than trusted from the request, and the guard refuses a
-contact id that disagrees with it.
+Rein identity ID (`contact_id`) that disagrees with it.
 
 Expiry is re-read with `clock_timestamp()` rather than `now()`, because this
 transaction can block on the caller and link row locks: `now()` is the

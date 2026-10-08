@@ -17,7 +17,7 @@ import { createVerificationToken, isGithubUsername, isPlausibleEmail, normalizeE
 function value(formData: FormData, key: string) { return String(formData.get(key) ?? '').trim() }
 function nullable(formData: FormData, key: string) { return value(formData, key) || null }
 function assertSlug(slug: string) { if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Use a lowercase, hyphenated slug.') }
-function assertUuid(id: string) { if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) throw new Error('Contact ID is invalid.') }
+function assertUuid(id: string) { if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) throw new Error('Rein identity ID is invalid.') }
 function assertExternalUrl(url: string, httpsOnly = false) {
   let parsed: URL
   try { parsed = new URL(url) } catch { throw new Error('Use a complete external URL.') }
@@ -64,12 +64,12 @@ export async function mergeContacts(formData: FormData) {
   const { service } = await requireAdmin()
   const source = value(formData, 'source_contact_id')
   const target = value(formData, 'target_contact_id')
-  if (!source || !target || source === target) throw new Error('Choose two different contacts.')
+  if (!source || !target || source === target) throw new Error('Choose two different Rein identities.')
   const { error } = await service.rpc('merge_community_contacts', { p_source_contact_id: source, p_target_contact_id: target })
   if (error) throw error
   await audit('contact.merged', 'community_contact', target, { source_contact_id: source })
   revalidatePath('/admin/participants')
-  revalidatePath('/admin/contacts')
+  revalidatePath('/admin/identities')
 }
 
 export async function addDirectMember(formData: FormData) {
@@ -84,7 +84,7 @@ export async function addDirectMember(formData: FormData) {
   if (error) throw error
   await audit('contact.added', 'community_contact', data?.[0]?.contact_id, { kind, source })
   revalidatePath('/admin/participants')
-  revalidatePath('/admin/contacts')
+  revalidatePath('/admin/identities')
   revalidatePath('/admin')
 }
 
@@ -115,15 +115,15 @@ export async function setContactRoles(formData: FormData) {
     p_actor_id: user.id,
   })
   if (error) {
-    if (error.message.includes('contact_not_found')) throw new Error('Contact was not found or has been deleted.')
-    if (error.message.includes('contact_has_non_director_profile')) throw new Error('Contact already has a non-Director people profile. Resolve that profile before enabling Director access.')
+    if (error.message.includes('contact_not_found')) throw new Error('Rein identity was not found or has been deleted.')
+    if (error.message.includes('contact_has_non_director_profile')) throw new Error('This Rein identity already has a non-Director people profile. Resolve that profile before enabling Director access.')
     if (error.message.includes('director_profile_required')) throw new Error('Director name, slug, and role are required when enabling Director access.')
     if (error.code === '23505') throw new Error('Director slug is already in use.')
     throw error
   }
-  if (!data?.[0]?.contact_id) throw new Error('Could not update contact roles.')
+  if (!data?.[0]?.contact_id) throw new Error('Could not update Rein identity roles.')
 
-  revalidatePath('/admin/contacts')
+  revalidatePath('/admin/identities')
   revalidatePath('/admin/contributors')
   revalidatePath('/admin/people')
 }
@@ -480,7 +480,7 @@ function safeAdminFormError(error: unknown) {
   const fallback = 'We could not complete this action. Review the fields and try again.'
   if (!(error instanceof Error)) return fallback
   if (process.env.NODE_ENV === 'development') return error.message
-  return /^(A |Alt text|An approval|Application|Choose|Confirm|Contact|Contributor|Core Contributors|Could not|Director|Directors|Enter|Event|Images|Invalid|Nominating|Only|Partner|Select|This|Use)/.test(error.message)
+  return /^(A |Alt text|An approval|Application|Choose|Confirm|Contact|Contributor|Core Contributors|Could not|Director|Directors|Enter|Event|Images|Invalid|Nominating|Only|Partner|Rein|Select|This|Use)/.test(error.message)
     ? error.message
     : fallback
 }

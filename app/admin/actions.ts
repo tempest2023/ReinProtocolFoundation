@@ -101,7 +101,7 @@ export async function setContactRoles(formData: FormData) {
   const directorSlug = value(formData, 'director_slug')
   const directorRole = value(formData, 'director_role')
   if (directorStatus === 'active') {
-    if (!directorDisplayName || !directorSlug || !directorRole) throw new Error('Director name, slug, and role are required when enabling Director access.')
+    if (!directorDisplayName || !directorSlug || !directorRole) throw new Error('Director name, slug, and role are required when granting Director permissions.')
     assertSlug(directorSlug)
   }
 
@@ -116,8 +116,8 @@ export async function setContactRoles(formData: FormData) {
   })
   if (error) {
     if (error.message.includes('contact_not_found')) throw new Error('Rein identity was not found or has been deleted.')
-    if (error.message.includes('contact_has_non_director_profile')) throw new Error('This Rein identity already has a non-Director people profile. Resolve that profile before enabling Director access.')
-    if (error.message.includes('director_profile_required')) throw new Error('Director name, slug, and role are required when enabling Director access.')
+    if (error.message.includes('contact_has_non_director_profile')) throw new Error('This Rein identity already has a non-Director people profile. Resolve that profile before granting Director permissions.')
+    if (error.message.includes('director_profile_required')) throw new Error('Director name, slug, and role are required when granting Director permissions.')
     if (error.code === '23505') throw new Error('Director slug is already in use.')
     throw error
   }

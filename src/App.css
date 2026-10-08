@@ -291,10 +291,13 @@
 .home-hero h1 em {
   display: block;
   margin-top: 0.08em;
-  color: var(--accent-dark);
   font-style: italic;
   font-weight: 390;
   letter-spacing: -0.045em;
+}
+
+.home-hero__accent {
+  color: var(--accent-dark);
 }
 
 .home-hero__mission {

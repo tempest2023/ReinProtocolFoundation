@@ -33,7 +33,7 @@
   --type-page-title-size: clamp(2.8rem, 12vw, 3.4rem);
   --type-page-title-weight: 420;
   --type-page-title-tracking: -0.055em;
-  --type-page-title-leading: 0.9;
+  --type-page-title-leading: 1.1;
   --type-page-lead-size: clamp(1.125rem, 4.5vw, 1.3rem);
   --type-page-lead-leading: 1.5;
   --type-section-title-size: clamp(2.15rem, 9vw, 3.4rem);

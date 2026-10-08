@@ -13,6 +13,7 @@ export const INDUSTRIES = [
 export const PARTICIPATION_REASONS = [
   'Learn more about AI Agents',
   'Meet and collaborate with peers',
+  'Prepare for a role working with AI agents',
   'Advance a public-benefit mission',
   'Contribute to research or open source',
   'Organize local, campus, or conference activity',
@@ -25,6 +26,8 @@ export const CONTRIBUTION_AREAS = [
   'Software and open-source development',
   'Courses and educational resources',
   'Events and campus/community organizing',
+  'Online presentations and study groups',
+  'Peer mentoring and career guidance',
   'Translation, design, or communications',
   'Partnerships and operations',
   'Other',

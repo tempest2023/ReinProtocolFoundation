@@ -1,6 +1,6 @@
 # Rein Protocol Foundation
 
-**Making AI agents safe for people and society.** Rein Protocol 通过社区、开源项目，以及透明性、可观测性和策略控制等方向的研究，推动 AI Agent 的发展。我们是 AI-native 组织，使用 Agent 协助运营和发展 Rein，由人类制定方向并承担责任。
+**让 AI Agent 安全地服务人类与社会。** Rein Protocol 通过社区、开源项目，以及透明性、可观测性和策略控制等方向的研究，推动 AI Agent 的发展。我们是 AI-native 组织，使用 Agent 协助运营和发展 Rein，由人类制定方向并承担责任。
 
 [访问网站](https://rein-protocol.org/) · [阅读创始蓝图](./PROJECT.md) · [加入社区](https://rein-protocol.org/community) · [English](./README.md)
 

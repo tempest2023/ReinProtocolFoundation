@@ -2,13 +2,13 @@
 
 [简体中文](./README-zh.md)
 
-**Making AI agents safer for people and society.** Rein Protocol supports AI agent development through community, open-source projects, and security and safety research. We are an AI-native organization: agents help operate and grow Rein, with people setting direction and remaining accountable.
+**Making AI agents safe for people and society.** Rein Protocol supports AI agent development through community, open-source projects, and research into transparency, observability, and policy controls. We are an AI-native organization: agents help operate and grow Rein, with people setting direction and remaining accountable.
 
 [Explore the website](https://rein-protocol.org/) · [Read the founding blueprint](./PROJECT.md) · [Join the community](https://rein-protocol.org/community)
 
 ## Why Rein exists
 
-AI agents connect language models to tools, software, and real tasks. Their harnesses, permissions, and behavior need security, transparency, and oversight. Rein supports the people, research, and open infrastructure that make agents safer to use in society.
+AI agents connect language models to tools, software, and real tasks. Their harnesses, permissions, and behavior need security, transparency, and oversight. Rein supports the people, research, and open infrastructure needed to make agents safe to use in society.
 
 Our interests include monitoring and detection tools, understandable agent behavior, and mechanisms for human intervention. We believe agents can help supervise other agents. Community exchange, open-source work, and research help people contribute to that effort.
 
@@ -23,7 +23,7 @@ The current early program direction has two connected priorities. It refines the
 
 ## How the organization is intended to work
 
-Rein's guiding principle is **Agent operated, human accountable**. AI Agents may help with research, coordination, reporting, and program work within defined policies. They do not replace human fiduciary responsibility or gain independent authority over the mission, people, or resources.
+Rein is an **AI-native organization**. AI agents help with research, coordination, reporting, and program work within defined policies. We also explore how agents can help monitor other agents. People set limits, review consequential decisions, and remain responsible for outcomes; agents do not gain independent authority over the mission, people, or resources.
 
 The founding model assigns different responsibilities to a legally accountable **Human Board**, a **DAO** for collective participation within an adopted constitution, and **AI Agents** operating inside approved limits. Decisions about budgets, legal duties, governance rights, and exceptions require the appropriate human or collective authority. Public reporting is intended to make decisions, spending, outcomes, and failures inspectable. This is the organizational blueprint; proposed DAO and Agent operations should not be read as a claim that every mechanism is active today.
 

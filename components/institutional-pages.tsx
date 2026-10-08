@@ -78,24 +78,24 @@ export function InstitutionalHomePage() {
         <div className="home-hero__art" aria-hidden="true"><img src={sanFrancisco.src} alt="" width="971" height="1619" fetchPriority="high" /></div>
         <div className="home-hero__content page-shell">
           <p className="eyebrow hero-enter hero-enter--1">A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY</p>
-          <h1 id="home-title">Making AI agents <span className="home-hero__accent">safer</span> <em>for <span className="home-hero__accent">people</span> and <span className="home-hero__accent">society</span>.</em></h1>
-          <p className="home-hero__mission hero-enter hero-enter--3">We bring people together and support open-source projects and research to make AI agents safer.</p>
+          <h1 id="home-title">Making AI agents <span className="home-hero__accent">safe</span> <em>for <span className="home-hero__accent">people</span> and <span className="home-hero__accent">society</span>.</em></h1>
+          <p className="home-hero__mission hero-enter hero-enter--3">We bring people together and support open-source projects and research to make AI agents safe, with a focus on transparency, observability, and policy controls.</p>
           <div className="home-hero__actions hero-enter hero-enter--4">
             <Link href="/mission" className="primary-action">Read our mission <Arrow /></Link>
             <Link href="/community" className="quiet-action">Explore the community</Link>
           </div>
         </div>
-        <div className="home-hero__principles page-shell hero-enter hero-enter--5" aria-label="Founding principles"><span>Open participation</span><span>Agent operated</span><span>Human accountable</span></div>
+        <div className="home-hero__principles page-shell hero-enter hero-enter--5" aria-label="Founding principles"><span>Open participation</span><span>AI-native operations</span><span>Human accountable</span></div>
       </section>
 
       <section className="position-section" id="mission" aria-labelledby="position-title">
         <div className="page-shell position-grid">
           <p className="section-index" data-reveal>01 / Why agent safety</p>
-          <div data-reveal><h2 id="position-title">AI agents act in the real world.</h2><p className="position-lead">Agents use tools, access systems, and carry out tasks. We support the research, open-source work, and shared knowledge that help people understand and oversee those actions.</p></div>
+          <div data-reveal><h2 id="position-title">Intelligence is becoming public power.</h2><p className="position-lead">Agents use tools, access systems, and carry out tasks. We support the research, open-source work, and shared knowledge that help people understand and oversee those actions.</p></div>
           <div className="value-line" data-reveal>
-            <div><strong>Security</strong><span>Set clear limits on access and permissions.</span></div>
-            <div><strong>Visibility</strong><span>Understand what agents do and why.</span></div>
-            <div><strong>Oversight</strong><span>Detect problems and intervene when needed.</span></div>
+            <div><strong>Benefit</strong><span>Help agents do useful work for people and communities.</span></div>
+            <div><strong>Visibility</strong><span>Make agent actions understandable and inspectable.</span></div>
+            <div><strong>Governance</strong><span>Set clear permissions and keep people responsible.</span></div>
           </div>
           <TextLink href="/mission" light>Read the mission in full</TextLink>
         </div>
@@ -113,7 +113,7 @@ export function InstitutionalHomePage() {
       <section className="stewardship-section" id="governance" aria-labelledby="stewardship-title">
         <div className="stewardship-art" aria-hidden="true"><img className="deferred-image is-loaded" src={paloAlto.src} width="971" height="1619" alt="" loading="lazy" /></div>
         <div className="page-shell stewardship-content">
-          <div className="stewardship-heading" data-reveal><p className="section-index section-index--light">03 / How we operate</p><h2 id="stewardship-title">Agent operated. Human accountable.</h2><p>We use AI agents to help run and grow Rein. Our governance model sets limits on their authority and defines how decisions, funds, and outcomes are reviewed.</p></div>
+          <div className="stewardship-heading" data-reveal><p className="section-index section-index--light">03 / An AI-native organization</p><h2 id="stewardship-title">AI agents help run Rein and advance agent safety.</h2><p>We use AI agents to support research, coordination, and operations. We also explore how they can help monitor other agents. People set limits, review consequential decisions, and remain responsible for the outcomes.</p></div>
           <ol className="fund-path" data-reveal>{fundPath.map((step, index) => <li key={step.label}><span>0{index + 1}</span><strong>{step.label}</strong><p>{step.text}</p></li>)}</ol>
           <div className="accountability-line" data-reveal><p><strong>Human Board</strong> carries legal accountability.</p><p><strong>DAO</strong> participates through one collective vote.</p><p><strong>AI Agents</strong> execute within visible policy.</p></div>
           <TextLink href="/governance" light>Inspect the governance model</TextLink>
@@ -134,7 +134,7 @@ export function InstitutionalHomePage() {
         <div className="giving-content" data-reveal><p className="section-index">05 / Giving</p><h2 id="giving-title">Support the community advancing agent safety.</h2><p className="giving-lead">Our funding priorities include accessible events, shared learning, open-source projects, and safety research. Giving channels remain subject to legal and operational approval.</p><div className="giving-standard"><span>Foundation status</span><strong>Legal formation under review.</strong></div><p className="asset-summary">Community events · Shared learning · Open source · Research</p><TextLink href="/giving">Review our giving standards</TextLink></div>
       </section>
 
-      <section className="closing-section" aria-labelledby="closing-title"><div className="page-shell" data-reveal><p className="eyebrow">Take part</p><h2 id="closing-title">Help make AI agents safer for people and society.</h2><Link href="/community" className="closing-link">Find your place in the community <Arrow /></Link></div></section>
+      <section className="closing-section" aria-labelledby="closing-title"><div className="page-shell" data-reveal><p className="eyebrow">Take part</p><h2 id="closing-title">Help make AI agents safe for people and society.</h2><Link href="/community" className="closing-link">Find your place in the community <Arrow /></Link></div></section>
     </main>
   )
 }
@@ -144,19 +144,19 @@ function ArticleLayout({ summaryLabel, summary, children }: { summaryLabel: stri
 }
 
 export function MissionPage() {
-  return <main id="main-content"><ArticleHero eyebrow="Our mission" title="Making AI agents safer for people and society." lead="Rein supports AI agent development through community, open-source projects, and security and safety research. We want people to benefit from agents they can understand and oversee." image={santaClara} imagePosition="50% 58%" caption="Institutional memory / Santa Clara" />
-    <ArticleLayout summaryLabel="Our focus" summary="Support AI agent development and the people, research, and open infrastructure that make it safer.">
+  return <main id="main-content"><ArticleHero eyebrow="Our mission" title="Making AI agents safe for people and society." lead="Rein supports AI agent development through community, open-source projects, and research into transparency, observability, and policy controls. We want people to benefit from agents they can understand and oversee." image={santaClara} imagePosition="50% 58%" caption="Institutional memory / Santa Clara" />
+    <ArticleLayout summaryLabel="Our focus" summary="Support AI agent development and the people, research, and open infrastructure needed for safe use.">
       <p className="article-standfirst" data-reveal>AI agents connect language models to tools, software, and real tasks. That ability to act makes security, visibility, and oversight essential parts of their development.</p>
       <section id="constructive" data-reveal><p className="article-kicker">01 / Community and participation</p><h2>Help more people participate in AI agent development.</h2><p>Rein brings learners, researchers, and practitioners together to share knowledge and work on agent safety. Our role as a nonprofit includes supporting open-source projects, research, public discussion, and access to learning.</p><p>Members can meet at events, exchange ideas online, contribute learning materials, and guide peers moving into AI agent roles. These relationships help people turn an interest in the field into informed participation.</p></section>
       <section id="protective" data-reveal><p className="article-kicker">02 / Security, visibility, and oversight</p><h2>Understand what agents do. Keep their actions accountable.</h2><p>Agent safety includes the systems around a language model: the harness that coordinates its work, the tools it can use, and the permissions it receives. We support work that makes those systems easier to inspect, test, and supervise.</p><p>Our areas of interest include monitoring agent behavior, detecting security threats and failures, explaining actions, and enabling human intervention. The long-term goal is to prevent serious harm to people and society as agents take on greater responsibilities.</p></section>
       <blockquote className="article-proposition" data-reveal>We believe AI agents can help monitor and supervise other agents, with people setting the rules and remaining accountable.</blockquote>
-      <section id="practice" data-reveal><p className="article-kicker">03 / An AI-native organization</p><h2>Use agents to advance agent safety.</h2><p>We use AI agents to help operate and grow Rein. Applying them to research, coordination, and oversight also helps us understand the safety infrastructure an agent-operated organization needs.</p><p>Our early programs focus on in-person events and an online community for discussions, presentations, shared learning, and career guidance. These activities support a broader mission of open-source development and safety research.</p><TextLink href="/programs">Explore our early programs</TextLink></section>
+      <section id="practice" data-reveal><p className="article-kicker">03 / An AI-native organization</p><h2>Use agents to advance agent safety.</h2><p>We use AI agents to help operate and grow Rein. Applying them to research, coordination, and oversight also helps us understand the safety infrastructure an AI-native organization needs.</p><p>Our early programs focus on in-person events and an online community for discussions, presentations, shared learning, and career guidance. These activities support a broader mission of open-source development and safety research.</p><TextLink href="/programs">Explore our early programs</TextLink></section>
     </ArticleLayout>
   </main>
 }
 
 export function ProgramsPage() {
-  return <main id="main-content"><ArticleHero eyebrow="Our early programs" title="Meet in person. Keep learning together online." lead="Our early work has two priorities: in-person events and an online community. Both help people learn about AI agents, share their work, and take part in making agents safer." image={stanford} imagePosition="50% 58%" caption="Knowledge and duty / Stanford" />
+  return <main id="main-content"><ArticleHero eyebrow="Our early programs" title="Meet in person. Keep learning together online." lead="Our early work has two priorities: in-person events and an online community. Both help people learn about AI agents, share their work, and take part in making agents safe." image={stanford} imagePosition="50% 58%" caption="Knowledge and duty / Stanford" />
     <ArticleLayout summaryLabel="Two connected priorities" summary="Meet through local events, then continue the exchange through online discussions, presentations, shared resources, and peer guidance.">
       <p className="article-standfirst" data-reveal>Community is the starting point for Rein’s work. We want members to learn from one another, find collaborators, and develop the knowledge and experience to contribute to AI agent development and safety.</p>
       <div className="program-essay-list">{programs.map((program) => <section key={program.number} data-reveal><span>{program.number}</span><div><p className="article-kicker">{program.short}</p><h2>{program.title}</h2><p>{program.detail}</p><p>{program.approach}</p></div></section>)}</div>

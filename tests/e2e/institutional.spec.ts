@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 const institutionalRoutes = [
-  { path: '/', heading: 'Making AI agents safer for people and society.', title: 'Rein Protocol Foundation' },
-  { path: '/mission', heading: 'Making AI agents safer for people and society.', title: 'Mission' },
+  { path: '/', heading: 'Making AI agents safe for people and society.', title: 'Rein Protocol Foundation' },
+  { path: '/mission', heading: 'Making AI agents safe for people and society.', title: 'Mission' },
   { path: '/programs', heading: 'Meet in person. Keep learning together online.', title: 'Programs and Public Work' },
   { path: '/governance', heading: 'AI agents help run Rein. People remain responsible.', title: 'Governance and Stewardship' },
   { path: '/giving', heading: 'Support AI agent safety and community.', title: 'Giving' },
@@ -21,9 +21,18 @@ test.describe('institutional site', () => {
   test('home hero communicates the nonprofit mission and work', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.home-hero .eyebrow')).toHaveText('A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY')
-    await expect(page.locator('#home-title')).toHaveText('Making AI agents safer for people and society.')
-    await expect(page.locator('#home-title .home-hero__accent')).toHaveText(['safer', 'people', 'society'])
-    await expect(page.locator('.home-hero__mission')).toHaveText('We bring people together and support open-source projects and research to make AI agents safer.')
+    await expect(page.locator('#home-title')).toHaveText('Making AI agents safe for people and society.')
+    await expect(page.locator('#home-title .home-hero__accent')).toHaveText(['safe', 'people', 'society'])
+    await expect(page.locator('.home-hero__mission')).toHaveText('We bring people together and support open-source projects and research to make AI agents safe, with a focus on transparency, observability, and policy controls.')
+    await expect(page.locator('.home-hero__principles span')).toHaveText(['Open participation', 'AI-native operations', 'Human accountable'])
+    await expect(page.locator('#position-title')).toHaveText('Intelligence is becoming public power.')
+    await expect(page.locator('.value-line strong')).toHaveText(['Benefit', 'Visibility', 'Governance'])
+    await expect(page.locator('.value-line span')).toHaveText([
+      'Help agents do useful work for people and communities.',
+      'Make agent actions understandable and inspectable.',
+      'Set clear permissions and keep people responsible.',
+    ])
+    await expect(page.locator('#stewardship-title')).toHaveText('AI agents help run Rein and advance agent safety.')
   })
 
   test('page titles inherit the shared leading token', async ({ page }) => {

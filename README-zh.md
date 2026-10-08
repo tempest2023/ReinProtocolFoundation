@@ -1,12 +1,12 @@
 # Rein Protocol Foundation
 
-**Making AI agents safer for people and society.** Rein Protocol 通过社区、开源项目与安全研究，推动 AI Agent 的发展。我们是 AI-native 组织，使用 Agent 协助运营和发展 Rein，由人类制定方向并承担责任。
+**Making AI agents safe for people and society.** Rein Protocol 通过社区、开源项目，以及透明性、可观测性和策略控制等方向的研究，推动 AI Agent 的发展。我们是 AI-native 组织，使用 Agent 协助运营和发展 Rein，由人类制定方向并承担责任。
 
 [访问网站](https://rein-protocol.org/) · [阅读创始蓝图](./PROJECT.md) · [加入社区](https://rein-protocol.org/community) · [English](./README.md)
 
 ## 为什么需要 Rein
 
-AI Agent 通过工具、软件和任务执行机制，让语言模型能够接触真实世界。Agent 的 harness、权限和行为需要安全保障、透明性与监督。Rein 支持相关社区、研究和开源基础设施，帮助 Agent 更安全地参与社会活动。
+AI Agent 通过工具、软件和任务执行机制，让语言模型能够接触真实世界。Agent 的 harness、权限和行为需要安全保障、透明性与监督。Rein 支持相关社区、研究和开源基础设施，帮助 Agent 安全地参与社会活动。
 
 我们的关注方向包括 Agent 监测与检测工具、行为的可理解性，以及人类介入机制。我们认为 Agent 也能用于监督其他 Agent，社区交流、开源工作和研究可以让更多人参与这项工作。
 
@@ -21,7 +21,7 @@ AI Agent 通过工具、软件和任务执行机制，让语言模型能够接�
 
 ## 组织计划如何运作
 
-Rein 的指导原则是 **Agent 运作，人类负责**。AI Agents 可以在明确政策范围内协助研究、协调、报告和项目执行，但不能取代人的受托责任，也不能独立决定组织使命、人员或资源的使用。
+Rein 是一个 **AI-native 组织**。AI Agents 可以在明确政策范围内协助研究、协调、报告和项目执行。我们也探索如何使用 Agent 监督其他 Agent。人类设定权限边界、审查重要决策，并为结果负责；Agent 不能独立决定组织使命、人员或资源的使用。
 
 创始模型把职责分配给承担法律责任的 **Human Board**、在已采纳章程范围内集体参与治理的 **DAO**，以及受批准权限约束的 **AI Agents**。预算、法律责任、治理权利和异常事项应由相应的人类或集体治理主体决定。公开报告旨在让决策、支出、成果和失败可供检查。这是组织蓝图；其中拟议的 DAO 和 Agent 机制不代表已经全部投入运行。
 

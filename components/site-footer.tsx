@@ -20,7 +20,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="footer-legal page-shell">
-        <p>Making AI agents safer through community, open source, and research.</p>
+        <p>Making AI agents safe through community, open source, and research.</p>
         <p><Link href="/privacy">Privacy</Link> · <Link href="/community/code-of-conduct">Code of Conduct</Link></p>
         <p>© 2026 Rein Protocol Foundation</p>
       </div>

@@ -1,7 +1,7 @@
-## Address checks resolve existing contacts only
+## Address checks resolve existing Rein identities only
 
 The binding flow never creates a `community_contacts` row. A confirmed address
-must already belong to exactly one non-deleted contact. An unknown address moves
+must already belong to exactly one non-deleted Rein identity. An unknown address moves
 the link session to `registration_required`, records an audit event, and tells
 the person to contact an administrator for community registration.
 
@@ -20,7 +20,7 @@ confers no membership, Contributor standing, role, or governance right.
 ## Administrator registration and roles
 
 Authenticated administrators can register an email or GitHub identity directly from
-`/admin/contacts`. This operation intentionally bypasses email verification: the administrator,
+`/admin/identities`. This operation intentionally bypasses email verification: the administrator,
 not control of the submitted mailbox, is the trust boundary. It is the supported way to prepare an
 otherwise unknown community email for the normal two-proof chat-linking flow.
 

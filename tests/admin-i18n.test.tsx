@@ -128,6 +128,7 @@ describe('administrator client translations', () => {
     renderLanguage(<AdminNavigation />)
     const navigation = screen.getByRole('navigation', { name: '管理后台' })
     expect(within(navigation).getByRole('link', { name: '学习资源' })).toHaveAttribute('aria-current', 'page')
+    expect(within(navigation).getByRole('link', { name: 'Rein 身份' })).toHaveAttribute('href', '/admin/identities')
     expect(within(navigation).getByRole('link', { name: '设置' })).toHaveAttribute('href', '/admin/settings')
   })
 
@@ -230,6 +231,7 @@ describe('administrator server pages', () => {
 
   const pages: Array<[string, string, () => Promise<React.ReactNode>]> = [
     ['overview', 'Community operations', async () => (await import('@/app/admin/(dashboard)/page')).default()],
+    ['identities', 'Rein identities', async () => (await import('@/app/admin/(dashboard)/identities/page')).default({ searchParams: Promise.resolve({}) })],
     ['participants', 'Participants', async () => (await import('@/app/admin/(dashboard)/participants/page')).default({ searchParams: Promise.resolve({}) })],
     ['applications', 'Applications', async () => (await import('@/app/admin/(dashboard)/applications/page')).default()],
     ['contributors', 'Contributors', async () => (await import('@/app/admin/(dashboard)/contributors/page')).default()],

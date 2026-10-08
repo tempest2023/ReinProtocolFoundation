@@ -19,7 +19,7 @@ export default async function ParticipantsPage({ searchParams }: { searchParams:
 
   return (
     <main className="admin-main">
-      <header className="admin-heading"><div><p className="eyebrow">{t('Community')}</p><h1>{t('Participants')}</h1><p>{t('Find contacts, manage subscriptions, and reconcile identities.')}</p></div></header>
+      <header className="admin-heading"><div><p className="eyebrow">{t('Community')}</p><h1>{t('Participants')}</h1><p>{t('Find members, manage subscriptions, and reconcile Rein identities.')}</p></div></header>
       <div className="admin-toolbar">
         <form className="admin-form admin-toolbar__form" method="get">
           <label>{t('Industry')}<select name="industry" defaultValue={filters.industry ?? ''}><option value="">{t('All industries')}</option>{INDUSTRIES.map((industry) => <option key={industry} value={industry}>{t(industry)}</option>)}</select></label>
@@ -39,18 +39,18 @@ export default async function ParticipantsPage({ searchParams }: { searchParams:
           </AdminForm>
         </details>
         <details className="admin-create-panel">
-          <summary><strong>{t('Merge contacts')}</strong><span>{t('Move one identity into another')}</span></summary>
-          <AdminForm className="admin-form admin-form--grid" actionId="merge_contacts" successMessage={t('Contacts merged.')}>
-            <label>{t('Source contact ID')}<input name="source_contact_id" required /></label>
-            <label>{t('Target contact ID')}<input name="target_contact_id" required /></label>
-            <p className="admin-note admin-field--wide">{t('The source identity moves to the target contact. Historical count events remain unchanged.')}</p>
-            <AdminSubmitButton pendingLabel={t('Merging contacts…')}>{t('Merge contacts')}</AdminSubmitButton>
+          <summary><strong>{t('Merge Rein identities')}</strong><span>{t('Combine duplicate records for the same person')}</span></summary>
+          <AdminForm className="admin-form admin-form--grid" actionId="merge_contacts" successMessage={t('Rein identities merged.')}>
+            <label>{t('Source Rein identity ID')}<input name="source_contact_id" required /></label>
+            <label>{t('Target Rein identity ID')}<input name="target_contact_id" required /></label>
+            <p className="admin-note admin-field--wide">{t('All identifiers move to the target Rein identity. Historical member-count events remain unchanged.')}</p>
+            <AdminSubmitButton pendingLabel={t('Merging identities…')}>{t('Merge Rein identities')}</AdminSubmitButton>
           </AdminForm>
         </details>
       </div>
       {participants?.length ? (
         <div className="admin-table-wrap">
-          <table className="admin-table"><thead><tr><th>{t('Participant')}</th><th>{t('Industry')}</th><th>{t('Location')}</th><th>{t('Status')}</th><th>{t('Contact ID')}</th><th>{t('Privacy')}</th></tr></thead>
+          <table className="admin-table"><thead><tr><th>{t('Participant')}</th><th>{t('Industry')}</th><th>{t('Location')}</th><th>{t('Status')}</th><th>{t('Rein identity ID')}</th><th>{t('Privacy')}</th></tr></thead>
             <tbody>{participants.map((participant) => <tr key={participant.id}>
               <td><strong>{participant.name || t('Unnamed')}</strong><br /><small>{participant.email}</small></td>
               <td>{label(participant.industry)}{participant.industry_other ? ` — ${participant.industry_other}` : ''}</td>

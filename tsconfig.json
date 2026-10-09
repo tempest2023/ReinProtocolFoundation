@@ -35,7 +35,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next-e2e-data/types/**/*.ts",
-    ".next-e2e-data/dev/types/**/*.ts"
+    ".next-e2e-data/dev/types/**/*.ts",
+    ".next-auth-e2e/types/**/*.ts",
+    ".next-auth-e2e/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

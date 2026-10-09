@@ -23,7 +23,7 @@ const definitions: AuthEmail[] = [
     subject: 'Your sign-in link — Rein Protocol Foundation',
     heading: 'Sign in to Rein.',
     preheader: 'Your secure, one-time link to sign in to Rein.',
-    introduction: 'Use the button below to sign in to your Rein account. Open this link in the same browser where you requested it.',
+    introduction: 'Open the link below, then confirm on the Rein website to sign in. You can use a different browser or device. Opening the link alone does not sign you in.',
     action: 'Sign in to Rein →',
     securityNote: 'If you did not request this sign-in link, you can safely ignore this message. Do not forward it or share it with anyone.',
   },
@@ -65,9 +65,14 @@ const definitions: AuthEmail[] = [
 ]
 
 function renderAuthEmail(email: AuthEmail) {
+  const firstParty = email.name === 'confirmation' || email.name === 'magic_link'
+  const flow = email.name === 'confirmation' ? 'confirm-email' : 'admin-signin'
+  const actionUrl = firstParty ? `{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=${flow}` : '{{ .ConfirmationURL }}'
   const actionHtml = email.action
-    ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#a83f22" style="border:1px solid #a83f22;mso-padding-alt:13px 22px;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 22px;color:#ffffff;font-size:14px;font-weight:bold;line-height:1.4;text-decoration:none;">${email.action}</a></td></tr></table>
-<p style="margin:22px 0 16px;color:#75695e;font-size:13px;line-height:1.65;">If the button does not work, copy and paste this link into your browser:<br><a href="{{ .ConfirmationURL }}" style="color:#a83f22;text-decoration:underline;word-break:break-all;">{{ .ConfirmationURL }}</a></p>`
+    ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#a83f22" style="border:1px solid #a83f22;mso-padding-alt:13px 22px;"><a href="${actionUrl}" style="display:inline-block;padding:13px 22px;color:#ffffff;font-size:14px;font-weight:bold;line-height:1.4;text-decoration:none;">${email.action}</a></td></tr></table>
+<p style="margin:22px 0 16px;color:#75695e;font-size:13px;line-height:1.65;">If the button does not work, copy and paste this link into your browser:<br><a href="${actionUrl}" style="color:#a83f22;text-decoration:underline;word-break:break-all;">${actionUrl}</a></p>${firstParty ? `
+<p style="margin:0 0 16px;">Alternatively, enter your email address and the verification code below at <a href="{{ .SiteURL }}/auth/confirm" style="color:#a83f22;">the Rein confirmation page</a>. Select ${email.name === 'confirmation' ? 'Confirm email address' : 'Administrator sign-in'}.</p>
+<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p>` : ''}`
     : '<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p>'
 
   return `<!doctype html>

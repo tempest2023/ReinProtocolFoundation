@@ -5,6 +5,14 @@ import { adminEmails } from '@/lib/env'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { requireSecretClient } from '@/lib/supabase/secret'
 
+export async function isAllowedAdminUser(user: { id: string; email?: string }) {
+  if (!user.email) return false
+  if (adminEmails().has(user.email.toLowerCase())) return true
+  const { data, error } = await requireSecretClient().from('admin_users').select('active').eq('user_id', user.id).maybeSingle()
+  if (error) throw new Error('admin_authorization_unavailable')
+  return Boolean(data?.active)
+}
+
 export const requireAdmin = cache(async function requireAdmin() {
   const authClient = await createSupabaseServerClient()
   if (!authClient) redirect('/admin/login?error=not_configured')

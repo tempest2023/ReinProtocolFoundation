@@ -5,7 +5,8 @@ import { publicEnv } from '@/lib/env'
 import { contributorSchema, formDataRecord, participantSchema, resourceSubmissionSchema, zodErrors } from '@/lib/community/schemas'
 import type { ActionState } from '@/lib/community/types'
 import { requireSecretClient } from '@/lib/supabase/secret'
-import { createVerificationToken, hashedRateIdentifier, normalizeEmail, requestIpAddress } from '@/lib/security'
+import { createVerificationToken, hashedRateIdentifier, normalizeEmail } from '@/lib/security'
+import { consumeFormRateLimit as consumeLimit } from '@/lib/rate-limit'
 import { sendContributorVerification, sendParticipantConfirmation } from '@/lib/email'
 
 function databaseMessage(error: { message: string }) {
@@ -23,18 +24,6 @@ function hourWindow() {
 
 function dayWindow() {
   const date = new Date(); date.setUTCHours(0, 0, 0, 0); return date
-}
-
-async function consumeLimit(form: string, start: Date, limit: number, alternate?: { type: 'email_hash'; value: string }) {
-  const client = requireSecretClient()
-  const identifier = alternate ?? { type: 'ip' as const, value: await requestIpAddress() }
-  const expires = new Date(start); expires.setUTCDate(expires.getUTCDate() + 7)
-  const { data, error } = await client.rpc('consume_form_rate_limit', {
-    p_rate_key: identifier.value, p_identifier_type: identifier.type, p_form_type: form,
-    p_window_start: start.toISOString(), p_limit: limit, p_expires_at: expires.toISOString(),
-  })
-  if (error) throw error
-  if (!data) throw new Error('rate_limit_exceeded')
 }
 
 export async function registerParticipant(_previous: ActionState, formData: FormData): Promise<ActionState> {

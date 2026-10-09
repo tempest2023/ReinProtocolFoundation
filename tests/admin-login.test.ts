@@ -7,7 +7,11 @@ const mocks = vi.hoisted(() => ({
   redirect: vi.fn(() => { throw new Error('NEXT_REDIRECT') }),
   signInWithOtp: vi.fn(),
   verifyOtp: vi.fn(),
+  consumeAuthRateLimits: vi.fn(),
 }))
+
+vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
+vi.mock('@/lib/rate-limit', async (importOriginal) => ({ ...await importOriginal<typeof import('@/lib/rate-limit')>(), consumeAuthRateLimits: mocks.consumeAuthRateLimits }))
 
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect }))
 vi.mock('@/lib/admin/auth', () => ({ isAllowedAdminEmail: mocks.isAllowedAdminEmail }))
@@ -41,6 +45,7 @@ describe('administrator login', () => {
     })
     mocks.verifyOtp.mockResolvedValue({ error: null })
     mocks.signInWithOtp.mockResolvedValue({ error: null })
+    mocks.consumeAuthRateLimits.mockResolvedValue(undefined)
   })
 
   afterEach(() => vi.unstubAllEnvs())
@@ -61,6 +66,7 @@ describe('administrator login', () => {
     })
     expect(mocks.signInWithOtp).not.toHaveBeenCalled()
     expect(mocks.redirect).toHaveBeenCalledWith('/admin')
+    expect(mocks.consumeAuthRateLimits).not.toHaveBeenCalled()
   })
 
   it('uses the email magic-link flow outside the development bypass', async () => {
@@ -73,6 +79,27 @@ describe('administrator login', () => {
     })
 
     expect(mocks.signInWithOtp).toHaveBeenCalledOnce()
+    expect(mocks.generateLink).not.toHaveBeenCalled()
+    expect(mocks.verifyOtp).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['production', 'https://rein-protocol.org'],
+    ['development', 'http://localhost:3000'],
+    ['development', 'http://127.0.0.1:3000'],
+  ])('sends the %s email link to the configured origin %s', async (nodeEnvironment, siteUrl) => {
+    vi.stubEnv('NODE_ENV', nodeEnvironment)
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', siteUrl)
+    vi.stubEnv('RESEND_API_KEY', 're_test')
+    vi.resetModules()
+    const { requestAdminLink: configuredRequestAdminLink } = await import('@/app/admin/login/actions')
+
+    await expect(configuredRequestAdminLink(initialActionState, loginForm())).resolves.toMatchObject({ status: 'success' })
+
+    expect(mocks.signInWithOtp).toHaveBeenCalledWith({
+      email: 'admin@example.org',
+      options: { emailRedirectTo: `${siteUrl}/auth/callback?next=/admin` },
+    })
     expect(mocks.generateLink).not.toHaveBeenCalled()
     expect(mocks.verifyOtp).not.toHaveBeenCalled()
   })
@@ -91,5 +118,28 @@ describe('administrator login', () => {
     expect(mocks.verifyOtp).not.toHaveBeenCalled()
     expect(mocks.signInWithOtp).not.toHaveBeenCalled()
     expect(mocks.redirect).not.toHaveBeenCalled()
+  })
+
+  it('limits authorized and unauthorized email requests before checking eligibility', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    mocks.isAllowedAdminEmail.mockResolvedValue(false)
+    expect(await requestAdminLink(initialActionState, loginForm())).toMatchObject({ status: 'success' })
+    expect(mocks.consumeAuthRateLimits).toHaveBeenCalledWith('send', expect.any(Headers), 'admin@example.org')
+    expect(mocks.consumeAuthRateLimits.mock.invocationCallOrder[0]).toBeLessThan(mocks.isAllowedAdminEmail.mock.invocationCallOrder[0])
+    expect(mocks.signInWithOtp).not.toHaveBeenCalled()
+  })
+
+  it('fails closed when the shared limiter is unavailable', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    mocks.consumeAuthRateLimits.mockRejectedValue(new Error('database failed'))
+    expect(await requestAdminLink(initialActionState, loginForm())).toMatchObject({ status: 'error', message: 'Sign-in is temporarily unavailable. Please try again later.' })
+    expect(mocks.isAllowedAdminEmail).not.toHaveBeenCalled()
+    expect(mocks.signInWithOtp).not.toHaveBeenCalled()
+  })
+
+  it('uses the same response when an authorized email cannot be delivered', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    mocks.signInWithOtp.mockResolvedValue({ error: { message: 'sensitive provider detail' } })
+    expect(await requestAdminLink(initialActionState, loginForm())).toEqual({ status: 'success', message: 'If this address is authorized, a sign-in link has been sent.' })
   })
 })

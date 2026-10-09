@@ -7,6 +7,17 @@ import { databaseEnvironment, databaseFunction, databaseRelation, databaseTable,
 afterEach(() => vi.unstubAllEnvs())
 
 describe('runtime configuration', () => {
+  it('allows the complete administrator callback URLs in local Supabase Auth', () => {
+    const config = readFileSync('supabase/config.toml', 'utf8')
+    const authConfig = config.split('[auth]\n')[1]?.split('\n[auth.')[0] ?? ''
+    const redirects = authConfig.match(/additional_redirect_urls\s*=\s*\[([\s\S]*?)\]/)?.[1] ?? ''
+
+    expect(authConfig).toContain('site_url = "http://localhost:3000"')
+    expect(redirects).toContain('"http://localhost:3000/auth/callback?next=/admin"')
+    expect(redirects).toContain('"http://127.0.0.1:3000/auth/callback?next=/admin"')
+    expect(redirects).not.toContain('**')
+  })
+
   it('accepts current Supabase keys and rejects legacy JWT keys', () => {
     expect(isSupabasePublishableKey('sb_publishable_example')).toBe(true)
     expect(isSupabaseSecretKey('sb_secret_example')).toBe(true)

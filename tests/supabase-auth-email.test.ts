@@ -25,7 +25,7 @@ describe('Rein Supabase Auth emails', () => {
     expect(section).toContain(`content_path = "./supabase/templates/${name}.html"`)
   })
 
-  it.each(supabaseAuthEmailTemplates.filter(({ name }) => name !== 'reauthentication'))('retains the Supabase verification URL for $name, including a copyable fallback', ({ html }) => {
+  it.each(supabaseAuthEmailTemplates.filter(({ name }) => ['invite', 'recovery', 'email_change'].includes(name)))('retains the Supabase verification URL for $name, including a copyable fallback', ({ html }) => {
     const document = new DOMParser().parseFromString(html, 'text/html')
     const links = [...document.querySelectorAll('a')].filter((link) => link.getAttribute('href') === '{{ .ConfirmationURL }}')
     expect(links).toHaveLength(2)
@@ -33,6 +33,21 @@ describe('Rein Supabase Auth emails', () => {
     expect(html).not.toContain('{{ .RedirectTo }}')
     expect(html).not.toContain('{{ .SiteURL }}')
     expect(html).toContain('can only be used once')
+  })
+
+  it.each(supabaseAuthEmailTemplates.filter(({ name }) => ['confirmation', 'magic_link'].includes(name)))('uses a first-party fragment and an OTP fallback for $name', ({ name, html }) => {
+    const flow = name === 'confirmation' ? 'confirm-email' : 'admin-signin'
+    const document = new DOMParser().parseFromString(html, 'text/html')
+    const expected = `{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&flow=${flow}`
+    const links = [...document.querySelectorAll('a')].filter((link) => link.getAttribute('href') === expected)
+    expect(links).toHaveLength(2)
+    expect(links[1].textContent).toBe(expected)
+    expect(document.querySelector('a[href="{{ .SiteURL }}/auth/confirm"]')).not.toBeNull()
+    expect(html).toContain('{{ .Token }}')
+    expect(html).not.toContain('{{ .ConfirmationURL }}')
+    expect(html).not.toContain('{{ .RedirectTo }}')
+    expect(html).not.toContain('same browser')
+    expect(html).not.toMatch(/\?token_hash=|<script/)
   })
 
   it('preserves code-only reauthentication and the email-change variable', () => {

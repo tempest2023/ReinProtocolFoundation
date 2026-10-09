@@ -1,4 +1,5 @@
 import { AdminForm } from '@/components/admin-form'
+import { AdminIdentityAuthorizationForm } from '@/components/admin-identity-authorization-form'
 import { AdminSubmitButton } from '@/components/admin-submit-button'
 import { requireAdmin } from '@/lib/admin/auth'
 import { getAdminI18n } from '@/lib/admin/i18n-server'
@@ -215,22 +216,19 @@ export default async function IdentitiesPage({ searchParams }: { searchParams: P
                   </section>
 
                   <section className="admin-record__section">
-                    <h2>{t('Authorization')}</h2>
+                    <h2>{t('Agent permissions')}</h2>
+                    <p>{t('These permissions control which protected actions this person can perform through the Rein Agent.')}</p>
                     {contact.deleted_at ? <p>{t('Deleted Rein identities cannot receive roles.')}</p> : (
-                      <AdminForm
-                        actionId="set_contact_roles"
+                      <AdminIdentityAuthorizationForm
+                        contactId={contact.id}
+                        contributorStatus={contributor?.status === 'active' ? 'active' : 'inactive'}
+                        directorStatus={director?.authorization_status === 'active' ? 'active' : 'inactive'}
+                        directorDisplayName={director?.display_name || defaultName}
+                        directorSlug={director?.slug || suggestSlug(defaultName)}
+                        directorRole={director?.role || 'Director'}
+                        directorPublicationStatus={director?.publication_status}
                         resetKey={`${contact.id}:${contributor?.status ?? 'none'}:${director?.authorization_status ?? 'none'}`}
-                        successMessage={t('Rein identity authorization updated.')}
-                      >
-                        <input type="hidden" name="contact_id" value={contact.id} />
-                        <label>{t('Contributor')}<select name="contributor_status" defaultValue={contributor?.status === 'active' ? 'active' : 'inactive'}><option value="inactive">{t('Not active')}</option><option value="active">{t('Active Contributor')}</option></select></label>
-                        <label>{t('Director')}<select name="director_status" defaultValue={director?.authorization_status === 'active' ? 'active' : 'inactive'}><option value="inactive">{t('Not active')}</option><option value="active">{t('Active Director')}</option></select></label>
-                        <label>{t('Director display name')}<input name="director_display_name" defaultValue={director?.display_name || defaultName} /></label>
-                        <label>{t('Director profile slug')}<input name="director_slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={director?.slug || suggestSlug(defaultName)} /></label>
-                        <label>{t('Director role')}<input name="director_role" defaultValue={director?.role || 'Director'} /></label>
-                        {director ? <p><small>{t('Profile publication: {status}. Authorization is managed independently.', { status: label(director.publication_status) })}</small></p> : null}
-                        <AdminSubmitButton pendingLabel={t('Updating authorization…')}>{t('Save authorization')}</AdminSubmitButton>
-                      </AdminForm>
+                      />
                     )}
                   </section>
                 </div>

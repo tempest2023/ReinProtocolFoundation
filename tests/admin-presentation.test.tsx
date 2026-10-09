@@ -30,10 +30,12 @@ describe('administration presentation', () => {
 
   it('keeps direct Rein identity authorization inside the authenticated admin surface', () => {
     const identities = readFileSync('app/admin/(dashboard)/identities/page.tsx', 'utf8')
+    const permissions = readFileSync('components/admin-identity-authorization-form.tsx', 'utf8')
     const actions = readFileSync('app/admin/actions.ts', 'utf8')
 
     expect(identities).toContain('Direct registration without email verification')
-    expect(identities).toContain('actionId="set_contact_roles"')
+    expect(identities).toContain('<AdminIdentityAuthorizationForm')
+    expect(permissions).toContain('actionId="set_contact_roles"')
     expect(identities).toContain("service.from('rein_platform_links')")
     expect(actions).toContain("service.rpc('admin_set_contact_roles'")
     expect(actions).toContain('p_actor_id: user.id')

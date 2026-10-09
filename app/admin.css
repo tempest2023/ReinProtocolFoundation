@@ -569,6 +569,17 @@
   font-weight: 500;
 }
 
+.admin-form__field {
+  display: grid;
+  gap: .28rem;
+}
+
+.admin-form__field > small {
+  color: #756d63;
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
 .admin-form input,
 .admin-form select,
 .admin-form textarea {
@@ -613,6 +624,10 @@
   margin: 0;
   padding: .85rem;
   border: 1px solid #d7cfc2;
+}
+
+.admin-form fieldset[hidden] {
+  display: none;
 }
 
 .admin-form legend {

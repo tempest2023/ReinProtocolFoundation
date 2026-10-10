@@ -1,7 +1,7 @@
 # Supabase Auth email branding
 
 The six Auth emails use the same Rein Protocol Foundation design as the community welcome
-email: paper backgrounds, Rein logo, Golden Gate Bridge cover, serif heading, rust-red action,
+email: paper backgrounds, Rein logo, compact Golden Gate Bridge background beside the logo, serif heading, rust-red action,
 and a compact security footer. The copy is account-security copy, not a community welcome or
 marketing message. These templates are English and are independent of the Admin UI locale.
 

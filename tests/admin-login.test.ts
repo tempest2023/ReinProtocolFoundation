@@ -73,7 +73,7 @@ describe('administrator login', () => {
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('RESEND_API_KEY', '')
 
-    await expect(requestAdminLink(initialActionState, loginForm())).resolves.toEqual({
+    await expect(requestAdminLink(initialActionState, loginForm())).resolves.toMatchObject({
       status: 'success',
       message: 'If this address is authorized, a sign-in link has been sent.',
     })
@@ -98,7 +98,7 @@ describe('administrator login', () => {
 
     expect(mocks.signInWithOtp).toHaveBeenCalledWith({
       email: 'admin@example.org',
-      options: { emailRedirectTo: `${siteUrl}/auth/callback?next=/admin` },
+      options: { emailRedirectTo: `${siteUrl}/auth/confirm` },
     })
     expect(mocks.generateLink).not.toHaveBeenCalled()
     expect(mocks.verifyOtp).not.toHaveBeenCalled()
@@ -109,7 +109,7 @@ describe('administrator login', () => {
     vi.stubEnv('RESEND_API_KEY', '')
     mocks.isAllowedAdminEmail.mockResolvedValue(false)
 
-    await expect(requestAdminLink(initialActionState, loginForm('unknown@example.org'))).resolves.toEqual({
+    await expect(requestAdminLink(initialActionState, loginForm('unknown@example.org'))).resolves.toMatchObject({
       status: 'success',
       message: 'If this address is authorized, you will be signed in.',
     })
@@ -140,6 +140,27 @@ describe('administrator login', () => {
   it('uses the same response when an authorized email cannot be delivered', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     mocks.signInWithOtp.mockResolvedValue({ error: { message: 'sensitive provider detail' } })
-    expect(await requestAdminLink(initialActionState, loginForm())).toEqual({ status: 'success', message: 'If this address is authorized, a sign-in link has been sent.' })
+    expect(await requestAdminLink(initialActionState, loginForm())).toMatchObject({ status: 'success', message: 'If this address is authorized, a sign-in link has been sent.' })
   })
+  it('uses a fixed code redirect and reports the submitted method without exposing eligibility', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const form = loginForm()
+    form.set('method', 'code')
+    const sent = await requestAdminLink(initialActionState, form)
+    expect(sent).toMatchObject({ status: 'success', method: 'code', email: 'admin@example.org' })
+    expect(sent.retryAt).toBeGreaterThan(Date.now())
+    expect(mocks.signInWithOtp).toHaveBeenCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'http://localhost:3000/auth/code' } }))
+    mocks.isAllowedAdminEmail.mockResolvedValue(false)
+    expect(await requestAdminLink(initialActionState, form)).toMatchObject({ status: 'success', method: 'code', email: sent.email, message: sent.message })
+  })
+
+  it('rejects unknown and duplicate methods before sending', async () => {
+    for (const methods of [['recovery'], ['code', 'magic-link']]) {
+      const form = loginForm()
+      for (const method of methods) form.append('method', method)
+      expect(await requestAdminLink(initialActionState, form)).toMatchObject({ status: 'error' })
+    }
+    expect(mocks.signInWithOtp).not.toHaveBeenCalled()
+  })
+
 })

@@ -1000,14 +1000,14 @@
 
 .admin-login {
   display: grid;
-  min-height: 100vh;
+  min-height: 100svh;
   place-items: center;
   padding: 1rem;
   background: #f3efe6;
 }
 
 .admin-login__panel {
-  width: min(100%, 28rem);
+  width: min(100%, 40rem);
   padding: 1.5rem;
   border: 1px solid #c9c1b5;
   background: #fffaf2;
@@ -1090,3 +1090,20 @@
   .admin-record > summary::after { grid-column: 2; grid-row: 2; }
   .admin-row-form { min-width: 15rem; }
 }
+
+/* Focused authentication states share a readable, compact card. */
+.admin-login__panel { padding: clamp(1.25rem, 3vw, 2rem); }
+.admin-login__panel h1 { font-size: clamp(2rem, 4vw, 2.5rem); line-height: 1.1; }
+.admin-login__panel > p, .auth-sent p, .auth-link-result > p { margin-block: .75rem; }
+.auth-sent h2 { margin: 1rem 0 .5rem; font: 500 1.5rem/1.2 var(--font-display); }
+.auth-help, .auth-footer { font-size: .875rem; line-height: 1.5; }
+.auth-email-address { overflow-wrap: anywhere; font-weight: 600; }
+.auth-methods { display: flex; gap: .5rem; }
+.admin-form .auth-methods button { flex: 1; background: transparent; color: #302a25; border: 1px solid #c9c1b5; }
+.admin-form .auth-methods button[aria-pressed='true'] { border-color: #a83f22; background: #eee3d2; color: #8e321c; }
+.auth-secondary-actions { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin-top: 1rem; }
+.auth-text-button { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; font-size: .875rem; text-decoration: underline; cursor: pointer; }
+.auth-text-button:disabled { cursor: default; opacity: .55; }
+.auth-text-button:focus-visible { outline: 2px solid #a83f22; outline-offset: 4px; }
+.auth-primary-link { display: inline-block; padding: .8rem 1rem; text-decoration: none; }
+.admin-login__panel .form-status { margin-block: .75rem; padding: 1rem; }

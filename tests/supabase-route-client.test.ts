@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CookieMethodsServer } from '@supabase/ssr'
 const createServerClient = vi.hoisted(() => vi.fn())
 vi.mock('@supabase/ssr', () => ({ createServerClient }))
-vi.mock('@/lib/env', () => ({ publicEnv: { supabaseUrl: 'https://local-project.supabase.test', supabaseKey: 'sb_publishable_test' } }))
+vi.mock('@/lib/env', () => ({ publicEnv: { siteUrl: 'https://rein.test', supabaseUrl: 'https://local-project.supabase.test', supabaseKey: 'sb_publishable_test' } }))
 import { createSupabaseRouteClient } from '@/lib/supabase/route'
 
 describe('writable Supabase Route Handler adapter', () => {
@@ -16,13 +16,19 @@ describe('writable Supabase Route Handler adapter', () => {
     const cookies = createServerClient.mock.calls[0][2].cookies as CookieMethodsServer
     expect(cookies.getAll!()).toEqual([{ name: 'sb-old-auth-token.0', value: 'old' }])
     cookies.setAll!([
-      { name: 'sb-old-auth-token.0', value: 'chunk-0', options: { path: '/', secure: true } },
+      { name: 'sb-old-auth-token.0', value: 'chunk-0', options: { path: '/', secure: true, maxAge: 400 * 86400 } },
       { name: 'sb-old-auth-token.1', value: 'chunk-1', options: { path: '/', sameSite: 'lax' } },
       { name: 'sb-old-auth-token.2', value: '', options: { path: '/', maxAge: 0 } },
     ], { 'Cache-Control': 'private, no-cache, no-store, must-revalidate, max-age=0', Pragma: 'no-cache', Expires: '0' })
     const response = applyCookies(NextResponse.json({ status: 'verified' }))
     expect(response.cookies.getAll()).toHaveLength(3)
     expect(response.cookies.get('sb-old-auth-token.1')?.value).toBe('chunk-1')
+    expect(response.cookies.get('sb-old-auth-token.0')?.maxAge).toBe(30 * 86400)
+    expect(response.cookies.get('sb-old-auth-token.1')?.maxAge).toBe(30 * 86400)
+    expect(response.cookies.get('sb-old-auth-token.0')?.secure).toBe(true)
+    expect(response.cookies.get('sb-old-auth-token.1')?.secure).toBe(true)
+    expect(response.cookies.get('sb-old-auth-token.1')?.httpOnly).toBe(true)
+    expect(response.cookies.get('sb-old-auth-token.2')?.maxAge).toBe(0)
     expect(response.headers.get('set-cookie')).toContain('Max-Age=0')
     expect(response.headers.get('cache-control')).toContain('private')
     expect(response.headers.get('cache-control')).toContain('no-store')

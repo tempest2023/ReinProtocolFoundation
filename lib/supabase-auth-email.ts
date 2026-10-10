@@ -23,7 +23,7 @@ const definitions: AuthEmail[] = [
     subject: 'Your sign-in link — Rein Protocol Foundation',
     heading: 'Sign in to Rein.',
     preheader: 'Your secure, one-time link to sign in to Rein.',
-    introduction: 'Open the link below, then confirm on the Rein website to sign in. You can use a different browser or device. Opening the link alone does not sign you in.',
+    introduction: 'Click the button below to sign in to Rein. You can use a different browser or device.',
     action: 'Sign in to Rein →',
     securityNote: 'If you did not request this sign-in link, you can safely ignore this message. Do not forward it or share it with anyone.',
   },
@@ -64,40 +64,41 @@ const definitions: AuthEmail[] = [
   },
 ]
 
-function renderAuthEmail(email: AuthEmail) {
+function renderAuthEmail(email: AuthEmail, codeOnly = false) {
   const firstParty = email.name === 'confirmation' || email.name === 'magic_link'
   const flow = email.name === 'confirmation' ? 'confirm-email' : 'admin-signin'
   const actionUrl = firstParty ? `{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=${flow}` : '{{ .ConfirmationURL }}'
-  const actionHtml = email.action
-    ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#a83f22" style="border:1px solid #a83f22;mso-padding-alt:13px 22px;"><a href="${actionUrl}" style="display:inline-block;padding:13px 22px;color:#ffffff;font-size:14px;font-weight:bold;line-height:1.4;text-decoration:none;">${email.action}</a></td></tr></table>
-<p style="margin:22px 0 16px;color:#75695e;font-size:13px;line-height:1.65;">If the button does not work, copy and paste this link into your browser:<br><a href="${actionUrl}" style="color:#a83f22;text-decoration:underline;word-break:break-all;">${actionUrl}</a></p>${firstParty ? `
-<p style="margin:0 0 16px;">Alternatively, enter your email address and the verification code below at <a href="{{ .SiteURL }}/auth/confirm" style="color:#a83f22;">the Rein confirmation page</a>. Select ${email.name === 'confirmation' ? 'Confirm email address' : 'Administrator sign-in'}.</p>
-<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p>` : ''}`
-    : '<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p>'
+  const actionHtml = codeOnly || !email.action
+    ? '<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p>' + (codeOnly ? '<p style="margin:0 0 20px;">Enter this code on the sign-in page you just used, or <a href="{{ .SiteURL }}/auth/code" style="color:#a83f22;">open the code sign-in page</a>.</p>' : '')
+    : `<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#a83f22" style="border:1px solid #a83f22;mso-padding-alt:13px 22px;"><a href="${actionUrl}" style="display:inline-block;padding:13px 22px;color:#ffffff;font-size:14px;font-weight:bold;line-height:1.4;text-decoration:none;">${email.action}</a></td></tr></table>
+<p style="margin:22px 0 16px;color:#75695e;font-size:13px;line-height:1.65;">If the button does not work, copy and paste this link into your browser:<br><a href="${actionUrl}" style="color:#a83f22;text-decoration:underline;word-break:break-all;">${actionUrl}</a></p>`
 
   return `<!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${email.heading}</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${email.heading}</title><style>@media only screen and (max-width:480px){.rein-brand{padding:16px 8px 16px 16px!important}.rein-logo-cell{width:48px!important}.rein-mark{width:48px!important;height:48px!important}.rein-wordmark{padding-left:10px!important;font-size:11px!important;letter-spacing:1px!important}.rein-bridge{height:80px!important;background-size:220px 110px!important}}</style></head>
 <body style="margin:0;padding:0;background-color:#e8ddc8;color:#302a25;">
 <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">${email.preheader}</div>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#e8ddc8"><tr><td align="center" style="padding:24px 12px;">
 <!--[if mso]><table role="presentation" width="640" align="center"><tr><td><![endif]-->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f5ead3" style="max-width:640px;border:1px solid #d0c3ad;font-family:Arial,sans-serif;">
-<tr><td style="padding:24px;border-bottom:1px solid #d5c7b1;">
+<tr><td style="border-bottom:1px solid #d5c7b1;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
+<td class="rein-brand" width="65%" valign="middle" style="padding:24px;">
 <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
-<td width="64" valign="middle"><a href="https://rein-protocol.org/"><img src="https://rein-protocol.org/brand/rein-mark-header.png" width="64" height="64" alt="Rein logo" style="display:block;border:0;width:64px;height:64px;"></a></td>
-<td valign="middle" style="padding-left:16px;color:#302a25;font-size:16px;font-weight:bold;letter-spacing:2px;line-height:1.5;">REIN PROTOCOL<br>FOUNDATION</td>
+<td class="rein-logo-cell" width="64" valign="middle"><a href="https://rein-protocol.org/"><img class="rein-mark" src="https://rein-protocol.org/brand/rein-mark-header.png" width="64" height="64" alt="Rein logo" style="display:block;border:0;width:64px;height:64px;"></a></td>
+<td class="rein-wordmark" valign="middle" style="padding-left:16px;color:#302a25;font-size:16px;font-weight:bold;letter-spacing:2px;line-height:1.5;">REIN PROTOCOL<br>FOUNDATION</td>
+</tr></table></td>
+<td class="rein-bridge" width="35%" height="112" aria-hidden="true" bgcolor="#f5ead3" style="height:112px;background-image:url('https://rein-protocol.org/images/welcome-golden-gate-cover.jpg');background-repeat:no-repeat;background-position:10% 58%;background-size:300px 150px;font-size:0;line-height:0;">&nbsp;</td>
 </tr></table></td></tr>
 <tr><td style="padding:28px 24px 20px;">
 <p style="margin:0 0 12px;color:#75695e;font-size:11px;letter-spacing:2px;line-height:1.5;">ACCOUNT SECURITY</p>
 <h1 style="margin:0;font-family:Georgia,serif;font-size:34px;font-weight:normal;line-height:1.18;color:#302a25;">${email.heading}</h1>
 </td></tr>
-<tr><td align="center"><a href="https://rein-protocol.org/" style="text-decoration:none;"><img src="https://rein-protocol.org/images/welcome-golden-gate-cover.jpg" width="640" alt="The Golden Gate Bridge and San Francisco Bay in Rein’s paper-collage artwork." style="display:block;width:100%;max-width:640px;height:auto;border:0;"></a></td></tr>
-<tr><td style="padding:28px 24px 12px;font-size:15px;line-height:1.75;">
+<tr><td style="padding:16px 24px 12px;font-size:15px;line-height:1.75;">
 <p style="margin:0 0 16px;">Hello,</p>
 <p style="margin:0 0 20px;">${email.introduction}</p>
 ${actionHtml}
-<p style="margin:0 0 16px;">This ${email.action ? 'link' : 'code'} expires shortly and can only be used once.</p>
+<p style="margin:0 0 16px;">This ${codeOnly || !email.action ? 'code' : 'link'} ${firstParty ? 'is valid for 2 hours' : 'expires shortly'} and can only be used once.</p>
 <p style="margin:0 0 20px;">${email.securityNote}</p>
 <p style="margin:0 0 20px;">Rein Protocol Foundation</p>
 </td></tr>
@@ -109,11 +110,29 @@ ${actionHtml}
 </td></tr></table></body></html>`
 }
 
-export const supabaseAuthEmailTemplates = definitions.map((email) => ({
-  name: email.name,
-  subject: email.subject,
-  html: renderAuthEmail(email),
-}))
+const magicLink = definitions.find((email) => email.name === 'magic_link')!
+const codeEmail: AuthEmail = {
+  ...magicLink, subject: 'Your sign-in code — Rein Protocol Foundation', heading: 'Your sign-in code.',
+  preheader: 'Your one-time code to sign in to Rein.',
+  introduction: 'Enter this 8-digit code on the Rein sign-in page. It is valid for 2 hours.', action: undefined,
+  securityNote: 'If you did not request this sign-in code, you can safely ignore this message. Never share this code with anyone.',
+}
+const isCode = 'eq .RedirectTo (print .SiteURL "/auth/code")'
+const isAdminLink = 'eq .RedirectTo (print .SiteURL "/auth/confirm")'
+
+export const supabaseAuthEmailTemplates = definitions.map((email) => {
+  const firstParty = email.name === 'confirmation' || email.name === 'magic_link'
+  return {
+    name: email.name,
+    subject: firstParty ? `{{ if ${isCode} }}${codeEmail.subject}{{ else if ${isAdminLink} }}${magicLink.subject}{{ else }}${email.subject}{{ end }}` : email.subject,
+    html: firstParty ? `{{ if ${isCode} }}${renderAuthEmail(codeEmail, true)}{{ else if ${isAdminLink} }}${renderAuthEmail(magicLink)}{{ else }}${renderAuthEmail(email)}{{ end }}` : renderAuthEmail(email),
+  }
+})
+
+// Preview actual variants rather than displaying unexecuted Go template branches.
+export const supabaseAuthEmailPreviews = definitions.flatMap((email) => ['confirmation', 'magic_link'].includes(email.name)
+  ? [{ name: `${email.name}-link`, subject: email.subject, html: renderAuthEmail(email) }, { name: `${email.name}-code`, subject: codeEmail.subject, html: renderAuthEmail(codeEmail, true) }]
+  : [{ name: email.name, subject: email.subject, html: renderAuthEmail(email) }])
 
 export function supabaseAuthEmailConfiguration() {
   return Object.fromEntries(supabaseAuthEmailTemplates.flatMap((email) => [

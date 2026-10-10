@@ -46,7 +46,7 @@ async function uploadImage(formData: FormData, folder: string) {
 
 export async function signOut() {
   const client = await createSupabaseServerClient()
-  await client?.auth.signOut()
+  await client?.auth.signOut({ scope: 'local' })
   redirect('/admin/login')
 }
 

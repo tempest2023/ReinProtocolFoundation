@@ -44,3 +44,14 @@ Local templates are configured in this directory's `config.toml`; hosted templat
 updated separately without pushing localhost configuration into the shared project.
 
 Authentication emails expire after 7200 seconds (2 hours). Both confirmation and magic_link templates select a link-only or code-only variant using the fixed RedirectTo path. The first-party link is automatically exchanged on hydration; GET/HEAD alone do not consume it.
+
+Hosted Auth uses Resend custom SMTP (`smtp.resend.com:465`, user `resend`, sender
+`noreply@rein-protocol.org`) with `rate_limit_email_sent = 10` per hour across the project.
+SMTP credentials stay in the hosted settings; never commit them or push local SMTP configuration.
+The 60-second resend cooldown and application limits still apply independently.
+
+Browser Auth cookies persist for 30 days and renew when the proxy refreshes the session.
+Access tokens remain valid for one hour; hosted session timebox and inactivity timeout are disabled,
+and multiple devices are allowed. Sign Out revokes only the current session and clears its cookies.
+The cookie policy is applied at all SSR write boundaries because the installed SDK overrides
+`cookieOptions.maxAge` with its own default. Cookie deletion must retain `Max-Age=0`.

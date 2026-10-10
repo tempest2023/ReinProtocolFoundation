@@ -74,6 +74,56 @@ test('GET, HEAD and prefetch preserve the token; hydration automatically signs i
   expect(await replay.json()).toEqual({ status: 'invalid_or_expired' })
 })
 
+test('administrator persists across browser reopening and Sign Out ends only the current session', async ({ browser, baseURL }) => {
+  const original = await browser.newContext()
+  const link = await credential(adminEmail)
+  expect((await verify(original, link.hash, baseURL!, 'admin-signin')).ok()).toBe(true)
+  const authCookies = (await original.cookies()).filter(c => c.name.includes('auth-token'))
+  expect(authCookies.length).toBeGreaterThan(0)
+  for (const cookie of authCookies) expect(cookie.expires - Date.now() / 1000).toBeCloseTo(30 * 86400, -1)
+  const stored = await original.storageState()
+  await original.close()
+  const reopened = await browser.newContext({ storageState: stored })
+  const page = await reopened.newPage()
+  await page.goto('/admin/login')
+  await expect(page).toHaveURL(`${baseURL}/admin`)
+
+  // Age only client-side expiry metadata; keep the signed JWT and refresh token intact.
+  // This exercises the real proxy/GoTrue refresh path without waiting an hour.
+  const persisted = (await reopened.cookies()).filter(c => c.name.includes('auth-token')).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  const session = JSON.parse(Buffer.from(persisted.map(c => c.value).join('').slice(7), 'base64url').toString())
+  const previousRefreshToken = session.refresh_token
+  session.expires_at = Math.floor(Date.now() / 1000) - 60
+  const encoded = 'base64-' + Buffer.from(JSON.stringify(session)).toString('base64url')
+  const stem = persisted[0].name.replace(/\.\d+$/, '')
+  await reopened.clearCookies({ name: /auth-token/ })
+  const chunks = []
+  for (let offset = 0; offset < encoded.length; offset += 3000) {
+    const { name: _name, value: _value, ...attributes } = persisted[0]
+    chunks.push({ ...attributes, name: encoded.length > 3000 ? `${stem}.${chunks.length}` : stem, value: encoded.slice(offset, offset + 3000) })
+  }
+  await reopened.addCookies(chunks)
+  await page.goto('/admin')
+  await expect(page).toHaveURL(`${baseURL}/admin`)
+  const refreshed = (await reopened.cookies()).filter(c => c.name.includes('auth-token')).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  expect(JSON.parse(Buffer.from(refreshed.map(c => c.value).join('').slice(7), 'base64url').toString()).refresh_token).not.toBe(previousRefreshToken)
+  for (const cookie of refreshed) expect(cookie.expires - Date.now() / 1000).toBeCloseTo(30 * 86400, -1)
+
+  const second = await browser.newContext()
+  const secondLink = await credential(adminEmail)
+  expect((await verify(second, secondLink.hash, baseURL!, 'admin-signin')).ok()).toBe(true)
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click()
+  await expect(page).toHaveURL(`${baseURL}/admin/login`)
+  expect((await reopened.cookies()).filter(c => c.name.includes('auth-token'))).toHaveLength(0)
+  await page.goto('/admin')
+  await expect(page).toHaveURL(`${baseURL}/admin/login`)
+  const otherPage = await second.newPage()
+  await otherPage.goto('/admin')
+  await expect(otherPage.getByRole('heading', { name: 'Community operations', exact: true })).toBeVisible()
+  await reopened.close()
+  await second.close()
+})
+
 for (const existing of [false, true]) {
   test(`${existing ? 'existing' : 'first'} administrator receives a link-only email and signs in in a different browser`, async ({ page, browser, baseURL }, testInfo) => {
     if (existing) {

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { publicEnv } from '@/lib/env'
+import { authCookieOptions } from '@/lib/supabase/cookies'
 
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname === '/auth/confirm' || request.nextUrl.pathname === '/auth/confirmed' || request.nextUrl.pathname === '/auth/code') {
@@ -25,7 +26,7 @@ export async function proxy(request: NextRequest) {
       setAll: (cookiesToSet) => {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
         response = NextResponse.next({ request })
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, authCookieOptions(options)))
       },
     },
   })

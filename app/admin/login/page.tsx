@@ -3,8 +3,14 @@ import Link from 'next/link'
 import { AdminLoginForm } from '@/app/admin/login/login-form'
 import { adminReadiness, isDirectAdminLoginEnabled } from '@/lib/env'
 import { AdminLanguageSwitcher } from '@/components/admin-i18n'
+import { redirect } from 'next/navigation'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { isAllowedAdminUser } from '@/lib/admin/auth'
 
 export default async function AdminLoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const client = await createSupabaseServerClient()
+  const user = client ? (await client.auth.getUser()).data.user : null
+  if (user && await isAllowedAdminUser(user)) redirect('/admin')
   const { t } = await getAdminI18n()
   const { error } = await searchParams
   const readiness = adminReadiness()

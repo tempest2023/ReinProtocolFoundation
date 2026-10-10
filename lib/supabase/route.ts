@@ -2,6 +2,7 @@ import 'server-only'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { NextRequest, NextResponse } from 'next/server'
 import { publicEnv } from '@/lib/env'
+import { authCookieOptions } from '@/lib/supabase/cookies'
 
 // Keep writes pending until the final response is known, including every chunk
 // and stale-chunk deletion. Cookie failures are intentionally not swallowed.
@@ -21,7 +22,7 @@ export function createSupabaseRouteClient(request: NextRequest) {
   return {
     client,
     applyCookies(response: NextResponse) {
-      for (const { name, value, options } of pending.values()) response.cookies.set(name, value, options)
+      for (const { name, value, options } of pending.values()) response.cookies.set(name, value, authCookieOptions(options))
       pendingHeaders.forEach((value, key) => response.headers.set(key, value))
       return response
     },

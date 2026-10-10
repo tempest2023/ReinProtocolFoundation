@@ -24,20 +24,23 @@ Confirmation and magic-link templates now use a first-party verification entry:
 {{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&flow=admin-signin
 ```
 
-The button and copyable fallback use the same URL. Both emails also show `{{ .Token }}`
-and a credential-free `{{ .SiteURL }}/auth/confirm` link for manual OTP entry. Opening,
-prefetching or hydrating the page does not verify a credential. The browser reads the
-fragment into component memory and removes it from the address bar. Only the user's
-confirmation POST calls `verifyOtp` with the publishable key and persists SSR cookies.
-This works in another browser without the requesting browser's PKCE verifier. Refreshing
-loses the in-memory credential; reopen the email or use its code. JavaScript is required.
+The button and copyable fallback use the same URL. For administrator requests, the fixed
+`RedirectTo` selects mutually exclusive email variants: `/auth/confirm` sends a link-only
+email, and `/auth/code` sends a code-only email with a credential-free code-entry link.
+Both confirmation and magic_link templates support these variants, including first sign-in.
+The first-party page reads the fragment into component memory, removes it from the address
+bar and automatically POSTs once to exchange it. HTTP GET, HEAD and non-JavaScript prefetch
+do not consume credentials. Cross-browser sign-in does not require the requesting browser's
+PKCE verifier. Reopen the original email after losing the in-memory credential. JavaScript
+is required for automatic link sign-in; code sign-in is offered separately before sending.
 Query-string tokens and nested ConfirmationURL inputs are intentionally unsupported.
 
 Invite, recovery and email-change templates retain `{{ .ConfirmationURL }}` because their
 complete product flows are outside this release. Reauthentication keeps `{{ .Token }}`
 and email changes keep `{{ .NewEmail }}`. Do not substitute bare `{{ .RedirectTo }}`:
 it has no verification credential. The legacy `/auth/callback` remains supported.
-Neither OTP length nor expiry is hard-coded in the email copy.
+Administrator email copy states the configured two-hour validity; keep it synchronized with
+`mailer_otp_exp = 7200`. OTP inputs use the configured eight-digit length.
 
 The generated [Auth email preview](supabase-auth-email-preview.html) uses inert placeholder
 credentials. It is regenerated and checked with the same script as the six HTML files.
@@ -51,14 +54,15 @@ New Free projects created on or after June 3, 2026 cannot customize templates wh
 Supabase's default email service; custom SMTP removes that restriction. The linked Rein
 project was created after that date, so custom SMTP is required for this branding.
 
-For this first-party release, deploy the website before applying only
-`mailer_templates_confirmation_content` and `mailer_templates_magic_link_content` from
-`supabaseAuthEmailConfiguration()`. Subjects are unchanged. Do not update the other four
-flows as part of this release. The full helper still exports all twelve template fields
-for separate branding work. Configure SMTP separately if
-needed. Do not run `supabase config push` for this change: the local configuration intentionally
-retains localhost URLs, local SMTP behavior, and settings that must not overwrite the hosted
-project. Preserve hosted redirects, account-security flags, expiry, and rate limits.
+Deploy the website before applying the four confirmation/magic_link subject and HTML fields
+from `supabaseAuthEmailConfiguration()`. Preserve the other four flows. The full helper still
+exports all twelve template fields for separate branding work. Do not run `supabase config
+push`: local URLs and mail-catcher settings must not overwrite the hosted project.
+
+The hosted project uses Resend SMTP with a project-wide limit of ten Auth emails per hour,
+a 60-second resend cooldown, and 7200-second email credential validity. Browser session
+cookies persist for 30 days, renewing when access tokens refresh. JWTs remain valid for
+one hour. Sign Out clears and revokes the current session, preserving other devices.
 
 Verify the saved template bodies and SMTP settings by reading the hosted Auth configuration
 back. No email should be sent as a configuration test without an explicit request to do so.
@@ -81,12 +85,14 @@ Local implementation does not change hosted Auth configuration. Before rollout:
    SMTP and security settings. Set `AUTH_EMAIL_OTP_LENGTH` to that actual length; the
    local config and default use eight digits. A production build served over loopback
    HTTP for testing requires `AUTH_ALLOW_LOCAL_HTTP=1`; this option is ignored on Vercel.
-3. Back up the two old template bodies, then update only confirmation and magic-link
-   HTML. Preserve SMTP, sender, Site URL, redirect allowlist, cooldown, expiry and CAPTCHA.
+3. Back up Auth configuration, then update confirmation/magic_link subjects and HTML.
+   Set email credential expiry to 7200 seconds and the SMTP email limit to 10/hour.
+   Preserve Resend credentials, security flags, other templates and existing redirects;
+   append the fixed `/auth/confirm` and `/auth/code` HTTPS callbacks if missing.
 4. Read the bodies back. Keep email click/open tracking disabled. With separately
    authorized test recipients, test first-account confirmation, existing-account sign-in,
    OTP entry, another browser/device and Gmail/Outlook/Apple Mail including Safe Links.
-5. For rollback, restore the two backed-up bodies. Keep the new routes until previously
+5. For rollback, restore the backed-up subjects, bodies and relevant settings. Keep the new routes until previously
    sent first-party links expire plus a buffer; keep the legacy callback throughout.
 
 Verification checks Origin against the configured Site URL and a ten-minute host-only

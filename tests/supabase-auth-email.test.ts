@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { supabaseAuthEmailConfiguration, supabaseAuthEmailTemplates } from '@/lib/supabase-auth-email'
+import { supabaseAuthEmailConfiguration, supabaseAuthEmailTemplates, supabaseAuthEmailPreviews } from '@/lib/supabase-auth-email'
 import { participantConfirmationTemplate } from '@/lib/email-templates'
 
 describe('Rein Supabase Auth emails', () => {
@@ -21,7 +21,7 @@ describe('Rein Supabase Auth emails', () => {
     expect(readFileSync(`supabase/templates/${name}.html`, 'utf8')).toBe(`${html}\n`)
     const config = readFileSync('supabase/config.toml', 'utf8')
     const section = config.split(`[auth.email.template.${name}]\n`)[1]?.split('\n[')[0]
-    expect(section).toContain(`subject = "${subject}"`)
+    expect(section).toContain(subject)
     expect(section).toContain(`content_path = "./supabase/templates/${name}.html"`)
   })
 
@@ -35,19 +35,31 @@ describe('Rein Supabase Auth emails', () => {
     expect(html).toContain('can only be used once')
   })
 
-  it.each(supabaseAuthEmailTemplates.filter(({ name }) => ['confirmation', 'magic_link'].includes(name)))('uses a first-party fragment and an OTP fallback for $name', ({ name, html }) => {
-    const flow = name === 'confirmation' ? 'confirm-email' : 'admin-signin'
-    const document = new DOMParser().parseFromString(html, 'text/html')
-    const expected = `{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&flow=${flow}`
-    const links = [...document.querySelectorAll('a')].filter((link) => link.getAttribute('href') === expected)
-    expect(links).toHaveLength(2)
-    expect(links[1].textContent).toBe(expected)
-    expect(document.querySelector('a[href="{{ .SiteURL }}/auth/confirm"]')).not.toBeNull()
-    expect(html).toContain('{{ .Token }}')
+  it.each(supabaseAuthEmailPreviews.filter(({ name }) => name.endsWith('-link')))('keeps $name link-only', ({ html }) => {
+    expect(html).toContain('/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=')
+    expect(html).not.toContain('{{ .Token }}')
+    expect(html).not.toContain('/auth/code')
+    expect(html).not.toContain('then confirm')
+    expect(html).toContain('valid for 2 hours')
     expect(html).not.toContain('{{ .ConfirmationURL }}')
-    expect(html).not.toContain('{{ .RedirectTo }}')
-    expect(html).not.toContain('same browser')
-    expect(html).not.toMatch(/\?token_hash=|<script/)
+  })
+
+  it.each(supabaseAuthEmailPreviews.filter(({ name }) => name.endsWith('-code')))('keeps $name code-only', ({ html }) => {
+    expect(html).toContain('{{ .Token }}')
+    expect(html).toContain('{{ .SiteURL }}/auth/code')
+    expect(html).not.toContain('{{ .TokenHash }}')
+    expect(html).not.toContain('/auth/confirm')
+    expect(html).toContain('valid for 2 hours')
+  })
+
+  it('selects email variants using fixed redirect paths, without user metadata or an arbitrary action URL', () => {
+    for (const email of supabaseAuthEmailTemplates.filter(({ name }) => ['confirmation', 'magic_link'].includes(name))) {
+      expect(email.html).toContain('eq .RedirectTo (print .SiteURL "/auth/code")')
+      expect(email.html).toContain('eq .RedirectTo (print .SiteURL "/auth/confirm")')
+      expect(email.subject).toContain('Your sign-in code')
+      expect(email.html).not.toContain('{{ .Data')
+      expect(email.html).not.toContain('href="{{ .RedirectTo }}"')
+    }
   })
 
   it('preserves code-only reauthentication and the email-change variable', () => {

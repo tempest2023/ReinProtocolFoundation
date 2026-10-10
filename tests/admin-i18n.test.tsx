@@ -79,15 +79,15 @@ describe('administrator language configuration', () => {
     expect((await getAdminI18n()).t('Administration')).toBe('Administration')
   })
 
-  it('persists a validated language only within the administrator routes', async () => {
+  it('shares the language between administration and email authentication and removes the legacy cookie', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     const actions = await vi.importActual<typeof import('@/app/admin/locale-actions')>('@/app/admin/locale-actions')
     await actions.setAdminLanguage('zh')
     expect(mocks.setCookie).toHaveBeenCalledWith(adminLanguageCookie, 'zh', {
-      path: '/admin', maxAge: 31536000, httpOnly: true, sameSite: 'lax', secure: true,
+      path: '/', maxAge: 31536000, httpOnly: true, sameSite: 'lax', secure: true,
     })
     await expect(actions.setAdminLanguage('fr')).rejects.toThrow('Unsupported administrator language.')
-    expect(mocks.setCookie).toHaveBeenCalledOnce()
+    expect(mocks.setCookie).toHaveBeenCalledTimes(2)
   })
 
   it('allows local HTTP development to persist the preference', async () => {

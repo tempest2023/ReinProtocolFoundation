@@ -14,7 +14,7 @@ Foreign keys, uniqueness, checks, and RLS remain local to each environment. Ther
 
 ## Administrator authentication redirects
 
-The login action sends `emailRedirectTo=${NEXT_PUBLIC_SITE_URL}/auth/callback?next=/admin`.
+The login action selects `emailRedirectTo=${NEXT_PUBLIC_SITE_URL}/auth/confirm` for link-only mail or `/auth/code` for code-only mail.
 Keep the application URL and the shared hosted project's **Authentication > URL Configuration** aligned:
 
 | Setting | Production | Local development |
@@ -42,3 +42,5 @@ Supabase template variables, and hosted SMTP setup are documented in
 [`docs/outreach/supabase-auth-email.md`](../docs/outreach/supabase-auth-email.md).
 Local templates are configured in this directory's `config.toml`; hosted templates must be
 updated separately without pushing localhost configuration into the shared project.
+
+Authentication emails expire after 7200 seconds (2 hours). Both confirmation and magic_link templates select a link-only or code-only variant using the fixed RedirectTo path. The first-party link is automatically exchanged on hydration; GET/HEAD alone do not consume it.

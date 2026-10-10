@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { publicEnv } from '@/lib/env'
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname === '/auth/confirm' || request.nextUrl.pathname === '/auth/confirmed') {
+  if (request.nextUrl.pathname === '/auth/confirm' || request.nextUrl.pathname === '/auth/confirmed' || request.nextUrl.pathname === '/auth/code') {
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
     const development = process.env.NODE_ENV === 'development'
     const csp = `default-src 'self'; script-src 'self' 'nonce-${nonce}' ${development ? "'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' ${development ? 'ws: wss:' : ''}; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'`

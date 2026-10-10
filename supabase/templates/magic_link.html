@@ -1,4 +1,35 @@
-<!doctype html>
+{{ if eq .RedirectTo (print .SiteURL "/auth/code") }}<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your sign-in code.</title></head>
+<body style="margin:0;padding:0;background-color:#e8ddc8;color:#302a25;">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Your one-time code to sign in to Rein.</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#e8ddc8"><tr><td align="center" style="padding:24px 12px;">
+<!--[if mso]><table role="presentation" width="640" align="center"><tr><td><![endif]-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f5ead3" style="max-width:640px;border:1px solid #d0c3ad;font-family:Arial,sans-serif;">
+<tr><td style="padding:24px;border-bottom:1px solid #d5c7b1;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
+<td width="64" valign="middle"><a href="https://rein-protocol.org/"><img src="https://rein-protocol.org/brand/rein-mark-header.png" width="64" height="64" alt="Rein logo" style="display:block;border:0;width:64px;height:64px;"></a></td>
+<td valign="middle" style="padding-left:16px;color:#302a25;font-size:16px;font-weight:bold;letter-spacing:2px;line-height:1.5;">REIN PROTOCOL<br>FOUNDATION</td>
+</tr></table></td></tr>
+<tr><td style="padding:28px 24px 20px;">
+<p style="margin:0 0 12px;color:#75695e;font-size:11px;letter-spacing:2px;line-height:1.5;">ACCOUNT SECURITY</p>
+<h1 style="margin:0;font-family:Georgia,serif;font-size:34px;font-weight:normal;line-height:1.18;color:#302a25;">Your sign-in code.</h1>
+</td></tr>
+<tr><td align="center"><a href="https://rein-protocol.org/" style="text-decoration:none;"><img src="https://rein-protocol.org/images/welcome-golden-gate-cover.jpg" width="640" alt="The Golden Gate Bridge and San Francisco Bay in Rein’s paper-collage artwork." style="display:block;width:100%;max-width:640px;height:auto;border:0;"></a></td></tr>
+<tr><td style="padding:28px 24px 12px;font-size:15px;line-height:1.75;">
+<p style="margin:0 0 16px;">Hello,</p>
+<p style="margin:0 0 20px;">Enter this 8-digit code on the Rein sign-in page. It is valid for 2 hours.</p>
+<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p><p style="margin:0 0 20px;">Enter this code on the sign-in page you just used, or <a href="{{ .SiteURL }}/auth/code" style="color:#a83f22;">open the code sign-in page</a>.</p>
+<p style="margin:0 0 16px;">This code is valid for 2 hours and can only be used once.</p>
+<p style="margin:0 0 20px;">If you did not request this sign-in code, you can safely ignore this message. Never share this code with anyone.</p>
+<p style="margin:0 0 20px;">Rein Protocol Foundation</p>
+</td></tr>
+<tr><td style="padding:20px 24px 24px;border-top:1px solid #d5c7b1;color:#75695e;font-size:11px;line-height:1.65;">
+<p style="margin:0 0 10px;">You received this security email because an account action was requested for this address.</p>
+<p style="margin:0;"><a href="https://rein-protocol.org/" style="color:#75695e;">rein-protocol.org</a> · <a href="https://rein-protocol.org/privacy" style="color:#75695e;">Privacy</a> · <a href="mailto:admin@rein-protocol.org" style="color:#75695e;">Contact</a></p>
+</td></tr></table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td></tr></table></body></html>{{ else if eq .RedirectTo (print .SiteURL "/auth/confirm") }}<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in to Rein.</title></head>
 <body style="margin:0;padding:0;background-color:#e8ddc8;color:#302a25;">
@@ -18,12 +49,10 @@
 <tr><td align="center"><a href="https://rein-protocol.org/" style="text-decoration:none;"><img src="https://rein-protocol.org/images/welcome-golden-gate-cover.jpg" width="640" alt="The Golden Gate Bridge and San Francisco Bay in Rein’s paper-collage artwork." style="display:block;width:100%;max-width:640px;height:auto;border:0;"></a></td></tr>
 <tr><td style="padding:28px 24px 12px;font-size:15px;line-height:1.75;">
 <p style="margin:0 0 16px;">Hello,</p>
-<p style="margin:0 0 20px;">Open the link below, then confirm on the Rein website to sign in. You can use a different browser or device. Opening the link alone does not sign you in.</p>
+<p style="margin:0 0 20px;">Click the button below to sign in to Rein. You can use a different browser or device.</p>
 <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#a83f22" style="border:1px solid #a83f22;mso-padding-alt:13px 22px;"><a href="{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=admin-signin" style="display:inline-block;padding:13px 22px;color:#ffffff;font-size:14px;font-weight:bold;line-height:1.4;text-decoration:none;">Sign in to Rein →</a></td></tr></table>
 <p style="margin:22px 0 16px;color:#75695e;font-size:13px;line-height:1.65;">If the button does not work, copy and paste this link into your browser:<br><a href="{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=admin-signin" style="color:#a83f22;text-decoration:underline;word-break:break-all;">{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=admin-signin</a></p>
-<p style="margin:0 0 16px;">Alternatively, enter your email address and the verification code below at <a href="{{ .SiteURL }}/auth/confirm" style="color:#a83f22;">the Rein confirmation page</a>. Select Administrator sign-in.</p>
-<p style="margin:0 0 20px;padding:18px;border:1px solid #d0c3ad;color:#a83f22;font-size:28px;font-weight:bold;letter-spacing:6px;line-height:1.5;text-align:center;">{{ .Token }}</p>
-<p style="margin:0 0 16px;">This link expires shortly and can only be used once.</p>
+<p style="margin:0 0 16px;">This link is valid for 2 hours and can only be used once.</p>
 <p style="margin:0 0 20px;">If you did not request this sign-in link, you can safely ignore this message. Do not forward it or share it with anyone.</p>
 <p style="margin:0 0 20px;">Rein Protocol Foundation</p>
 </td></tr>
@@ -32,4 +61,36 @@
 <p style="margin:0;"><a href="https://rein-protocol.org/" style="color:#75695e;">rein-protocol.org</a> · <a href="https://rein-protocol.org/privacy" style="color:#75695e;">Privacy</a> · <a href="mailto:admin@rein-protocol.org" style="color:#75695e;">Contact</a></p>
 </td></tr></table>
 <!--[if mso]></td></tr></table><![endif]-->
-</td></tr></table></body></html>
+</td></tr></table></body></html>{{ else }}<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in to Rein.</title></head>
+<body style="margin:0;padding:0;background-color:#e8ddc8;color:#302a25;">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Your secure, one-time link to sign in to Rein.</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#e8ddc8"><tr><td align="center" style="padding:24px 12px;">
+<!--[if mso]><table role="presentation" width="640" align="center"><tr><td><![endif]-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f5ead3" style="max-width:640px;border:1px solid #d0c3ad;font-family:Arial,sans-serif;">
+<tr><td style="padding:24px;border-bottom:1px solid #d5c7b1;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
+<td width="64" valign="middle"><a href="https://rein-protocol.org/"><img src="https://rein-protocol.org/brand/rein-mark-header.png" width="64" height="64" alt="Rein logo" style="display:block;border:0;width:64px;height:64px;"></a></td>
+<td valign="middle" style="padding-left:16px;color:#302a25;font-size:16px;font-weight:bold;letter-spacing:2px;line-height:1.5;">REIN PROTOCOL<br>FOUNDATION</td>
+</tr></table></td></tr>
+<tr><td style="padding:28px 24px 20px;">
+<p style="margin:0 0 12px;color:#75695e;font-size:11px;letter-spacing:2px;line-height:1.5;">ACCOUNT SECURITY</p>
+<h1 style="margin:0;font-family:Georgia,serif;font-size:34px;font-weight:normal;line-height:1.18;color:#302a25;">Sign in to Rein.</h1>
+</td></tr>
+<tr><td align="center"><a href="https://rein-protocol.org/" style="text-decoration:none;"><img src="https://rein-protocol.org/images/welcome-golden-gate-cover.jpg" width="640" alt="The Golden Gate Bridge and San Francisco Bay in Rein’s paper-collage artwork." style="display:block;width:100%;max-width:640px;height:auto;border:0;"></a></td></tr>
+<tr><td style="padding:28px 24px 12px;font-size:15px;line-height:1.75;">
+<p style="margin:0 0 16px;">Hello,</p>
+<p style="margin:0 0 20px;">Click the button below to sign in to Rein. You can use a different browser or device.</p>
+<table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#a83f22" style="border:1px solid #a83f22;mso-padding-alt:13px 22px;"><a href="{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=admin-signin" style="display:inline-block;padding:13px 22px;color:#ffffff;font-size:14px;font-weight:bold;line-height:1.4;text-decoration:none;">Sign in to Rein →</a></td></tr></table>
+<p style="margin:22px 0 16px;color:#75695e;font-size:13px;line-height:1.65;">If the button does not work, copy and paste this link into your browser:<br><a href="{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=admin-signin" style="color:#a83f22;text-decoration:underline;word-break:break-all;">{{ .SiteURL }}/auth/confirm#token_hash={{ .TokenHash }}&amp;flow=admin-signin</a></p>
+<p style="margin:0 0 16px;">This link is valid for 2 hours and can only be used once.</p>
+<p style="margin:0 0 20px;">If you did not request this sign-in link, you can safely ignore this message. Do not forward it or share it with anyone.</p>
+<p style="margin:0 0 20px;">Rein Protocol Foundation</p>
+</td></tr>
+<tr><td style="padding:20px 24px 24px;border-top:1px solid #d5c7b1;color:#75695e;font-size:11px;line-height:1.65;">
+<p style="margin:0 0 10px;">You received this security email because an account action was requested for this address.</p>
+<p style="margin:0;"><a href="https://rein-protocol.org/" style="color:#75695e;">rein-protocol.org</a> · <a href="https://rein-protocol.org/privacy" style="color:#75695e;">Privacy</a> · <a href="mailto:admin@rein-protocol.org" style="color:#75695e;">Contact</a></p>
+</td></tr></table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td></tr></table></body></html>{{ end }}

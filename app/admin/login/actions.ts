@@ -6,13 +6,16 @@ import { isDirectAdminLoginEnabled, publicEnv } from '@/lib/env'
 import { isAllowedAdminEmail } from '@/lib/admin/auth'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { requireSecretClient } from '@/lib/supabase/secret'
-import type { ActionState } from '@/lib/community/types'
+import type { AdminSignInState } from '@/lib/auth/sign-in'
 import { consumeAuthRateLimits, RateLimitError } from '@/lib/rate-limit'
 import { isPlausibleEmail, normalizeEmail } from '@/lib/security'
 
-export async function requestAdminLink(_previous: ActionState, formData: FormData): Promise<ActionState> {
+export async function requestAdminLink(_previous: AdminSignInState, formData: FormData): Promise<AdminSignInState> {
   const email = normalizeEmail(String(formData.get('email') ?? ''))
   if (formData.getAll('email').length !== 1 || !isPlausibleEmail(email)) return { status: 'error', message: 'Enter a valid administrator email.' }
+  const method = formData.get('method') ?? 'magic-link'
+  if (formData.getAll('method').length > 1 || (method !== 'magic-link' && method !== 'code')) return { status: 'error', message: 'Choose a sign-in method.' }
+  const sent = (): AdminSignInState => ({ status: 'success', email, method, retryAt: Date.now() + 60000, message: method === 'code' ? 'If this address is authorized, a verification code has been sent.' : 'If this address is authorized, a sign-in link has been sent.' })
   const client = await createSupabaseServerClient()
   if (!client) return { status: 'error', message: 'Supabase authentication is not configured.' }
 
@@ -27,12 +30,7 @@ export async function requestAdminLink(_previous: ActionState, formData: FormDat
   try { authorized = await isAllowedAdminEmail(email) }
   catch { return { status: 'error', message: 'Sign-in is temporarily unavailable. Please try again later.' } }
   if (!authorized) {
-    return {
-      status: 'success',
-      message: directLogin
-        ? 'If this address is authorized, you will be signed in.'
-        : 'If this address is authorized, a sign-in link has been sent.',
-    }
+    return directLogin ? { status: 'success', message: 'If this address is authorized, you will be signed in.' } : sent()
   }
 
   if (directLogin) {
@@ -60,8 +58,8 @@ export async function requestAdminLink(_previous: ActionState, formData: FormDat
   try {
     await client.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${publicEnv.siteUrl}/auth/callback?next=/admin` },
+      options: { emailRedirectTo: `${publicEnv.siteUrl}${method === 'code' ? '/auth/code' : '/auth/confirm'}` },
     })
   } catch { /* Delivery failures must not reveal whether this address is authorized. */ }
-  return { status: 'success', message: 'If this address is authorized, a sign-in link has been sent.' }
+  return sent()
 }

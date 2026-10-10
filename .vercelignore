@@ -1,0 +1,16 @@
+.git
+.vercel
+.env*
+*.local
+node_modules
+.next*
+next-env.d.ts
+tsconfig.tsbuildinfo
+dist
+dist-ssr
+test-results
+playwright-report
+SECRETs.md
+.private
+output
+local-archives

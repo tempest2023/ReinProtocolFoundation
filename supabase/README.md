@@ -50,7 +50,7 @@ Hosted Auth uses Resend custom SMTP (`smtp.resend.com:465`, user `resend`, sende
 SMTP credentials stay in the hosted settings; never commit them or push local SMTP configuration.
 The 60-second resend cooldown and application limits still apply independently.
 
-Browser Auth cookies persist for 30 days and renew when the proxy refreshes the session.
+Browser Auth cookies are HttpOnly (Secure on HTTPS), persist for 30 days and renew when the proxy refreshes the session.
 Access tokens remain valid for one hour; hosted session timebox and inactivity timeout are disabled,
 and multiple devices are allowed. Sign Out revokes only the current session and clears its cookies.
 The cookie policy is applied at all SSR write boundaries because the installed SDK overrides

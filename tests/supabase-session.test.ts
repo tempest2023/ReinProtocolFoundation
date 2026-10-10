@@ -6,7 +6,7 @@ import type { CookieMethodsServer } from '@supabase/ssr'
 const mocks = vi.hoisted(() => ({ createServerClient: vi.fn(), getUser: vi.fn(), set: vi.fn() }))
 vi.mock('@supabase/ssr', () => ({ createServerClient: mocks.createServerClient }))
 vi.mock('next/headers', () => ({ cookies: async () => ({ getAll: () => [], set: mocks.set }) }))
-vi.mock('@/lib/env', () => ({ publicEnv: { supabaseUrl: 'https://local-project.supabase.test', supabaseKey: 'sb_publishable_test' } }))
+vi.mock('@/lib/env', () => ({ publicEnv: { siteUrl: 'https://rein.test', supabaseUrl: 'https://local-project.supabase.test', supabaseKey: 'sb_publishable_test' } }))
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { proxy } from '@/proxy'
 import { AUTH_COOKIE_MAX_AGE } from '@/lib/supabase/cookies'
@@ -38,6 +38,8 @@ describe('persistent Auth cookies', () => {
     })
     const response = await proxy(new NextRequest('https://rein.test/admin'))
     expect(response.cookies.get(writes[0].name)?.maxAge).toBe(AUTH_COOKIE_MAX_AGE)
+    expect(response.cookies.get(writes[0].name)?.httpOnly).toBe(true)
+    expect(response.cookies.get(writes[0].name)?.secure).toBe(true)
     expect(response.cookies.get(writes[1].name)?.maxAge).toBe(0)
     expect(response.headers.get('cache-control')).toContain('no-store')
   })

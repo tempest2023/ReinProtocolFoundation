@@ -69,7 +69,7 @@ type VerificationRequest =
 
 保留 4 KiB 请求限制、严格字段校验、同源 Origin/CSRF、防缓存、no-referrer、CSP 和完整 SSR Cookie 分块写入。验证码页纳入与链接页相同的隐私及安全响应头。
 
-管理员浏览器使用 30 天持久会话 Cookie，关闭并重新打开浏览器仍可进入后台。访问令牌保持 3600 秒，通过代理自动刷新；刷新写入的 Cookie 同样保留 30 天。Server Action、Route Handler 和代理共用写入策略，保持退出及旧分块删除的 `Max-Age=0`。当前 SSR SDK 会覆盖 `cookieOptions.maxAge`，因此期限必须在 Cookie 实际写入时应用。
+管理员浏览器使用 30 天持久会话 Cookie（HttpOnly，HTTPS 环境下 Secure），关闭并重新打开浏览器仍可进入后台。访问令牌保持 3600 秒，通过代理自动刷新；刷新写入的 Cookie 同样保留 30 天。Server Action、Route Handler 和代理共用写入策略，保持退出及旧分块删除的 `Max-Age=0`。当前 SSR SDK 会覆盖 `cookieOptions.maxAge`，因此期限必须在 Cookie 实际写入时应用。
 
 已有有效管理员会话访问 `/admin/login` 时直接进入 `/admin`。Sign Out 使用 `scope: 'local'` 撤销当前会话并删除当前浏览器 Cookie，不影响同一管理员的其他设备。线上不启用更短的会话总时长、闲置超时或单设备限制；清除浏览器 Cookie、撤销会话或移除管理员权限仍会终止访问。
 

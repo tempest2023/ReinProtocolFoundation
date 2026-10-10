@@ -80,7 +80,10 @@ test('administrator persists across browser reopening and Sign Out ends only the
   expect((await verify(original, link.hash, baseURL!, 'admin-signin')).ok()).toBe(true)
   const authCookies = (await original.cookies()).filter(c => c.name.includes('auth-token'))
   expect(authCookies.length).toBeGreaterThan(0)
-  for (const cookie of authCookies) expect(cookie.expires - Date.now() / 1000).toBeCloseTo(30 * 86400, -1)
+  for (const cookie of authCookies) {
+    expect(cookie.expires - Date.now() / 1000).toBeCloseTo(30 * 86400, -1)
+    expect(cookie.httpOnly).toBe(true)
+  }
   const stored = await original.storageState()
   await original.close()
   const reopened = await browser.newContext({ storageState: stored })

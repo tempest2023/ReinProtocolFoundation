@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CookieMethodsServer } from '@supabase/ssr'
 const createServerClient = vi.hoisted(() => vi.fn())
 vi.mock('@supabase/ssr', () => ({ createServerClient }))
-vi.mock('@/lib/env', () => ({ publicEnv: { supabaseUrl: 'https://local-project.supabase.test', supabaseKey: 'sb_publishable_test' } }))
+vi.mock('@/lib/env', () => ({ publicEnv: { siteUrl: 'https://rein.test', supabaseUrl: 'https://local-project.supabase.test', supabaseKey: 'sb_publishable_test' } }))
 import { createSupabaseRouteClient } from '@/lib/supabase/route'
 
 describe('writable Supabase Route Handler adapter', () => {
@@ -26,6 +26,8 @@ describe('writable Supabase Route Handler adapter', () => {
     expect(response.cookies.get('sb-old-auth-token.0')?.maxAge).toBe(30 * 86400)
     expect(response.cookies.get('sb-old-auth-token.1')?.maxAge).toBe(30 * 86400)
     expect(response.cookies.get('sb-old-auth-token.0')?.secure).toBe(true)
+    expect(response.cookies.get('sb-old-auth-token.1')?.secure).toBe(true)
+    expect(response.cookies.get('sb-old-auth-token.1')?.httpOnly).toBe(true)
     expect(response.cookies.get('sb-old-auth-token.2')?.maxAge).toBe(0)
     expect(response.headers.get('set-cookie')).toContain('Max-Age=0')
     expect(response.headers.get('cache-control')).toContain('private')

@@ -2,7 +2,7 @@ import 'server-only'
 import { unstable_noStore as noStore } from 'next/cache'
 import { getPublicClient } from '@/lib/supabase/public'
 import { getSecretClient } from '@/lib/supabase/secret'
-import { databaseRelation } from '@/lib/supabase/database-names'
+import { publishedEventsQuery, publishedResourcesQuery } from '@/lib/community/queries'
 import type { MemberMetrics, PublicEvent, PublicPerson, PublicResource } from '@/lib/community/types'
 
 const emptyMetrics: MemberMetrics = { allTime: 0, thisMonth: 0, bySource: {} }
@@ -34,9 +34,9 @@ export async function getPublishedResources({ limit = 12, offset = 0 } = {}): Pr
   noStore()
   const client = getPublicClient()
   if (!client) return { resources: [], hasMore: false }
-  const { data, error } = await client.from('resources').select('id,slug,title,summary,public_url,resource_type,language,difficulty,topics,author_publisher,access_notes,featured').eq('publication_status', 'published').order('sort_order').order('published_at', { ascending: false }).order('id').range(offset, offset + limit)
+  const { data, error } = await publishedResourcesQuery(client).range(offset, offset + limit)
   if (error) return { resources: [], hasMore: false }
-  const resources = (data ?? []) as PublicResource[]
+  const resources = (data ?? []) as unknown as PublicResource[]
   return { resources: resources.slice(0, limit), hasMore: resources.length > limit }
 }
 
@@ -44,15 +44,15 @@ export async function getPublishedEvents(): Promise<PublicEvent[]> {
   noStore()
   const client = getPublicClient()
   if (!client) return []
-  const { data, error } = await client.from('events').select(`*,${databaseRelation('event_sessions')}(starts_at,ends_at)`).eq('publication_status', 'published').order('created_at', { ascending: false })
-  return error ? [] : (data as PublicEvent[])
+  const { data, error } = await publishedEventsQuery(client)
+  return error ? [] : (data as unknown as PublicEvent[])
 }
 
 export async function getPublishedEvent(slug: string): Promise<PublicEvent | null> {
   noStore()
   const client = getPublicClient()
   if (!client) return null
-  const { data, error } = await client.from('events').select(`*,${databaseRelation('event_sessions')}(starts_at,ends_at)`).eq('publication_status', 'published').eq('slug', slug).maybeSingle()
+  const { data, error } = await publishedEventsQuery(client).eq('slug', slug).maybeSingle()
   return error ? null : (data as PublicEvent | null)
 }
 

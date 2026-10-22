@@ -29,7 +29,7 @@ export const IDENTITY_SCOPES = [
   'ingress.relay',
 ] as const
 
-export const SERVICE_SCOPES = [...GOVERNANCE_SCOPES, ...IDENTITY_SCOPES] as const
+export const SERVICE_SCOPES = [...GOVERNANCE_SCOPES, ...IDENTITY_SCOPES, 'community.read'] as const
 
 export type ServiceScope = (typeof SERVICE_SCOPES)[number]
 
@@ -67,8 +67,26 @@ export function isGovernanceOperation(value: unknown): value is GovernanceOperat
   return typeof value === 'string' && governanceOperationSet.has(value)
 }
 
-export function scopeForOperation(operation: GovernanceOperation): ServiceScope {
-  return GOVERNANCE_OPERATION_SCOPES[operation]
+export const COMMUNITY_OPERATION_SCOPES = {
+  community_resources_search: 'community.read',
+  community_resource_get: 'community.read',
+  community_events_search: 'community.read',
+  community_event_get: 'community.read',
+} as const satisfies Record<string, ServiceScope>
+
+export type CommunityOperation = keyof typeof COMMUNITY_OPERATION_SCOPES
+export type AgentOperation = GovernanceOperation | CommunityOperation
+
+export function isCommunityOperation(value: unknown): value is CommunityOperation {
+  return typeof value === 'string' && Object.hasOwn(COMMUNITY_OPERATION_SCOPES, value)
+}
+
+export function isAgentOperation(value: unknown): value is AgentOperation {
+  return isGovernanceOperation(value) || isCommunityOperation(value)
+}
+
+export function scopeForOperation(operation: AgentOperation): ServiceScope {
+  return isCommunityOperation(operation) ? COMMUNITY_OPERATION_SCOPES[operation] : GOVERNANCE_OPERATION_SCOPES[operation]
 }
 
 /** A platform tuple a caller is allowed to act for. */

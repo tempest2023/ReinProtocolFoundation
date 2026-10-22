@@ -7,7 +7,8 @@ import { validateIngressAssertion } from '@/lib/agent/assertions'
 import {
   allowsChannel,
   allowsPlatform,
-  isGovernanceOperation,
+  isAgentOperation,
+  isCommunityOperation,
   operationsRequestSchema,
   refuse,
   scopeForOperation,
@@ -15,6 +16,7 @@ import {
   type MachineRefusal,
 } from '@/lib/agent/contracts'
 import { canApplyRevision, resolvePlatformIdentity } from '@/lib/identity/linking'
+import { queryCommunityCatalog } from '@/lib/community/catalog'
 
 export const runtime = 'nodejs'
 
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return failure(refuse('invalid_request', 400))
 
   const { operation, input, proof } = parsed.data
-  if (!isGovernanceOperation(operation)) return failure(refuse('invalid_operation', 400))
+  if (!isAgentOperation(operation)) return failure(refuse('invalid_operation', 400))
 
   const auth = await authenticateCaller(request, { scope: scopeForOperation(operation) })
   if (!auth.ok) return failure(auth)
@@ -88,6 +90,22 @@ export async function POST(request: Request) {
     return failure(refuse('binding_not_verified', 403))
   }
   const contactId = identity.contactId
+
+  if (isCommunityOperation(operation)) {
+    const result = await queryCommunityCatalog(operation, input)
+    if (!result.ok) return failure(refuse(result.reason, result.reason === 'invalid_request' ? 400 : 503))
+    // Do not release data if the link was revoked or rebound while the query was running.
+    const current = await resolvePlatformIdentity({
+      platform: validated.assertion.platform,
+      workspaceId: validated.assertion.workspaceId,
+      platformUserId: validated.assertion.platformUserId,
+    })
+    if (!current) return failure(refuse('unavailable', 503))
+    if (current.status === 'identity_revoked') return failure(refuse('identity_revoked', 403))
+    if (current.status !== 'resolved' || current.contactId !== contactId) return failure(refuse('binding_not_verified', 403))
+    await touchCaller(auth.caller.callerId)
+    return NextResponse.json({ ok: true, operation, result }, { headers: { 'Cache-Control': 'no-store' } })
+  }
 
   const reader = createFoundationDbReader({})
   // Every write this route performs is guarded: the guard is the authenticated caller and the digest

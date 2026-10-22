@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createHash } from 'node:crypto'
 
+const catalog = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/community/catalog', () => ({ queryCommunityCatalog: catalog }))
+
 // The governance reader and writer resolve their PostgREST configuration on
 // first use, from `publicEnv.supabaseUrl` and `SUPABASE_SECRET_KEY`. This suite
 // stubs the transport, so it pins a hermetic development configuration the same
@@ -304,6 +307,7 @@ function revisionReads(): TransportLog[] {
 }
 
 beforeEach(() => {
+  catalog.mockReset()
   vi.stubGlobal('fetch', governedFetch)
   state.caller = caller()
   state.assertion = assertion()
@@ -315,6 +319,76 @@ beforeEach(() => {
   state.guardedRefusal = null
   state.transport = []
   governedFetch.mockClear()
+})
+
+describe('member-only organization discovery through the authenticated dispatcher', () => {
+  const lookup = (op = 'community_resources_search') => operation({ operation: op, input: {} })
+  const catalogResult = { ok: true, status: 'empty', source: 'foundation_catalog', environment: 'dev', items: [], hasMore: false, nextOffset: null }
+  beforeEach(() => {
+    state.caller = caller({ scopes: ['community.read'] })
+    state.identity = { status: 'resolved', contact_id: 'c-1', is_active_contributor: false, is_director: false }
+    catalog.mockResolvedValue(catalogResult)
+  })
+  it.each(['slack', 'discord'])('admits an ordinary linked %s Community Member without governance privileges', async platform => {
+    state.caller = caller({ scopes: ['community.read'], platform_allowlist: [{ platform, workspace_id: 'T0TEST' }] })
+    state.assertion = assertion({ platform })
+    for (const op of ['community_resources_search', 'community_resource_get', 'community_events_search', 'community_event_get']) {
+      const response = await POST(request(lookup(op)))
+      expect(response.status).toBe(200)
+      expect(response.headers.get('cache-control')).toBe('no-store')
+      expect(await response.json()).toEqual({ ok: true, operation: op, result: catalogResult })
+      expect(catalog).toHaveBeenLastCalledWith(op, {})
+    }
+    expect(state.transport).toEqual([])
+  })
+  it.each(['identity_not_linked', 'identity_revoked', 'identity_expired'])('denies %s before any catalog read', async status => {
+    state.identity = { ...state.identity, status }
+    const response = await POST(request(lookup()))
+    expect(response.status).toBe(403)
+    expect(await reasonOf(response)).toBe(status === 'identity_revoked' ? 'identity_revoked' : 'binding_not_verified')
+    expect(catalog).not.toHaveBeenCalled()
+  })
+  it('does not let governance.read substitute for community.read', async () => {
+    state.caller = caller()
+    const response = await POST(request(lookup()))
+    expect(response.status).toBe(403)
+    expect(await reasonOf(response)).toBe('scope_missing')
+    expect(catalog).not.toHaveBeenCalled()
+  })
+  it('requires the registered caller, assertion and allowed channel, even for public catalog rows', async () => {
+    const missing = await POST(request(lookup(), {}))
+    expect(missing.status).toBe(401)
+    state.assertion = assertion({ platform_channel_id: 'OTHER_CHANNEL' })
+    expect((await POST(request(lookup()))).status).toBe(403)
+    state.assertion = assertion({ caller_id: 'OTHER_CALLER' })
+    expect((await POST(request(lookup()))).status).toBe(403)
+    state.assertion = { ok: false, reason: 'proof_expired' }
+    expect((await POST(request(lookup()))).status).toBe(401)
+    expect(catalog).not.toHaveBeenCalled()
+  })
+  it('rechecks permission on a second call in the same conversation', async () => {
+    expect((await POST(request(lookup()))).status).toBe(200)
+    state.identity = { ...state.identity, status: 'identity_revoked' }
+    expect((await POST(request(lookup()))).status).toBe(403)
+    expect(catalog).toHaveBeenCalledTimes(1)
+  })
+  it.each(['identity_revoked', 'identity_not_linked', 'rebound'])('withholds fetched data if the link becomes %s during a query', async status => {
+    catalog.mockImplementation(async () => {
+      state.identity = { ...state.identity, status: status === 'rebound' ? 'resolved' : status, contact_id: 'changed-contact' }
+      return { ...catalogResult, items: [{ title: 'must-not-release' }] }
+    })
+    const response = await POST(request(lookup()))
+    expect(response.status).toBe(403)
+    expect(await response.text()).not.toContain('must-not-release')
+  })
+  it('keeps malformed input and backend outage separate from no matches', async () => {
+    for (const [reason, status] of [['invalid_request', 400], ['unavailable', 503]] as const) {
+      catalog.mockResolvedValue({ ok: false, reason })
+      const response = await POST(request(lookup()))
+      expect(response.status).toBe(status)
+      expect(await response.json()).toEqual({ ok: false, reason })
+    }
+  })
 })
 
 describe('POST /api/agent/operations', () => {

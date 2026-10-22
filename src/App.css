@@ -511,6 +511,34 @@
   line-height: 1.6;
 }
 
+.work-participation,
+.closing-invitation {
+  max-width: 34rem;
+  margin: 0 0 2rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.stewardship-heading + .accountability-line {
+  margin-top: 3rem;
+}
+
+.stewardship-support {
+  max-width: 48rem;
+  margin: 0;
+  color: oklch(78% 0.018 70);
+  line-height: 1.7;
+}
+
+.closing-section .closing-invitation {
+  margin-top: 2rem;
+  color: var(--ink);
+}
+
+.closing-section .primary-action {
+  background: var(--ink);
+}
+
 .text-link {
   display: flex;
   width: min(100%, 25rem);

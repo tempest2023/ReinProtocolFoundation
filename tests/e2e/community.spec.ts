@@ -10,7 +10,6 @@ test.describe('Community overview and navigation', () => {
     await page.goto('/community')
     await expect(page.getByRole('heading', { level: 1, name: /A community of/ })).toBeVisible()
     for (const heading of [
-      'Start with a conversation, a resource, or an event.',
       'Meet in person. Stay connected online.',
       'People behind the work.',
       'Register for community updates.',
@@ -72,7 +71,7 @@ test.describe('Community learning resources', () => {
     const previewCount = await resources.count()
     expect(previewCount).toBeLessThanOrEqual(3)
 
-    const showMore = page.getByRole('link', { name: 'Show More', exact: true })
+    const showMore = page.getByRole('link', { name: 'Browse all learning resources', exact: true })
     if (await showMore.count()) {
       expect(previewCount).toBe(3)
       await expect(showMore).toHaveAttribute('href', '/community/learn')
@@ -116,16 +115,20 @@ test.describe('Community learning resources', () => {
 
     if (catalogCount > 3) {
       await page.goto('/community')
-      await expect(page.getByRole('link', { name: 'Show More', exact: true })).toHaveAttribute('href', '/community/learn')
+      await expect(page.getByRole('link', { name: 'Browse all learning resources', exact: true })).toHaveAttribute('href', '/community/learn')
     }
   })
 })
 
 test.describe('Community contribution and policies', () => {
-  test('Program offers resource and event submission actions', async ({ page }) => {
-    await page.goto('/community#program')
-    await expect(page.getByRole('link', { name: 'Submit a learning resource' })).toHaveAttribute('href', '/community/contribute/resources/submit')
-    await expect(page.getByRole('link', { name: 'Propose an event on GitHub' })).toHaveAttribute('href', /github\.com/)
+  test('contribution actions appear once, after the community introduction', async ({ page }) => {
+    await page.goto('/community')
+    await expect(page.locator('.community-hero a')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Submit a resource', exact: true })).toHaveCount(1)
+    await expect(page.getByRole('link', { name: 'Event proposal', exact: true })).toHaveCount(1)
+    await expect(page.getByRole('link', { name: 'Apply privately', exact: true })).toHaveCount(1)
+    await expect(page.locator('.community-contribution-context')).toContainText('without applying')
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   })
 
   test('Contribute offers private, GitHub, and learning-resource paths', async ({ page }) => {

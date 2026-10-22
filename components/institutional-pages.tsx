@@ -5,7 +5,6 @@ import santaClara from '@/src/assets/scenes/santa-clara.webp'
 import stanford from '@/src/assets/scenes/stanford.webp'
 import paloAlto from '@/src/assets/scenes/palo-alto.webp'
 import losAngeles from '@/src/assets/scenes/los-angeles.webp'
-import { Arrow } from '@/components/icons'
 import { ArticleHero, TextLink } from '@/components/primitives'
 import { getPublicMemberMetrics, getPublicPeople } from '@/lib/community/data'
 import { publicCommunityAudience } from '@/lib/community/presentation'
@@ -80,10 +79,7 @@ export function InstitutionalHomePage() {
           <p className="eyebrow hero-enter hero-enter--1">A NONPROFIT ORGANIZATION FOR AI AGENT SAFETY</p>
           <h1 id="home-title">Making AI agents <span className="home-hero__accent">safe</span> <em>for <span className="home-hero__accent">people</span> and <span className="home-hero__accent">society</span>.</em></h1>
           <p className="home-hero__mission hero-enter hero-enter--3">We bring people together and support open-source projects and research to make AI agents safe, with a focus on transparency, observability, and policy controls.</p>
-          <div className="home-hero__actions hero-enter hero-enter--4">
-            <Link href="/mission" className="primary-action">Read our mission <Arrow /></Link>
-            <Link href="/community" className="quiet-action">Explore the community</Link>
-          </div>
+
         </div>
         <div className="home-hero__principles page-shell hero-enter hero-enter--5" aria-label="Founding principles"><span>Open participation</span><span>AI-native operations</span><span>Human accountable</span></div>
       </section>
@@ -97,7 +93,6 @@ export function InstitutionalHomePage() {
             <div><strong>Visibility</strong><span>Make agent actions understandable and inspectable.</span></div>
             <div><strong>Governance</strong><span>Set clear permissions and keep people responsible.</span></div>
           </div>
-          <TextLink href="/mission" light>Read the mission in full</TextLink>
         </div>
       </section>
 
@@ -105,8 +100,8 @@ export function InstitutionalHomePage() {
         <div className="work-visual" aria-hidden="true" data-reveal><img className="deferred-image is-loaded" src={stanford.src} width="972" height="1619" alt="" loading="lazy" /><span>Knowledge bears duty</span></div>
         <div className="work-content" data-reveal>
           <p className="section-index">02 / Our early programs</p><h2 id="work-title">Meet in person. Keep learning together online.</h2>
-          <ol className="work-list">{programs.map((program) => <li key={program.number}><span>{program.number}</span><div><strong>{program.title}</strong><p>{program.short}</p></div></li>)}</ol>
-          <TextLink href="/programs">Explore our programs</TextLink>
+          <ol className="work-list">{programs.map((program) => <li key={program.number}><span>{program.number}</span><div><strong>{program.title}</strong><p>{program.detail}</p></div></li>)}</ol>
+          <p className="work-participation">Public learning resources and events are open without registration. Bring a question, a project, or experience to share.</p>
         </div>
       </section>
 
@@ -114,27 +109,21 @@ export function InstitutionalHomePage() {
         <div className="stewardship-art" aria-hidden="true"><img className="deferred-image is-loaded" src={paloAlto.src} width="971" height="1619" alt="" loading="lazy" /></div>
         <div className="page-shell stewardship-content">
           <div className="stewardship-heading" data-reveal><p className="section-index section-index--light">03 / An AI-native organization</p><h2 id="stewardship-title">AI agents help run Rein and advance agent safety.</h2><p>We use AI agents to support research, coordination, and operations. We also explore how they can help monitor other agents. People set limits, review consequential decisions, and remain responsible for the outcomes.</p></div>
-          <ol className="fund-path" data-reveal>{fundPath.map((step, index) => <li key={step.label}><span>0{index + 1}</span><strong>{step.label}</strong><p>{step.text}</p></li>)}</ol>
           <div className="accountability-line" data-reveal><p><strong>Human Board</strong> carries legal accountability.</p><p><strong>DAO</strong> participates through one collective vote.</p><p><strong>AI Agents</strong> execute within visible policy.</p></div>
-          <TextLink href="/governance" light>Inspect the governance model</TextLink>
+          <p className="stewardship-support" id="giving" data-reveal>Our funding priorities are accessible events, shared learning, open-source projects, and safety research. Giving channels remain subject to legal and operational approval.</p>
         </div>
       </section>
 
       <section className="community-section community-section--soft" aria-labelledby="home-community-title">
         <div className="page-shell">
-          <div className="community-heading"><p className="section-index">04 / Community</p><div><h2 id="home-community-title">A public network of <Suspense fallback={<span className="audience-pending">many active participants</span>}><HomeAudience /></Suspense>.</h2><p>Meet people working with AI agents, join local and online events, share learning materials, and help each other prepare for AI agent roles.</p><TextLink href="/community">Enter the community</TextLink></div></div>
+          <div className="community-heading"><p className="section-index">04 / Community</p><div><h2 id="home-community-title">A public network of <Suspense fallback={<span className="audience-pending">many active participants</span>}><HomeAudience /></Suspense>.</h2><p>Meet people working with AI agents, join local and online events, share learning materials, and help each other prepare for AI agent roles.</p></div></div>
           <Suspense fallback={<HomePeopleFallback />}>
             <HomeFeaturedPeople />
           </Suspense>
         </div>
       </section>
 
-      <section className="giving-section" id="giving" aria-labelledby="giving-title">
-        <div className="giving-art" aria-hidden="true" data-reveal><img className="deferred-image is-loaded" src={losAngeles.src} width="971" height="1619" alt="" loading="lazy" /></div>
-        <div className="giving-content" data-reveal><p className="section-index">05 / Giving</p><h2 id="giving-title">Support a safer future for AI agents.</h2><p className="giving-lead">Our funding priorities include accessible events, shared learning, open-source projects, and safety research. Giving channels remain subject to legal and operational approval.</p><p className="asset-summary">Community events · Shared learning · Open source · Research</p><TextLink href="/giving">Review our giving standards</TextLink></div>
-      </section>
-
-      <section className="closing-section" aria-labelledby="closing-title"><div className="page-shell" data-reveal><p className="eyebrow">Take part</p><h2 id="closing-title">Help make AI agents safe for people and society.</h2><Link href="/community" className="closing-link">Find your place in the community <Arrow /></Link></div></section>
+      <section className="closing-section" aria-labelledby="closing-title"><div className="page-shell" data-reveal><p className="eyebrow">Take part</p><h2 id="closing-title">Help make AI agents safe for people and society.</h2><p className="closing-invitation">Explore events and learning materials, register for updates, or bring your experience to a community project.</p><Link href="/community" className="primary-action">Explore the community</Link></div></section>
     </main>
   )
 }

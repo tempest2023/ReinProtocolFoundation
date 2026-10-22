@@ -218,13 +218,38 @@
   border-bottom: 1px solid var(--line);
 }
 
+.community-program-list > article > div:only-child {
+  grid-column: 1 / -1;
+}
+
 .community-program-list > article > div:first-child > h3 + p {
   max-width: 32rem;
   margin-top: .8rem;
 }
 
-.community-program-action {
-  margin-top: 1.5rem;
+.community-hero__welcome {
+  max-width: 36rem;
+  margin: 2rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.community-contribution-context {
+  max-width: 48rem;
+  margin: 0 0 2rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.community-program-list > article > div:first-child > p + p {
+  max-width: 32rem;
+  margin-top: 1rem;
+}
+
+.community-program-list > article > div:only-child > p {
+  max-width: 48rem;
 }
 
 .article-kicker,

@@ -64,10 +64,12 @@ test.describe('institutional site', () => {
 
   test('home remains Mission-first while exposing Community', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('link', { name: 'Read our mission' })).toHaveAttribute('href', '/mission')
+    await expect(page.locator('main a')).toHaveCount(1)
+    await expect(page.locator('.work-list')).toContainText('Local meetups, workshops, presentations, and discussions')
     await expect(page.getByRole('heading', { name: /A public network of/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Enter the community' })).toHaveAttribute('href', '/community')
-    await expect(page.locator('.giving-content')).toContainText('Support a safer future for AI agents.')
+    await expect(page.getByRole('link', { name: 'Explore the community' })).toHaveAttribute('href', '/community')
+    await expect(page.locator('.stewardship-support')).toContainText('Giving channels remain subject to legal and operational approval.')
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     await expect(page.getByText(/not active|not ready|pre-launch|in formation/i)).toHaveCount(0)
   })
 
